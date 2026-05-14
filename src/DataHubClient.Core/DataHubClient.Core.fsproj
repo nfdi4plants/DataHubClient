@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -6,7 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Library.fs" />
+    <Compile Include="Http/HttpRequest.fs" />
+    <Compile Include="Http/HttpResponse.fs" />
+    <Compile Include="Http/IHttpClient.fs" />
+    <Compile Include="Http/Authentication.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fable.Core" Version="5.0.0" />
   </ItemGroup>
 
 </Project>
