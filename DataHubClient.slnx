@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DataHubClient.Core/DataHubClient.Core.fsproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DataHubClient.Tests/DataHubClient.Tests.fsproj" />
+  </Folder>
+  <Project Path="build/build.fsproj" />
+</Solution>

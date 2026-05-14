@@ -1,0 +1,279 @@
+# DataHubClient — Initial Implementation Plan
+
+## Context
+
+`DataHubClient` is a greenfield polyglot client library for **DataPLANT ARC DataHubs** — heavily customized GitLab CE instances used to host ARCs (Annotated Research Contexts). The library is written in F# and transpiled to JavaScript/TypeScript and Python via **Fable**, then distributed via NuGet, npm, and PyPI.
+
+The repo currently contains only a README, LICENSE, .gitignore, and a devcontainer (`.NET 10 SDK`, `Node 20`, `Python 3.11 + uv`, Ionide). Everything below is new construction.
+
+Design priorities locked with the user:
+- **MVP surface:** repos/branches/commits, repository files, issues + merge requests, generic Package Registry.
+- **HTTP layer:** `IHttpClient` interface in Core + a per-target implementation (System.Net.Http on .NET, `fetch` on JS/TS, `httpx` on Python). Mirrors the ARCtrl pattern.
+- **Async style:** `Async<'T>` in Core. Fable maps Async → JS Promise and Python awaitable; .NET callers get `Async.StartAsTask` for free.
+- **Distribution:** all three registries (NuGet + npm + PyPI) from day one.
+- **F# conventions:** transpilation-first — classes with `[<AttachMembers>]`, static members in lieu of modules, no record types in the public surface.
+
+## Solution Layout
+
+```
+DataHubClient.sln
+src/
+  DataHubClient.Core/                # data models + IHttpClient + resource APIs (transpiled)
+    DataHubClient.Core.fsproj
+    Http/
+      HttpRequest.fs                 # class, [<AttachMembers>]
+      HttpResponse.fs
+      IHttpClient.fs                 # interface
+      Authentication.fs              # class w/ static factories (PAT / OAuth / JobToken)
+    Models/
+      Project.fs                     # all class, [<AttachMembers>], static Encoder/Decoder
+      User.fs
+      Branch.fs
+      Commit.fs
+      RepoFile.fs
+      Issue.fs
+      Note.fs
+      MergeRequest.fs
+      Package.fs
+      Errors.fs                      # DataHubError class hierarchy
+    Json/
+      ThothExtensions.fs             # shared encoder helpers
+    Resources/
+      ProjectsApi.fs                 # class taking (baseUrl, auth, http)
+      RepositoryApi.fs               # branches, commits, tree
+      FilesApi.fs
+      IssuesApi.fs
+      MergeRequestsApi.fs
+      PackagesApi.fs
+    DataHubClient.fs                 # top-level facade: properties .Projects, .Issues, ...
+
+  DataHubClient.DotNet/              # .NET-only shim: HttpClient impl + convenience ctor
+    DataHubClient.DotNet.fsproj
+    DotNetHttpClient.fs              # IHttpClient over System.Net.Http.HttpClient
+    DataHubClient.DotNet.fs          # subclass / factory wrapping Core with default HTTP
+
+  DataHubClient.JavaScript/          # Fable JS/TS target: fetch impl
+    DataHubClient.JavaScript.fsproj
+    FetchHttpClient.fs               # IHttpClient over globalThis.fetch
+    package.json
+    fable.config.json                # --lang typescript
+
+  DataHubClient.Python/              # Fable Python target: httpx impl
+    DataHubClient.Python.fsproj
+    HttpxHttpClient.fs               # IHttpClient over httpx.AsyncClient
+    pyproject.toml
+
+tests/
+  DataHubClient.Tests/               # single Fable.Pyxpecto suite — transpiled to all three targets
+
+.config/
+  dotnet-tools.json                  # fable, fantomas, fsdocs
+
+build.fsproj                         # FAKE-style script with dotnet run for build orchestration
+```
+
+### Why this shape
+
+- **Core carries the whole API surface** (models + resource classes) so business logic transpiles once and the per-target packages stay tiny.
+- **Per-target package = HTTP impl + ergonomic constructor.** A user on .NET writes `DataHubClient.Create(url, auth)` and gets a working client with `HttpClient` injected; same in JS/Python via the equivalent shim. They can still inject a custom `IHttpClient` for retries/proxy/tests.
+- **No conditional compilation in Core.** Cleaner reads, simpler Fable runs.
+
+## Key Conventions
+
+### Classes over records, attached members
+
+```fsharp
+[<AttachMembers>]
+type Project(id: int, name: string, path: string) =
+    member val Id = id with get, set
+    member val Name = name with get, set
+    member val Path = path with get, set
+
+    static member Decoder : Decoder<Project> =
+        Decode.object (fun get ->
+            Project(
+                get.Required.Field "id" Decode.int,
+                get.Required.Field "name" Decode.string,
+                get.Required.Field "path" Decode.string))
+
+    static member Encoder (p: Project) : JsonValue =
+        Encode.object [
+            "id", Encode.int p.Id
+            "name", Encode.string p.Name
+            "path", Encode.string p.Path ]
+```
+
+- `[<AttachMembers>]` makes methods land on the JS/Python class prototype, so consumers call `project.updateName(...)` naturally.
+- Static `Decoder`/`Encoder` members keep serialization discoverable per type, no module hunting.
+- Mutable `with get, set` is acceptable here — feels native in JS/Python and avoids `with`-record syntax that doesn't exist in those ecosystems.
+
+### Async at the boundary
+
+All public methods return `Async<'T>`. The .NET shim exposes a `Task<'T>` wrapper for ergonomics; Fable's runtime already handles `Async` → `Promise` / `asyncio`-awaitable.
+
+### JSON via Thoth.Json
+
+Hand-written encoders/decoders on each model class. Avoids reflection-based serialization (which is brittle under Fable) and is the de-facto choice in ARCtrl.
+
+## HTTP Abstraction
+
+```fsharp
+// DataHubClient.Core/Http/IHttpClient.fs
+[<AttachMembers>]
+type HttpRequest(url: string, methd: string) =
+    member val Url = url with get, set
+    member val Method = methd with get, set
+    member val Headers : (string * string) list = [] with get, set
+    member val Body : string option = None with get, set
+
+[<AttachMembers>]
+type HttpResponse(statusCode: int, body: string, headers: (string * string) list) =
+    member val StatusCode = statusCode
+    member val Body = body
+    member val Headers = headers
+
+type IHttpClient =
+    abstract SendAsync : HttpRequest -> Async<HttpResponse>
+```
+
+Per-target impls live in their own shim projects and depend only on Core.
+
+### Suggested HTTP libs
+
+| Target | Library | Notes |
+|---|---|---|
+| .NET | `System.Net.Http.HttpClient` | Ship a singleton instance behind the impl; consumers can pass their own. |
+| JS/TS | `globalThis.fetch` | Zero deps in modern Node 18+/browsers. Optional `cross-fetch` polyfill for older Node. |
+| Python | `httpx.AsyncClient` | First-class async, sync façade available, works with Fable.Python's asyncio mapping. |
+
+Optional later: a `Fable.SimpleHttp`-based universal impl for users who don't want per-target deps — but not needed for MVP.
+
+## Authentication
+
+```fsharp
+[<AttachMembers>]
+type Authentication private (header: string, value: string) =
+    member _.Header = header
+    member _.Value = value
+
+    static member PersonalAccessToken(token: string) =
+        Authentication("PRIVATE-TOKEN", token)
+    static member OAuthToken(token: string) =
+        Authentication("Authorization", "Bearer " + token)
+    static member JobToken(token: string) =
+        Authentication("JOB-TOKEN", token)
+```
+
+Applied automatically by every resource class when assembling requests.
+
+## Resource API Shape
+
+Resource classes follow GitLab's URL grouping. Example:
+
+```fsharp
+[<AttachMembers>]
+type IssuesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
+    member this.List(projectId: int) : Async<Issue array> = ...
+    member this.Get(projectId: int, iid: int) : Async<Issue> = ...
+    member this.Create(projectId: int, title: string, ?description: string) : Async<Issue> = ...
+    member this.Update(projectId: int, iid: int, patch: Issue) : Async<Issue> = ...
+    member this.Close(projectId: int, iid: int) : Async<Issue> = ...
+    member this.Notes(projectId: int, iid: int) : Async<Note array> = ...
+```
+
+Top-level facade:
+
+```fsharp
+[<AttachMembers>]
+type DataHubClient(baseUrl: string, auth: Authentication, http: IHttpClient) =
+    member val Projects   = ProjectsApi(baseUrl, auth, http)
+    member val Repository = RepositoryApi(baseUrl, auth, http)
+    member val Files      = FilesApi(baseUrl, auth, http)
+    member val Issues     = IssuesApi(baseUrl, auth, http)
+    member val MergeRequests = MergeRequestsApi(baseUrl, auth, http)
+    member val Packages   = PackagesApi(baseUrl, auth, http)
+```
+
+## Build & Transpilation
+
+`.config/dotnet-tools.json` pins `fable`, `fantomas`, `fsdocs`.
+
+Build commands (encoded in `build.fsproj` or a simple script):
+
+```bash
+# .NET build + test + pack
+dotnet build
+dotnet test
+dotnet pack -c Release src/DataHubClient.Core
+dotnet pack -c Release src/DataHubClient.DotNet
+
+# JS/TS transpile
+dotnet fable src/DataHubClient.JavaScript --lang typescript -o dist/js
+npm --prefix dist/js pack
+
+# Python transpile
+dotnet fable src/DataHubClient.Python --lang python -o dist/py
+uv build dist/py
+```
+
+Wire matching scripts into the post-create hook (currently commented out) and a `build.fsproj` `dotnet run` entrypoint.
+
+## Testing
+
+Tests are written **once in F#** using **[Fable.Pyxpecto](https://github.com/Freymaurer/Fable.Pyxpecto)** (the polyglot testing lib maintained by the DataPLANT side) and run on all three targets — .NET via Expecto, JS via Mocha, Python via pytest — using the same source.
+
+- **Unit tests** in `DataHubClient.Tests` exercise resource APIs against an in-memory `IHttpClient` that records outgoing requests and returns canned responses. This validates URL construction, header injection, JSON encoding/decoding, and `Async` plumbing identically on every target.
+- **Integration tests** in the same suite run against a docker-composed GitLab CE container with seeded data. The fixture stands up the container once per CI job; each transpiled output runs the same test cases against it.
+- **Transpiled-shape smoke tests** assert `[<AttachMembers>]` produced real prototype/class methods on the JS/Python outputs (e.g. `typeof project.updateName === 'function'`).
+
+Test commands:
+
+```bash
+dotnet test                                              # .NET
+dotnet fable tests/DataHubClient.Tests --lang javascript -o dist/js-tests && npx mocha dist/js-tests
+dotnet fable tests/DataHubClient.Tests --lang python     -o dist/py-tests && uv run pytest dist/py-tests
+```
+
+## CI
+
+GitHub Actions:
+1. `lint` — `fantomas --check`.
+2. `dotnet-test` — runs the Pyxpecto suite via Expecto.
+3. `transpile` — run Fable for JS/TS and Python, cache artifacts (both library and test suite).
+4. `js-test` — Mocha on the transpiled Pyxpecto suite.
+5. `python-test` — pytest on the transpiled Pyxpecto suite.
+6. `pack` — produces `.nupkg`, `.tgz`, and a `.whl` as workflow artifacts.
+7. `publish` (tag-triggered) — pushes to NuGet, npm, PyPI.
+
+## Open Suggestions / Decisions to Make Later
+
+- **Pagination:** GitLab uses `Link` headers + `page`/`per_page`. Suggest a `Paginated<'T>` helper exposing `AsArray`/`Iterate` that callers can ignore for simple cases.
+- **Error model:** custom `DataHubError` subclasses (`Unauthorized`, `NotFound`, `RateLimited`, `Server`) wrapping the raw response — better cross-language ergonomics than throwing raw HTTP exceptions.
+- **Retry/backoff:** keep out of Core. Provide a decorator `IHttpClient` impl (`RetryingHttpClient(inner, policy)`) ship-able per target.
+- **Logging:** inject an `ILogger`-style minimal interface; default no-op.
+- **fsdocs site:** add later, once the API stabilizes.
+
+## Verification
+
+After the first implementation pass, this checks the design holds end-to-end:
+
+1. `dotnet build` succeeds; `dotnet test` runs unit tests against an in-memory `IHttpClient`.
+2. `dotnet fable ... --lang typescript` and `... --lang python` produce no errors and emit class definitions (grep for `class Project` in JS, `class Project:` in Python).
+3. From `dist/js`: `import { DataHubClient, Authentication } from '...'; const c = new DataHubClient(url, Authentication.personalAccessToken('xxx'), new FetchHttpClient()); await c.projects.list();` runs against a local GitLab CE container and returns parsed objects.
+4. Same flow in Python: `from datahub_client import DataHubClient, Authentication, HttpxHttpClient; await DataHubClient(...).projects.list()`.
+5. `[<AttachMembers>]` proven correct: `typeof project.updateName === 'function'` in JS, `callable(project.update_name)` in Python.
+
+## Critical Files (all new)
+
+- `DataHubClient.sln`
+- `src/DataHubClient.Core/DataHubClient.Core.fsproj`
+- `src/DataHubClient.Core/Http/IHttpClient.fs`
+- `src/DataHubClient.Core/Http/Authentication.fs`
+- `src/DataHubClient.Core/Models/Project.fs` (template for the other models)
+- `src/DataHubClient.Core/Resources/IssuesApi.fs` (template for other resource APIs)
+- `src/DataHubClient.Core/DataHubClient.fs`
+- `src/DataHubClient.DotNet/DotNetHttpClient.fs`
+- `src/DataHubClient.JavaScript/FetchHttpClient.fs` + `package.json` + `fable.config.json`
+- `src/DataHubClient.Python/HttpxHttpClient.fs` + `pyproject.toml`
+- `.config/dotnet-tools.json`
+- `.github/workflows/ci.yml`
