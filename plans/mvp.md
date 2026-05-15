@@ -296,17 +296,21 @@ test suite green before the next begins. Check items off as they land.
   in Stages 5–6. Note: Thoth.Json 0.9 encoders return `IEncodable` (not `Json`)
   and have no `Encode.option` — use `ThothExtensions.encodeOption`.
 
-### Stage 3 — Resource APIs & facade
+### Stage 3 — Resource APIs & facade ✅ *done*
 
-- [ ] `MockHttpClient` (route-table `IHttpClient`) + `SampleData` JSON fixtures
+- [x] `MockHttpClient` (route-table `IHttpClient`) + `SampleData` JSON fixtures
       in `tests/DataHubClient.Tests/Mock/` — see *Mock API testing strategy*
-- [ ] Deterministic (sorted-key) query-string builder shared across resource APIs
-- [ ] `Resources/ProjectsApi.fs`, `RepositoryApi.fs`, `FilesApi.fs`
-- [ ] `Resources/IssuesApi.fs`, `MergeRequestsApi.fs`, `PackagesApi.fs`
-- [ ] `DataHubClient.fs` top-level facade exposing all resource properties
-- [ ] Per-resource mock-API tests (`testCaseAsync`): assert request path / query /
+- [x] Deterministic (sorted-key) query-string builder shared across resource APIs
+- [x] `Resources/ProjectsApi.fs`, `RepositoryApi.fs`, `FilesApi.fs`
+- [x] `Resources/IssuesApi.fs`, `MergeRequestsApi.fs`, `PackagesApi.fs`
+- [x] `DataHubClient.fs` top-level facade exposing all resource properties
+- [x] Per-resource mock-API tests (`testCaseAsync`): assert request path / query /
       verb / auth header / body **and** decoded response + error mapping
-- **Exit:** every resource API exercised against `MockHttpClient`; `runtests` green.
+- **Exit:** every resource API exercised against `MockHttpClient`; `./build.sh runtests`
+  green on .NET (22 tests). The FAKE `BuildSolution` target now builds the
+  source/test project list directly because `dotnet build DataHubClient.slnx`
+  fails in the current .NET 10.0.300 container during solution restore with no
+  diagnostics, while the individual projects build successfully.
 
 ### Stage 4 — .NET shim
 

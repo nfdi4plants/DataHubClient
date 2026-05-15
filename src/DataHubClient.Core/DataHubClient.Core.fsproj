@@ -21,11 +21,20 @@
     <Compile Include="Models/Issue.fs" />
     <Compile Include="Models/MergeRequest.fs" />
     <Compile Include="Models/Package.fs" />
+    <Compile Include="Resources/ResourceHelpers.fs" />
+    <Compile Include="Resources/ProjectsApi.fs" />
+    <Compile Include="Resources/RepositoryApi.fs" />
+    <Compile Include="Resources/FilesApi.fs" />
+    <Compile Include="Resources/IssuesApi.fs" />
+    <Compile Include="Resources/MergeRequestsApi.fs" />
+    <Compile Include="Resources/PackagesApi.fs" />
+    <Compile Include="DataHubClient.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Fable.Core" Version="5.0.0" />
     <PackageReference Include="Thoth.Json.Core" Version="0.9.0" />
+    <PackageReference Include="Thoth.Json.Newtonsoft" Version="0.4.0" />
   </ItemGroup>
 
 </Project>

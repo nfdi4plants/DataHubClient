@@ -25,13 +25,18 @@ let setPrereleaseTag = BuildTask.create "SetPrereleaseTag" [] {
     isPrerelease <- true
 }
 
-/// builds the solution file (dotnet build solution.sln)
+/// Builds all source and test projects. The repository still keeps the .slnx
+/// manifest, but .NET 10.0.300 currently fails the solution restore target
+/// without diagnostics in this container.
 let buildSolution =
-    BuildTask.create "BuildSolution" [ clean ] { 
-        solutionFile 
-        |> DotNet.build (fun p ->
-            { p with MSBuildParams = { p.MSBuildParams with DisableInternalBinLog = true }}
-            |> DotNet.Options.withCustomParams (Some "-tl")
+    BuildTask.create "BuildSolution" [ clean ] {
+        buildProjects
+        |> Seq.iter (fun project ->
+            project
+            |> DotNet.build (fun p ->
+                { p with MSBuildParams = { p.MSBuildParams with DisableInternalBinLog = true }}
+                |> DotNet.Options.withCustomParams (Some "-tl")
+            )
         )
     }
 

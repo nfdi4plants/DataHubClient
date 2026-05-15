@@ -12,6 +12,7 @@ open Fable.Core.JsInterop
 let all = testList "All" [
     AuthenticationTests.tests
     ModelTests.tests
+    ResourceTests.tests
 ]
 
 [<EntryPoint>]

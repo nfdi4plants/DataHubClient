@@ -10,6 +10,13 @@ let testProjects =
         "tests/DataHubClient.Tests/DataHubClient.Tests.fsproj"
     ]
 
+let sourceProjects =
+    [
+        "src/DataHubClient.Core/DataHubClient.Core.fsproj"
+    ]
+
+let buildProjects = sourceProjects @ testProjects
+
 let solutionFile  = $"{project}.slnx"
 
 let configuration = "Release"

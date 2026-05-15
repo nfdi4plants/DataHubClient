@@ -20,3 +20,13 @@ let roundTrip (encoder: 'T -> IEncodable) (decoder: Decoder<'T>) (value: 'T) : '
     match Decode.fromString decoder json with
     | Ok decoded -> decoded
     | Error err -> failwith ("decode failed: " + err)
+
+/// Decode a JSON string with the active Thoth.Json runtime.
+let decodeString (decoder: Decoder<'T>) (json: string) : 'T =
+    match Decode.fromString decoder json with
+    | Ok decoded -> decoded
+    | Error err -> failwith ("decode failed: " + err)
+
+/// Encode a value with the active Thoth.Json runtime.
+let encodeString (encoder: 'T -> IEncodable) (value: 'T) : string =
+    Encode.toString 0 (encoder value)

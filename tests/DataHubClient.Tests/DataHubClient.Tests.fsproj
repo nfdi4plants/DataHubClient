@@ -9,8 +9,11 @@
 
   <ItemGroup>
     <Compile Include="TestJson.fs" />
+    <Compile Include="Mock/MockHttpClient.fs" />
+    <Compile Include="Mock/SampleData.fs" />
     <Compile Include="AuthenticationTests.fs" />
     <Compile Include="ModelTests.fs" />
+    <Compile Include="ResourceTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
