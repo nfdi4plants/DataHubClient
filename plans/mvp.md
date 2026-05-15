@@ -253,6 +253,80 @@ GitHub Actions:
 - **Logging:** inject an `ILogger`-style minimal interface; default no-op.
 - **fsdocs site:** add later, once the API stabilizes.
 
+## Implementation Stages
+
+Tracked in dependency order. Each stage should leave the solution building and the
+test suite green before the next begins. Check items off as they land.
+
+### Stage 1 — Scaffold & HTTP foundation ✅ *done*
+
+- [x] `DataHubClient.slnx` + BuildProject pipeline (`build/`, `build.sh`/`build.cmd`)
+- [x] `.devcontainer` (.NET 10 / Node 20 / Python 3.11)
+- [x] `DataHubClient.Core` project (`netstandard2.0`, `Fable.Core`)
+- [x] `Http/HttpRequest.fs`, `Http/HttpResponse.fs`, `Http/IHttpClient.fs`
+- [x] `Http/Authentication.fs` (PAT / OAuth / JobToken factories)
+- [x] Pyxpecto test harness (`tests/DataHubClient.Tests`) + `AuthenticationTests`
+
+### Stage 2 — Core models & JSON ✅ *done*
+
+- [x] Add `Thoth.Json.Core` package reference to `DataHubClient.Core`
+- [x] `Models/Errors.fs` — `DataHubError` class hierarchy
+- [x] `Json/ThothExtensions.fs` — shared encoder/decoder helpers
+- [x] Model classes with static `Decoder`/`Encoder`: `Project`, `User`, `Branch`,
+      `Commit`, `RepoFile`, `Issue`, `Note`, `MergeRequest`, `Package`
+- [x] Register all new `.fs` files in `DataHubClient.Core.fsproj` (dependency order)
+- [x] Encoder/decoder round-trip tests for each model
+- **Exit:** `./build.sh runtests` green on .NET (13 tests). JS/Python runtime is
+  wired in `tests/.../TestJson.fs` via `#if` but only verified once Fable runs
+  in Stages 5–6. Note: Thoth.Json 0.9 encoders return `IEncodable` (not `Json`)
+  and have no `Encode.option` — use `ThothExtensions.encodeOption`.
+
+### Stage 3 — Resource APIs & facade
+
+- [ ] In-memory `IHttpClient` stub for tests (records requests, returns canned JSON)
+- [ ] `Resources/ProjectsApi.fs`, `RepositoryApi.fs`, `FilesApi.fs`
+- [ ] `Resources/IssuesApi.fs`, `MergeRequestsApi.fs`, `PackagesApi.fs`
+- [ ] `DataHubClient.fs` top-level facade exposing all resource properties
+- [ ] Per-resource unit tests: URL construction, header injection, JSON, `Async`
+- **Exit:** every resource API exercised against the stub; `runtests` green.
+
+### Stage 4 — .NET shim
+
+- [ ] `DataHubClient.DotNet` project referencing Core
+- [ ] `DotNetHttpClient.fs` — `IHttpClient` over `System.Net.Http.HttpClient`
+- [ ] `DataHubClient.DotNet.fs` — `Create(url, auth)` convenience ctor
+- **Exit:** `dotnet build` succeeds; a .NET caller can construct a working client.
+
+### Stage 5 — JavaScript/TypeScript shim
+
+- [ ] `DataHubClient.JavaScript` project + `FetchHttpClient.fs`
+- [ ] `package.json`, `fable.config.json` (`--lang typescript`)
+- [ ] Transpile verification: `dotnet fable ... --lang typescript` emits classes
+- [ ] Transpiled-shape smoke test (`typeof project.updateName === 'function'`)
+- **Exit:** transpiled suite passes under `node`/`tsx`.
+
+### Stage 6 — Python shim
+
+- [ ] `DataHubClient.Python` project + `HttpxHttpClient.fs`
+- [ ] `pyproject.toml`
+- [ ] Transpile verification: `dotnet fable ... --lang py` emits classes
+- [ ] Transpiled-shape smoke test (`callable(project.update_name)`)
+- **Exit:** transpiled suite passes under `pytest`.
+
+### Stage 7 — CI & packaging
+
+- [ ] `.github/workflows/ci.yml` (lint, dotnet-test, transpile, js-test, python-test, pack)
+- [ ] `pack` task produces `.nupkg`, `.tgz`, `.whl`
+- [ ] Tag-triggered `publish` job (NuGet + npm + PyPI)
+- **Exit:** CI green on a PR; artifacts downloadable from the run.
+
+### Stage 8 — Integration tests
+
+- [ ] docker-compose GitLab CE container with seeded ARC data
+- [ ] Integration suite reusing the Pyxpecto cases against the live container
+- [ ] Wire the container fixture into CI
+- **Exit:** integration job green on all three targets.
+
 ## Verification
 
 After the first implementation pass, this checks the design holds end-to-end:

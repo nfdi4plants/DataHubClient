@@ -6,7 +6,7 @@ Guidance for AI coding agents working in this repo.
 
 `DataHubClient` is a polyglot client library for **DataPLANT ARC DataHubs** — heavily customized GitLab CE instances that host ARCs (Annotated Research Contexts). The library is **written once in F#** and transpiled to JavaScript/TypeScript and Python via **[Fable](https://fable.io)**, then distributed to NuGet, npm, and PyPI.
 
-The full design plan lives at [plans/mvp.md](plans/mvp.md) — read it before making non-trivial changes.
+The full design plan lives at [plans/mvp.md](plans/mvp.md) — read it before making non-trivial changes. It ends with an **Implementation Stages** checklist; tick items off there as you complete them so progress stays visible across sessions.
 
 ## Architecture (short version)
 
@@ -34,6 +34,7 @@ These conventions are non-negotiable because the F# is consumed from JS and Pyth
 - **`Async<'T>` at the public API boundary.** Fable maps Async to JS Promise and Python awaitable. Avoid `Task<'T>` in Core.
 - **No reflection-based JSON.** Use [Thoth.Json](https://github.com/thoth-org/Thoth.Json) with hand-written `Decoder`/`Encoder` as static members on each model class.
 - **Avoid F#-only types (Option, Result, DU) in the public signature where a string/enum/class would do** — they transpile but are clunky to construct from JS/Python.
+- **Full XML doc comments on all new code.** Every public type, member, constructor parameter, and static `Decoder`/`Encoder` gets a `///` comment — `<summary>` plus `<param>` tags on the primary constructor. Model classes must additionally link the relevant GitLab REST API page in their `<summary>` via `<see href="https://docs.gitlab.com/ee/api/...">`. Docs are part of every change, not a follow-up.
 
 Example pattern (see [src/DataHubClient.Core/Http/Authentication.fs](src/DataHubClient.Core/Http/Authentication.fs)):
 

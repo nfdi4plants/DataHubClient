@@ -10,10 +10,22 @@
     <Compile Include="Http/HttpResponse.fs" />
     <Compile Include="Http/IHttpClient.fs" />
     <Compile Include="Http/Authentication.fs" />
+    <Compile Include="Json/ThothExtensions.fs" />
+    <Compile Include="Models/Errors.fs" />
+    <Compile Include="Models/User.fs" />
+    <Compile Include="Models/Project.fs" />
+    <Compile Include="Models/Commit.fs" />
+    <Compile Include="Models/Branch.fs" />
+    <Compile Include="Models/RepoFile.fs" />
+    <Compile Include="Models/Note.fs" />
+    <Compile Include="Models/Issue.fs" />
+    <Compile Include="Models/MergeRequest.fs" />
+    <Compile Include="Models/Package.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Fable.Core" Version="5.0.0" />
+    <PackageReference Include="Thoth.Json.Core" Version="0.9.0" />
   </ItemGroup>
 
 </Project>
