@@ -220,18 +220,33 @@ Wire matching scripts into the post-create hook (currently commented out) and a 
 
 ## Testing
 
-Tests are written **once in F#** using **[Fable.Pyxpecto](https://github.com/Freymaurer/Fable.Pyxpecto)** (the polyglot testing lib maintained by the DataPLANT side) and run on all three targets — .NET via Expecto, JS via Mocha, Python via pytest — using the same source.
+Tests are written **once in F#** using **[Fable.Pyxpecto](https://github.com/Freymaurer/Fable.Pyxpecto)** (the polyglot testing lib maintained by the DataPLANT side) and run on all three targets from the same source — .NET as a `dotnet run` executable, JS/TS and Python via the Fable-transpiled suite.
 
-- **Unit tests** in `DataHubClient.Tests` exercise resource APIs against an in-memory `IHttpClient` that records outgoing requests and returns canned responses. This validates URL construction, header injection, JSON encoding/decoding, and `Async` plumbing identically on every target.
+- **Unit / mock-API tests** in `DataHubClient.Tests` exercise resource APIs against an in-memory `IHttpClient` (see below). They validate URL construction, header injection, JSON encoding/decoding, error mapping, and `Async` plumbing identically on every target.
 - **Integration tests** in the same suite run against a docker-composed GitLab CE container with seeded data. The fixture stands up the container once per CI job; each transpiled output runs the same test cases against it.
 - **Transpiled-shape smoke tests** assert `[<AttachMembers>]` produced real prototype/class methods on the JS/Python outputs (e.g. `typeof project.updateName === 'function'`).
 
-Test commands:
+### Mock API testing strategy
+
+Because every HTTP call goes through `IHttpClient`, the test double is itself plain F# that transpiles with the suite. The same mock, canned payloads, and assertions therefore run on .NET, JS, and Python — so **mock API tests double as transpilation conformance tests**: a Fable bug that only surfaces on Python is caught here.
+
+- **`MockHttpClient`** (test-only, `tests/DataHubClient.Tests/Mock/`) — a route-table `IHttpClient`. Tests register `(method, url) → canned HttpResponse`; it records every outgoing `HttpRequest` and **throws with the attempted URL on an unmatched route**, so a wrongly-built URL fails loudly instead of silently passing.
+- **`SampleData`** — hand-written GitLab JSON literals shaped like real responses, including fields the models ignore (proves decoders tolerate extra fields). Fixtures are *not* generated from the encoders, so a decoder/encoder bug cannot mask itself.
+- **Each test asserts both sides:** the recorded request (path, query params as an order-independent map, verb, injected auth header, and create/update bodies decoded back through a decoder — never string-compared) and the decoded response (model scalar properties, or error subclass for non-2xx).
+
+Cross-language rules these tests must follow:
+
+- Resource-API tests use Pyxpecto's **`testCaseAsync`** — never `Async.RunSynchronously`, which blocks or no-ops under Fable JS/Python.
+- Assert **scalar properties, not whole model objects** — model classes have reference equality, so `Expect.equal` on two instances fails under Fable.
+- Resource APIs build **query strings deterministically** (sorted keys) so URL assertions hold identically on every runtime.
+- No reflection and no culture-sensitive `DateTime` parsing in the mock or fixtures.
+
+Test commands (`dotnet run`, not `dotnet test` — Pyxpecto is a plain executable):
 
 ```bash
-dotnet test                                              # .NET
-dotnet fable tests/DataHubClient.Tests --lang javascript -o dist/js-tests && npx mocha dist/js-tests
-dotnet fable tests/DataHubClient.Tests --lang python     -o dist/py-tests && uv run pytest dist/py-tests
+dotnet run --project tests/DataHubClient.Tests                                                          # .NET
+dotnet fable tests/DataHubClient.Tests --lang javascript -o dist/js-tests && node dist/js-tests/Main.js  # JS
+dotnet fable tests/DataHubClient.Tests --lang python     -o dist/py-tests && python dist/py-tests/main.py # Python
 ```
 
 ## CI
@@ -283,12 +298,15 @@ test suite green before the next begins. Check items off as they land.
 
 ### Stage 3 — Resource APIs & facade
 
-- [ ] In-memory `IHttpClient` stub for tests (records requests, returns canned JSON)
+- [ ] `MockHttpClient` (route-table `IHttpClient`) + `SampleData` JSON fixtures
+      in `tests/DataHubClient.Tests/Mock/` — see *Mock API testing strategy*
+- [ ] Deterministic (sorted-key) query-string builder shared across resource APIs
 - [ ] `Resources/ProjectsApi.fs`, `RepositoryApi.fs`, `FilesApi.fs`
 - [ ] `Resources/IssuesApi.fs`, `MergeRequestsApi.fs`, `PackagesApi.fs`
 - [ ] `DataHubClient.fs` top-level facade exposing all resource properties
-- [ ] Per-resource unit tests: URL construction, header injection, JSON, `Async`
-- **Exit:** every resource API exercised against the stub; `runtests` green.
+- [ ] Per-resource mock-API tests (`testCaseAsync`): assert request path / query /
+      verb / auth header / body **and** decoded response + error mapping
+- **Exit:** every resource API exercised against `MockHttpClient`; `runtests` green.
 
 ### Stage 4 — .NET shim
 
