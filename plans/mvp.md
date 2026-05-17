@@ -19,7 +19,9 @@ Design priorities locked with the user:
 DataHubClient.sln
 src/
   DataHubClient.Core/                # data models + IHttpClient + resource APIs (transpiled)
-    DataHubClient.Core.fsproj
+    DataHubClient.Core.fsproj            # .NET build (Thoth.Json.Newtonsoft)
+    DataHubClient.Core.Javascript.fsproj # Fable JS/TS build (Thoth.Json.Javascript)
+    DataHubClient.Core.Compile.props     # <Compile> list shared by both project files
     Http/
       HttpRequest.fs                 # class, [<AttachMembers>]
       HttpResponse.fs
@@ -55,8 +57,8 @@ src/
   DataHubClient.JavaScript/          # Fable JS/TS target: fetch impl
     DataHubClient.JavaScript.fsproj
     FetchHttpClient.fs               # IHttpClient over globalThis.fetch
-    package.json
-    fable.config.json                # --lang typescript
+    DataHubClient.JavaScript.fs      # DataHubClientJavaScript: Core subclass with default HTTP
+    package.json                     # npm distribution metadata (Fable 5 needs no fable.config.json)
 
   DataHubClient.Python/              # Fable Python target: httpx impl
     DataHubClient.Python.fsproj
@@ -66,9 +68,10 @@ src/
 tests/
   DataHubClient.Tests/               # single Fable.Pyxpecto suite — transpiled to all three targets
   DataHubClient.DotNet.Tests/        # .NET-only Pyxpecto suite for the System.Net.Http shim
+  DataHubClient.JavaScript.Tests/    # JS-only suite (FetchHttpClient + transpiled shape) + the shared suite
 
 .config/
-  dotnet-tools.json                  # fable, fantomas, fsdocs
+  dotnet-tools.json                  # fable (fantomas, fsdocs added later)
 
 build.fsproj                         # FAKE-style script with dotnet run for build orchestration
 ```
@@ -331,15 +334,49 @@ test suite green before the next begins. Check items off as they land.
   not the shared suite: `DotNetHttpClient` depends on `System.Net.Http`, which Fable
   cannot transpile, so it must never enter the Pyxpecto source.
 
-### Stage 5 — JavaScript/TypeScript shim
+### Stage 5 — JavaScript/TypeScript shim ✅ *done*
 
-- [ ] `DataHubClient.JavaScript` project + `FetchHttpClient.fs`
-- [ ] `package.json`, `fable.config.json` (`--lang typescript`)
-- [ ] Transpile verification: `dotnet fable ... --lang typescript` emits classes
-- [ ] Transpiled-shape smoke test (`typeof project.updateName === 'function'`)
-- [ ] Target-only `FetchHttpClient` test (request/response mapping) — mirrors the
-      `DataHubClient.DotNet.Tests` pattern from Stage 4
-- **Exit:** transpiled suite passes under `node`/`tsx`.
+- [x] **Made Core transpilable (prerequisite).** Core could not transpile: it
+      referenced `Thoth.Json.Newtonsoft`, whose `System.IO` use Fable rejects, and
+      never referenced `Thoth.Json.JavaScript`. Fixed with the ARCtrl pattern —
+      parallel project files over one source tree, see *JSON runtime selection*
+      below: `DataHubClient.Core.Compile.props` (shared `<Compile>` list) plus
+      `DataHubClient.Core.fsproj` (.NET, Newtonsoft) and the new
+      `DataHubClient.Core.Javascript.fsproj` (`FABLE_COMPILER*` constants,
+      `Thoth.Json.Javascript`). The `#if` switch in `ResourceHelpers.fs` was
+      already correct.
+- [x] `.config/dotnet-tools.json` pinning `fable` 5.0.0
+- [x] `DataHubClient.JavaScript` project + `FetchHttpClient.fs` (`IHttpClient`
+      over the global `fetch`) + `DataHubClientJavaScript` convenience subclass
+- [x] `package.json` for the npm distribution. No `fable.config.json`: Fable 5
+      has no config file — it is configured by CLI args, encoded in the
+      `RunTestsJavaScript` build task.
+- [x] Transpile verification: `dotnet fable --lang typescript` emits `class`
+      definitions for the Core models, resource APIs, facade, and `FetchHttpClient`
+- [x] Transpiled-shape smoke tests (`TranspileShapeTests.fs`): assert
+      `[<AttachMembers>]` produced real class members — resource-API methods are
+      `function`s, model scalars are readable properties. (The plan's
+      `project.updateName` example does not apply: model classes carry properties
+      and static coders, not instance mutators.)
+- [x] Target-only `FetchHttpClient` test (`FetchHttpClientTests.fs`): request /
+      response mapping against a fake global `fetch` — mirrors the
+      `DataHubClient.DotNet.Tests` fake-handler pattern from Stage 4
+- **Exit:** `./build.sh RunTestsJavaScript` green — the shared Pyxpecto suite
+  (22 cases) plus the two JS-only suites (7 cases) transpile via Fable and pass
+  under `node`, 29 in total. The JS projects are built only by Fable, never
+  `dotnet build`: they stay out of `buildProjects` and the `.slnx` so the two
+  Core project files (sharing a directory) never collide over `obj/`.
+
+#### JSON runtime selection (ARCtrl pattern)
+
+`Thoth.Json.Core` is target-agnostic (it yields `IEncodable` / `Decoder<'T>`);
+the concrete runtime differs per target — `Newtonsoft` on .NET, `JavaScript` on
+JS/TS, `Python` on Python — and Newtonsoft cannot transpile. Following ARCtrl,
+one Core source tree is compiled by **parallel project files**, each setting its
+own `<DefineConstants>` and referencing only its own runtime. `ResourceHelpers.fs`
+switches on `#if FABLE_COMPILER_*`; the `.fsproj` decides which branch is live
+and which package Fable sees. Stage 6 adds `DataHubClient.Core.Python.fsproj`
+the same way.
 
 ### Stage 6 — Python shim
 

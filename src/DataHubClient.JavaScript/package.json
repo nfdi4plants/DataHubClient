@@ -1,0 +1,25 @@
+{
+  "name": "@nfdi4plants/datahub-client",
+  "version": "0.0.0",
+  "description": "A polyglot client library for ARC DataHubs — JavaScript/TypeScript distribution.",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nfdi4plants/DataHubClient.git"
+  },
+  "homepage": "https://github.com/nfdi4plants/DataHubClient",
+  "main": "./DataHubClient.JavaScript.js",
+  "types": "./DataHubClient.JavaScript.d.ts",
+  "files": [
+    "**/*.js",
+    "**/*.ts"
+  ],
+  "keywords": [
+    "ARC",
+    "DataPLANT",
+    "nfdi4plants",
+    "GitLab",
+    "DataHub"
+  ]
+}

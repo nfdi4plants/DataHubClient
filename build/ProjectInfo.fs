@@ -19,6 +19,12 @@ let sourceProjects =
 
 let buildProjects = sourceProjects @ testProjects
 
+/// The JavaScript/TypeScript Pyxpecto suite. Fable transpiles it and node runs
+/// it — never `dotnet build`/`dotnet run` — so it stays out of buildProjects,
+/// the .NET build list. See the RunTestsJavaScript task.
+let javaScriptTestProject =
+    "tests/DataHubClient.JavaScript.Tests/DataHubClient.JavaScript.Tests.fsproj"
+
 let solutionFile  = $"{project}.slnx"
 
 let configuration = "Release"

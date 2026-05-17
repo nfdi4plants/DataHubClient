@@ -1,0 +1,38 @@
+<Project>
+
+  <!--
+    The Core source file list, shared by every per-target project file in this
+    directory (DataHubClient.Core.fsproj for .NET, DataHubClient.Core.Javascript.fsproj
+    for Fable JS/TS, DataHubClient.Core.Python.fsproj for Fable Python). Keeping the
+    <Compile> list in one place guarantees identical file order on every target —
+    F# compilation is order-sensitive — and means a new model or resource is
+    registered once. Each project file imports this and adds only its own
+    target-specific Thoth.Json runtime package.
+  -->
+  <ItemGroup>
+    <Compile Include="Http/HttpRequest.fs" />
+    <Compile Include="Http/HttpResponse.fs" />
+    <Compile Include="Http/IHttpClient.fs" />
+    <Compile Include="Http/Authentication.fs" />
+    <Compile Include="Json/ThothExtensions.fs" />
+    <Compile Include="Models/Errors.fs" />
+    <Compile Include="Models/User.fs" />
+    <Compile Include="Models/Project.fs" />
+    <Compile Include="Models/Commit.fs" />
+    <Compile Include="Models/Branch.fs" />
+    <Compile Include="Models/RepoFile.fs" />
+    <Compile Include="Models/Note.fs" />
+    <Compile Include="Models/Issue.fs" />
+    <Compile Include="Models/MergeRequest.fs" />
+    <Compile Include="Models/Package.fs" />
+    <Compile Include="Resources/ResourceHelpers.fs" />
+    <Compile Include="Resources/ProjectsApi.fs" />
+    <Compile Include="Resources/RepositoryApi.fs" />
+    <Compile Include="Resources/FilesApi.fs" />
+    <Compile Include="Resources/IssuesApi.fs" />
+    <Compile Include="Resources/MergeRequestsApi.fs" />
+    <Compile Include="Resources/PackagesApi.fs" />
+    <Compile Include="DataHubClient.fs" />
+  </ItemGroup>
+
+</Project>

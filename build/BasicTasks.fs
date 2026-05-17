@@ -13,7 +13,8 @@ let clean = BuildTask.create "Clean" [] {
     ++ "tests/**/bin"
     ++ "tests/**/obj"
     ++ "pkg"
-    |> Shell.cleanDirs 
+    ++ "dist"
+    |> Shell.cleanDirs
 }
 
 

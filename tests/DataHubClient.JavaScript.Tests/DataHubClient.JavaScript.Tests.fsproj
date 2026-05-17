@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The JavaScript/TypeScript test project. Fable transpiles it and the suite is
+    run with `node`. It compiles the shared Pyxpecto source from
+    tests/DataHubClient.Tests (so the same cases run on every target) and adds the
+    two JS-only suites. The FABLE_COMPILER* constants match the Core JS build and
+    select the Thoth.Json.JavaScript runtime in tests/DataHubClient.Tests/TestJson.fs.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <DefineConstants>FABLE_COMPILER;FABLE_COMPILER_JAVASCRIPT;FABLE_COMPILER_TYPESCRIPT</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\DataHubClient.Tests\TestJson.fs" />
+    <Compile Include="..\DataHubClient.Tests\Mock\MockHttpClient.fs" />
+    <Compile Include="..\DataHubClient.Tests\Mock\SampleData.fs" />
+    <Compile Include="..\DataHubClient.Tests\AuthenticationTests.fs" />
+    <Compile Include="..\DataHubClient.Tests\ModelTests.fs" />
+    <Compile Include="..\DataHubClient.Tests\ResourceTests.fs" />
+    <Compile Include="FetchHttpClientTests.fs" />
+    <Compile Include="TranspileShapeTests.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fable.Core" Version="5.0.0" />
+    <PackageReference Include="Fable.Pyxpecto" Version="2.0.0" />
+    <PackageReference Include="Thoth.Json.Core" Version="0.9.0" />
+    <PackageReference Include="Thoth.Json.Javascript" Version="0.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DataHubClient.Core\DataHubClient.Core.Javascript.fsproj" />
+    <ProjectReference Include="..\..\src\DataHubClient.JavaScript\DataHubClient.JavaScript.fsproj" />
+  </ItemGroup>
+
+</Project>

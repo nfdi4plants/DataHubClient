@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The Fable JavaScript/TypeScript build of Core. This project file is never run
+    through `dotnet run`; it is the input Fable transpiles. The FABLE_COMPILER*
+    constants activate the Thoth.Json.JavaScript branch of the #if switch in
+    Resources/ResourceHelpers.fs, and only that runtime is referenced — so Fable
+    never sees Thoth.Json.Newtonsoft, which cannot transpile. Source files come
+    from the shared DataHubClient.Core.Compile.props.
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <DefineConstants>FABLE_COMPILER;FABLE_COMPILER_JAVASCRIPT;FABLE_COMPILER_TYPESCRIPT</DefineConstants>
+  </PropertyGroup>
+
+  <Import Project="DataHubClient.Core.Compile.props" />
+
+  <ItemGroup>
+    <PackageReference Include="Fable.Core" Version="5.0.0" />
+    <PackageReference Include="Thoth.Json.Core" Version="0.9.0" />
+    <PackageReference Include="Thoth.Json.Javascript" Version="0.5.0" />
+  </ItemGroup>
+
+</Project>

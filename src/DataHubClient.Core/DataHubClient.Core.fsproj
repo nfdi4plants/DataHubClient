@@ -1,35 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!--
+    The .NET build of Core. JSON is served by Thoth.Json.Newtonsoft, selected by
+    the #if !FABLE_COMPILER branch in Resources/ResourceHelpers.fs. The Fable JS/TS
+    and Python builds use the sibling DataHubClient.Core.Javascript.fsproj /
+    DataHubClient.Core.Python.fsproj, which set the matching FABLE_COMPILER_*
+    constants and reference their own Thoth runtime. All three share the source
+    file list in DataHubClient.Core.Compile.props.
+  -->
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="Http/HttpRequest.fs" />
-    <Compile Include="Http/HttpResponse.fs" />
-    <Compile Include="Http/IHttpClient.fs" />
-    <Compile Include="Http/Authentication.fs" />
-    <Compile Include="Json/ThothExtensions.fs" />
-    <Compile Include="Models/Errors.fs" />
-    <Compile Include="Models/User.fs" />
-    <Compile Include="Models/Project.fs" />
-    <Compile Include="Models/Commit.fs" />
-    <Compile Include="Models/Branch.fs" />
-    <Compile Include="Models/RepoFile.fs" />
-    <Compile Include="Models/Note.fs" />
-    <Compile Include="Models/Issue.fs" />
-    <Compile Include="Models/MergeRequest.fs" />
-    <Compile Include="Models/Package.fs" />
-    <Compile Include="Resources/ResourceHelpers.fs" />
-    <Compile Include="Resources/ProjectsApi.fs" />
-    <Compile Include="Resources/RepositoryApi.fs" />
-    <Compile Include="Resources/FilesApi.fs" />
-    <Compile Include="Resources/IssuesApi.fs" />
-    <Compile Include="Resources/MergeRequestsApi.fs" />
-    <Compile Include="Resources/PackagesApi.fs" />
-    <Compile Include="DataHubClient.fs" />
-  </ItemGroup>
+  <Import Project="DataHubClient.Core.Compile.props" />
 
   <ItemGroup>
     <PackageReference Include="Fable.Core" Version="5.0.0" />
