@@ -1,13 +1,17 @@
 <Project>
 
   <!--
-    The Core source file list, shared by every per-target project file in this
-    directory (DataHubClient.Core.fsproj for .NET, DataHubClient.Core.Javascript.fsproj
-    for Fable JS/TS, DataHubClient.Core.Python.fsproj for Fable Python). Keeping the
-    <Compile> list in one place guarantees identical file order on every target —
-    F# compilation is order-sensitive — and means a new model or resource is
-    registered once. Each project file imports this and adds only its own
-    target-specific Thoth.Json runtime package.
+    The target-agnostic Core source file list, shared by every per-target project
+    file in this directory (DataHubClient.Core.fsproj for .NET,
+    DataHubClient.Core.Javascript.fsproj for Fable JS/TS, and later
+    DataHubClient.Core.Python.fsproj for Fable Python). Keeping the <Compile> list
+    in one place guarantees identical file order on every target — F# compilation
+    is order-sensitive — and means a new model or resource is registered once.
+
+    Two files are NOT here, because they are target-specific: each project file
+    appends its own concrete IHttpClient implementation (Http/DotNetHttpClient.fs,
+    Http/FetchHttpClient.fs, ...) followed by DataHubClient.fs — the facade whose
+    default-transport constructor #if-selects that implementation.
   -->
   <ItemGroup>
     <Compile Include="Http/HttpRequest.fs" />
@@ -32,7 +36,6 @@
     <Compile Include="Resources/IssuesApi.fs" />
     <Compile Include="Resources/MergeRequestsApi.fs" />
     <Compile Include="Resources/PackagesApi.fs" />
-    <Compile Include="DataHubClient.fs" />
   </ItemGroup>
 
 </Project>

@@ -35,7 +35,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\DataHubClient.Core\DataHubClient.Core.Javascript.fsproj" />
-    <ProjectReference Include="..\..\src\DataHubClient.JavaScript\DataHubClient.JavaScript.fsproj" />
   </ItemGroup>
 
 </Project>

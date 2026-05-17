@@ -15,7 +15,9 @@ let private memberType (target: obj) (name: string) : string =
     emitJsExpr (target, name) "typeof $0[$1]"
 
 let private makeClient () =
-    DataHubClient("https://hub.example/", Authentication.PersonalAccessToken "token", MockHttpClient())
+    let client = DataHubClient("https://hub.example/", Authentication.PersonalAccessToken "token")
+    client.Http <- MockHttpClient()
+    client
 
 let tests =
     testList "TranspiledShape" [

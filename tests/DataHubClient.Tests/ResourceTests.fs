@@ -13,7 +13,9 @@ let private auth = Authentication.PersonalAccessToken("token")
 
 let private makeClient () =
     let mock = MockHttpClient()
-    DataHubClient(baseUrl, auth, mock :> IHttpClient), mock
+    let client = DataHubClient(baseUrl, auth)
+    client.Http <- mock
+    client, mock
 
 let private expectAuthHeader (request: HttpRequest) =
     Expect.equal request.Headers.[0] ("PRIVATE-TOKEN", "token") "auth header"

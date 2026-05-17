@@ -10,7 +10,7 @@
   <ItemGroup>
     <Compile Include="FakeHttpMessageHandler.fs" />
     <Compile Include="DotNetHttpClientTests.fs" />
-    <Compile Include="DataHubClientDotNetTests.fs" />
+    <Compile Include="DataHubClientTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\DataHubClient.Core\DataHubClient.Core.fsproj" />
-    <ProjectReference Include="..\..\src\DataHubClient.DotNet\DataHubClient.DotNet.fsproj" />
   </ItemGroup>
 
 </Project>

@@ -14,7 +14,6 @@ let testProjects =
 let sourceProjects =
     [
         "src/DataHubClient.Core/DataHubClient.Core.fsproj"
-        "src/DataHubClient.DotNet/DataHubClient.DotNet.fsproj"
     ]
 
 let buildProjects = sourceProjects @ testProjects

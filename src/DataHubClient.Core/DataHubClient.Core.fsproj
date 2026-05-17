@@ -1,12 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    The .NET build of Core. JSON is served by Thoth.Json.Newtonsoft, selected by
-    the #if !FABLE_COMPILER branch in Resources/ResourceHelpers.fs. The Fable JS/TS
-    and Python builds use the sibling DataHubClient.Core.Javascript.fsproj /
-    DataHubClient.Core.Python.fsproj, which set the matching FABLE_COMPILER_*
-    constants and reference their own Thoth runtime. All three share the source
-    file list in DataHubClient.Core.Compile.props.
+    The .NET build of Core. It carries the System.Net.Http transport
+    (Http/DotNetHttpClient.fs) so the single DataHubClient type works out of the
+    box on .NET. JSON is served by Thoth.Json.Newtonsoft, selected by the
+    #if !FABLE_COMPILER branches in Resources/ResourceHelpers.fs and DataHubClient.fs.
+    The Fable JS/TS and Python builds use the sibling
+    DataHubClient.Core.Javascript.fsproj / DataHubClient.Core.Python.fsproj, which
+    set the matching FABLE_COMPILER* constants and swap in their own transport and
+    Thoth runtime. All three share the source list in DataHubClient.Core.Compile.props.
   -->
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -14,6 +16,11 @@
   </PropertyGroup>
 
   <Import Project="DataHubClient.Core.Compile.props" />
+
+  <ItemGroup>
+    <Compile Include="Http/DotNetHttpClient.fs" />
+    <Compile Include="DataHubClient.fs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Fable.Core" Version="5.0.0" />

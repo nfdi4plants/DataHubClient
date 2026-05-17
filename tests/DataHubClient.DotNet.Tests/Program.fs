@@ -5,7 +5,7 @@ open Fable.Pyxpecto
 let all =
     testList "All" [
         DotNetHttpClientTests.tests
-        DataHubClientDotNetTests.tests
+        DataHubClientTests.tests
     ]
 
 [<EntryPoint>]

@@ -9,8 +9,8 @@
     "url": "https://github.com/nfdi4plants/DataHubClient.git"
   },
   "homepage": "https://github.com/nfdi4plants/DataHubClient",
-  "main": "./DataHubClient.JavaScript.js",
-  "types": "./DataHubClient.JavaScript.d.ts",
+  "main": "./DataHubClient.js",
+  "types": "./DataHubClient.d.ts",
   "files": [
     "**/*.js",
     "**/*.ts"

@@ -1,4 +1,4 @@
-module DataHubClient.DotNet.Tests.DataHubClientDotNetTests
+module DataHubClient.DotNet.Tests.DataHubClientTests
 
 open System.Net
 open System.Net.Http
@@ -13,17 +13,18 @@ let private projectJson =
     """{"id":42,"name":"My ARC","path":"my-arc","path_with_namespace":"lab/my-arc","visibility":"private","web_url":"https://hub.example/lab/my-arc","default_branch":"main"}"""
 
 let tests =
-    testList "DataHubClientDotNet" [
+    testList "DataHubClient" [
 
-        testCase "constructs a working DataHubClient from a URL and credentials" <| fun () ->
-            let client = DataHubClientDotNet(baseUrl, auth)
-            Expect.isTrue (box client :? DataHubClient) "DataHubClientDotNet is a DataHubClient"
-            Expect.isTrue (not (isNull (box client.Projects))) "resource properties are wired"
+        testCase "two-argument constructor wires resource APIs with the default .NET transport" <| fun () ->
+            let client = DataHubClient(baseUrl, auth)
+            Expect.isTrue (not (isNull (box client.Projects))) "Projects API is wired"
+            Expect.isTrue (not (isNull (box client.Packages))) "Packages API is wired"
 
-        testCaseAsync "routes resource calls through the supplied HttpClient" <| async {
+        testCaseAsync "routes resource calls through a caller-supplied transport" <| async {
             let handler = new FakeHttpMessageHandler(HttpStatusCode.OK, projectJson, [])
             use httpClient = new HttpClient(handler)
-            let client = DataHubClientDotNet(baseUrl, auth, httpClient)
+            let client = DataHubClient(baseUrl, auth)
+            client.Http <- DotNetHttpClient(httpClient)
 
             let! project = client.Projects.Get(42)
 
