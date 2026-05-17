@@ -1,8 +1,10 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/DataHubClient.Core/DataHubClient.Core.fsproj" />
+    <Project Path="src/DataHubClient.DotNet/DataHubClient.DotNet.fsproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/DataHubClient.Tests/DataHubClient.Tests.fsproj" />
+    <Project Path="tests/DataHubClient.DotNet.Tests/DataHubClient.DotNet.Tests.fsproj" />
   </Folder>
 </Solution>

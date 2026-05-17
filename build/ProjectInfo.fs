@@ -8,11 +8,13 @@ let project = "DataHubClient"
 let testProjects =
     [
         "tests/DataHubClient.Tests/DataHubClient.Tests.fsproj"
+        "tests/DataHubClient.DotNet.Tests/DataHubClient.DotNet.Tests.fsproj"
     ]
 
 let sourceProjects =
     [
         "src/DataHubClient.Core/DataHubClient.Core.fsproj"
+        "src/DataHubClient.DotNet/DataHubClient.DotNet.fsproj"
     ]
 
 let buildProjects = sourceProjects @ testProjects

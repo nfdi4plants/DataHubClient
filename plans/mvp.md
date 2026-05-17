@@ -50,7 +50,7 @@ src/
   DataHubClient.DotNet/              # .NET-only shim: HttpClient impl + convenience ctor
     DataHubClient.DotNet.fsproj
     DotNetHttpClient.fs              # IHttpClient over System.Net.Http.HttpClient
-    DataHubClient.DotNet.fs          # subclass / factory wrapping Core with default HTTP
+    DataHubClient.DotNet.fs          # DataHubClientDotNet: Core subclass with default HTTP
 
   DataHubClient.JavaScript/          # Fable JS/TS target: fetch impl
     DataHubClient.JavaScript.fsproj
@@ -65,6 +65,7 @@ src/
 
 tests/
   DataHubClient.Tests/               # single Fable.Pyxpecto suite — transpiled to all three targets
+  DataHubClient.DotNet.Tests/        # .NET-only Pyxpecto suite for the System.Net.Http shim
 
 .config/
   dotnet-tools.json                  # fable, fantomas, fsdocs
@@ -75,7 +76,7 @@ build.fsproj                         # FAKE-style script with dotnet run for bui
 ### Why this shape
 
 - **Core carries the whole API surface** (models + resource classes) so business logic transpiles once and the per-target packages stay tiny.
-- **Per-target package = HTTP impl + ergonomic constructor.** A user on .NET writes `DataHubClient.Create(url, auth)` and gets a working client with `HttpClient` injected; same in JS/Python via the equivalent shim. They can still inject a custom `IHttpClient` for retries/proxy/tests.
+- **Per-target package = HTTP impl + ergonomic constructor.** A user on .NET writes `new DataHubClientDotNet(url, auth)` and gets a working client with `HttpClient` injected; the JS/Python shims subclass the Core client the same way. They can still inject a custom `IHttpClient` for retries/proxy/tests.
 - **No conditional compilation in Core.** Cleaner reads, simpler Fable runs.
 
 ## Key Conventions
@@ -222,6 +223,8 @@ Wire matching scripts into the post-create hook (currently commented out) and a 
 
 Tests are written **once in F#** using **[Fable.Pyxpecto](https://github.com/Freymaurer/Fable.Pyxpecto)** (the polyglot testing lib maintained by the DataPLANT side) and run on all three targets from the same source — .NET as a `dotnet run` executable, JS/TS and Python via the Fable-transpiled suite.
 
+**Per-target HTTP shims are the exception to "write once."** `DotNetHttpClient`, `FetchHttpClient`, and `HttpxHttpClient` each wrap a concrete, non-transpilable HTTP library, so their tests cannot enter the shared Pyxpecto source. Each shim gets a small target-only test project — e.g. `tests/DataHubClient.DotNet.Tests`, a .NET Pyxpecto exe — exercising request/response mapping against a fake transport, never run through Fable.
+
 - **Unit / mock-API tests** in `DataHubClient.Tests` exercise resource APIs against an in-memory `IHttpClient` (see below). They validate URL construction, header injection, JSON encoding/decoding, error mapping, and `Async` plumbing identically on every target.
 - **Integration tests** in the same suite run against a docker-composed GitLab CE container with seeded data. The fixture stands up the container once per CI job; each transpiled output runs the same test cases against it.
 - **Transpiled-shape smoke tests** assert `[<AttachMembers>]` produced real prototype/class methods on the JS/Python outputs (e.g. `typeof project.updateName === 'function'`).
@@ -312,12 +315,21 @@ test suite green before the next begins. Check items off as they land.
   fails in the current .NET 10.0.300 container during solution restore with no
   diagnostics, while the individual projects build successfully.
 
-### Stage 4 — .NET shim
+### Stage 4 — .NET shim ✅ *done*
 
-- [ ] `DataHubClient.DotNet` project referencing Core
-- [ ] `DotNetHttpClient.fs` — `IHttpClient` over `System.Net.Http.HttpClient`
-- [ ] `DataHubClient.DotNet.fs` — `Create(url, auth)` convenience ctor
-- **Exit:** `dotnet build` succeeds; a .NET caller can construct a working client.
+- [x] `DataHubClient.DotNet` project referencing Core
+- [x] `DotNetHttpClient.fs` — `IHttpClient` over `System.Net.Http.HttpClient`
+- [x] `DataHubClient.DotNet.fs` — `DataHubClientDotNet`, a thin subclass of the
+      Core `DataHubClient` whose constructors default the transport to
+      `DotNetHttpClient`. C# and F# callers both just `new` it; no factory class
+      or extension members. Overloads accept a custom `HttpClient` or `IHttpClient`.
+- [x] `tests/DataHubClient.DotNet.Tests` — .NET-only Pyxpecto suite: `DotNetHttpClient`
+      request/response mapping against a fake `HttpMessageHandler` (no network) and
+      `DataHubClientDotNet` construction + transport wiring
+- **Exit:** `./build.sh runtests` green on .NET — 22 tests in `DataHubClient.Tests`
+  plus 5 in `DataHubClient.DotNet.Tests`. The shim's tests live in their own project,
+  not the shared suite: `DotNetHttpClient` depends on `System.Net.Http`, which Fable
+  cannot transpile, so it must never enter the Pyxpecto source.
 
 ### Stage 5 — JavaScript/TypeScript shim
 
@@ -325,6 +337,8 @@ test suite green before the next begins. Check items off as they land.
 - [ ] `package.json`, `fable.config.json` (`--lang typescript`)
 - [ ] Transpile verification: `dotnet fable ... --lang typescript` emits classes
 - [ ] Transpiled-shape smoke test (`typeof project.updateName === 'function'`)
+- [ ] Target-only `FetchHttpClient` test (request/response mapping) — mirrors the
+      `DataHubClient.DotNet.Tests` pattern from Stage 4
 - **Exit:** transpiled suite passes under `node`/`tsx`.
 
 ### Stage 6 — Python shim
@@ -333,6 +347,8 @@ test suite green before the next begins. Check items off as they land.
 - [ ] `pyproject.toml`
 - [ ] Transpile verification: `dotnet fable ... --lang py` emits classes
 - [ ] Transpiled-shape smoke test (`callable(project.update_name)`)
+- [ ] Target-only `HttpxHttpClient` test (request/response mapping) — mirrors the
+      `DataHubClient.DotNet.Tests` pattern from Stage 4
 - **Exit:** transpiled suite passes under `pytest`.
 
 ### Stage 7 — CI & packaging
