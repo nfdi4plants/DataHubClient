@@ -14,16 +14,22 @@ open Thoth.Json.Core
 /// <param name="commit">The commit the branch currently points at.</param>
 [<AttachMembers>]
 type Branch(name: string, isDefault: bool, isProtected: bool, merged: bool, commit: Commit) =
+    let mutable _name = name
+    let mutable _isDefault = isDefault
+    let mutable _isProtected = isProtected
+    let mutable _merged = merged
+    let mutable _commit = commit
+
     /// The branch name.
-    member val Name = name with get, set
+    member _.Name with get () = _name and set value = _name <- value
     /// Whether this is the repository's default branch.
-    member val Default = isDefault with get, set
+    member _.Default with get () = _isDefault and set value = _isDefault <- value
     /// Whether the branch is protected against force-pushes and deletion.
-    member val Protected = isProtected with get, set
+    member _.Protected with get () = _isProtected and set value = _isProtected <- value
     /// Whether the branch has been merged into the default branch.
-    member val Merged = merged with get, set
+    member _.Merged with get () = _merged and set value = _merged <- value
     /// The commit the branch currently points at.
-    member val Commit = commit with get, set
+    member _.Commit with get () = _commit and set value = _commit <- value
 
     /// Decodes a <see cref="T:DataHubClient.Branch"/> from its GitLab JSON representation.
     static member Decoder : Decoder<Branch> =

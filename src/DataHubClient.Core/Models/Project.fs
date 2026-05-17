@@ -27,22 +27,31 @@ type Project
         ?description: string,
         ?defaultBranch: string
     ) =
+    let mutable _id = id
+    let mutable _name = name
+    let mutable _path = path
+    let mutable _pathWithNamespace = pathWithNamespace
+    let mutable _visibility = visibility
+    let mutable _webUrl = webUrl
+    let mutable _description : string option = description
+    let mutable _defaultBranch : string option = defaultBranch
+
     /// The project's unique, instance-wide numeric identifier.
-    member val Id = id with get, set
+    member _.Id with get () = _id and set value = _id <- value
     /// The project's display name.
-    member val Name = name with get, set
+    member _.Name with get () = _name and set value = _name <- value
     /// The project's URL slug within its namespace.
-    member val Path = path with get, set
+    member _.Path with get () = _path and set value = _path <- value
     /// The full namespace-qualified path (e.g. <c>lab/my-arc</c>).
-    member val PathWithNamespace = pathWithNamespace with get, set
+    member _.PathWithNamespace with get () = _pathWithNamespace and set value = _pathWithNamespace <- value
     /// The visibility level (<c>private</c>, <c>internal</c>, or <c>public</c>).
-    member val Visibility = visibility with get, set
+    member _.Visibility with get () = _visibility and set value = _visibility <- value
     /// The URL of the project's web page.
-    member val WebUrl = webUrl with get, set
+    member _.WebUrl with get () = _webUrl and set value = _webUrl <- value
     /// The project description, or <c>None</c> if none is set.
-    member val Description : string option = description with get, set
+    member _.Description with get () = _description and set value = _description <- value
     /// The name of the default branch, or <c>None</c> if the repository has none.
-    member val DefaultBranch : string option = defaultBranch with get, set
+    member _.DefaultBranch with get () = _defaultBranch and set value = _defaultBranch <- value
 
     /// Decodes a <see cref="T:DataHubClient.Project"/> from its GitLab JSON representation.
     static member Decoder : Decoder<Project> =

@@ -15,18 +15,25 @@ open Thoth.Json.Core
 /// <param name="avatarUrl">The URL of the user's avatar image, if one is set.</param>
 [<AttachMembers>]
 type User(id: int, username: string, name: string, state: string, webUrl: string, ?avatarUrl: string) =
+    let mutable _id = id
+    let mutable _username = username
+    let mutable _name = name
+    let mutable _state = state
+    let mutable _webUrl = webUrl
+    let mutable _avatarUrl : string option = avatarUrl
+
     /// The user's unique, instance-wide numeric identifier.
-    member val Id = id with get, set
+    member _.Id with get () = _id and set value = _id <- value
     /// The user's login handle.
-    member val Username = username with get, set
+    member _.Username with get () = _username and set value = _username <- value
     /// The user's display name.
-    member val Name = name with get, set
+    member _.Name with get () = _name and set value = _name <- value
     /// The account state (e.g. <c>active</c>, <c>blocked</c>).
-    member val State = state with get, set
+    member _.State with get () = _state and set value = _state <- value
     /// The URL of the user's profile page.
-    member val WebUrl = webUrl with get, set
+    member _.WebUrl with get () = _webUrl and set value = _webUrl <- value
     /// The URL of the user's avatar image, or <c>None</c> if none is set.
-    member val AvatarUrl : string option = avatarUrl with get, set
+    member _.AvatarUrl with get () = _avatarUrl and set value = _avatarUrl <- value
 
     /// Decodes a <see cref="T:DataHubClient.User"/> from its GitLab JSON representation.
     static member Decoder : Decoder<User> =

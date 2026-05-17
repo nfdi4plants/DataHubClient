@@ -38,32 +38,46 @@ type MergeRequest
         ?description: string,
         ?mergeStatus: string
     ) =
+    let mutable _id = id
+    let mutable _iid = iid
+    let mutable _projectId = projectId
+    let mutable _title = title
+    let mutable _state = state
+    let mutable _sourceBranch = sourceBranch
+    let mutable _targetBranch = targetBranch
+    let mutable _author = author
+    let mutable _webUrl = webUrl
+    let mutable _createdAt = createdAt
+    let mutable _updatedAt = updatedAt
+    let mutable _description : string option = description
+    let mutable _mergeStatus : string option = mergeStatus
+
     /// The merge request's unique, instance-wide numeric identifier.
-    member val Id = id with get, set
+    member _.Id with get () = _id and set value = _id <- value
     /// The per-project merge request number shown in the UI.
-    member val Iid = iid with get, set
+    member _.Iid with get () = _iid and set value = _iid <- value
     /// The identifier of the project the merge request belongs to.
-    member val ProjectId = projectId with get, set
+    member _.ProjectId with get () = _projectId and set value = _projectId <- value
     /// The merge request title.
-    member val Title = title with get, set
+    member _.Title with get () = _title and set value = _title <- value
     /// The state (e.g. <c>opened</c>, <c>merged</c>, <c>closed</c>).
-    member val State = state with get, set
+    member _.State with get () = _state and set value = _state <- value
     /// The branch whose changes are proposed for merging.
-    member val SourceBranch = sourceBranch with get, set
+    member _.SourceBranch with get () = _sourceBranch and set value = _sourceBranch <- value
     /// The branch the changes would be merged into.
-    member val TargetBranch = targetBranch with get, set
+    member _.TargetBranch with get () = _targetBranch and set value = _targetBranch <- value
     /// The user who opened the merge request.
-    member val Author = author with get, set
+    member _.Author with get () = _author and set value = _author <- value
     /// The URL of the merge request's web page.
-    member val WebUrl = webUrl with get, set
+    member _.WebUrl with get () = _webUrl and set value = _webUrl <- value
     /// The creation timestamp as an ISO 8601 string.
-    member val CreatedAt = createdAt with get, set
+    member _.CreatedAt with get () = _createdAt and set value = _createdAt <- value
     /// The last-update timestamp as an ISO 8601 string.
-    member val UpdatedAt = updatedAt with get, set
+    member _.UpdatedAt with get () = _updatedAt and set value = _updatedAt <- value
     /// The merge request description, or <c>None</c> if none is set.
-    member val Description : string option = description with get, set
+    member _.Description with get () = _description and set value = _description <- value
     /// The mergeability status (e.g. <c>can_be_merged</c>), or <c>None</c> if not reported.
-    member val MergeStatus : string option = mergeStatus with get, set
+    member _.MergeStatus with get () = _mergeStatus and set value = _mergeStatus <- value
 
     /// Decodes a <see cref="T:DataHubClient.MergeRequest"/> from its GitLab JSON representation.
     static member Decoder : Decoder<MergeRequest> =

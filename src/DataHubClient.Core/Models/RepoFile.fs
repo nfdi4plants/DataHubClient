@@ -28,22 +28,31 @@ type RepoFile
         blobId: string,
         commitId: string
     ) =
+    let mutable _fileName = fileName
+    let mutable _filePath = filePath
+    let mutable _size = size
+    let mutable _encoding = encoding
+    let mutable _content = content
+    let mutable _refName = refName
+    let mutable _blobId = blobId
+    let mutable _commitId = commitId
+
     /// The file's name without its directory path.
-    member val FileName = fileName with get, set
+    member _.FileName with get () = _fileName and set value = _fileName <- value
     /// The file's full path relative to the repository root.
-    member val FilePath = filePath with get, set
+    member _.FilePath with get () = _filePath and set value = _filePath <- value
     /// The file size in bytes.
-    member val Size = size with get, set
+    member _.Size with get () = _size and set value = _size <- value
     /// The encoding of <c>Content</c> (typically <c>base64</c>).
-    member val Encoding = encoding with get, set
+    member _.Encoding with get () = _encoding and set value = _encoding <- value
     /// The file content, encoded as described by <c>Encoding</c>.
-    member val Content = content with get, set
+    member _.Content with get () = _content and set value = _content <- value
     /// The branch, tag, or commit SHA the file was read from.
-    member val Ref = refName with get, set
+    member _.Ref with get () = _refName and set value = _refName <- value
     /// The SHA of the file blob.
-    member val BlobId = blobId with get, set
+    member _.BlobId with get () = _blobId and set value = _blobId <- value
     /// The SHA of the last commit that touched the file.
-    member val CommitId = commitId with get, set
+    member _.CommitId with get () = _commitId and set value = _commitId <- value
 
     /// Decodes a <see cref="T:DataHubClient.RepoFile"/> from its GitLab JSON representation.
     static member Decoder : Decoder<RepoFile> =

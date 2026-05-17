@@ -36,30 +36,43 @@ type Issue
         updatedAt: string,
         ?description: string
     ) =
+    let mutable _id = id
+    let mutable _iid = iid
+    let mutable _projectId = projectId
+    let mutable _title = title
+    let mutable _state = state
+    let mutable _author = author
+    let mutable _assignees = assignees
+    let mutable _labels = labels
+    let mutable _webUrl = webUrl
+    let mutable _createdAt = createdAt
+    let mutable _updatedAt = updatedAt
+    let mutable _description : string option = description
+
     /// The issue's unique, instance-wide numeric identifier.
-    member val Id = id with get, set
+    member _.Id with get () = _id and set value = _id <- value
     /// The per-project issue number shown in the UI.
-    member val Iid = iid with get, set
+    member _.Iid with get () = _iid and set value = _iid <- value
     /// The identifier of the project the issue belongs to.
-    member val ProjectId = projectId with get, set
+    member _.ProjectId with get () = _projectId and set value = _projectId <- value
     /// The issue title.
-    member val Title = title with get, set
+    member _.Title with get () = _title and set value = _title <- value
     /// The issue state (e.g. <c>opened</c>, <c>closed</c>).
-    member val State = state with get, set
+    member _.State with get () = _state and set value = _state <- value
     /// The user who opened the issue.
-    member val Author = author with get, set
+    member _.Author with get () = _author and set value = _author <- value
     /// The users currently assigned to the issue.
-    member val Assignees = assignees with get, set
+    member _.Assignees with get () = _assignees and set value = _assignees <- value
     /// The label names applied to the issue.
-    member val Labels = labels with get, set
+    member _.Labels with get () = _labels and set value = _labels <- value
     /// The URL of the issue's web page.
-    member val WebUrl = webUrl with get, set
+    member _.WebUrl with get () = _webUrl and set value = _webUrl <- value
     /// The creation timestamp as an ISO 8601 string.
-    member val CreatedAt = createdAt with get, set
+    member _.CreatedAt with get () = _createdAt and set value = _createdAt <- value
     /// The last-update timestamp as an ISO 8601 string.
-    member val UpdatedAt = updatedAt with get, set
+    member _.UpdatedAt with get () = _updatedAt and set value = _updatedAt <- value
     /// The issue description, or <c>None</c> if none is set.
-    member val Description : string option = description with get, set
+    member _.Description with get () = _description and set value = _description <- value
 
     /// Decodes an <see cref="T:DataHubClient.Issue"/> from its GitLab JSON representation.
     static member Decoder : Decoder<Issue> =

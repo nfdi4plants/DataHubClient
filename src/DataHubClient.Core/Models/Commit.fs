@@ -27,22 +27,31 @@ type Commit
         createdAt: string,
         ?webUrl: string
     ) =
+    let mutable _id = id
+    let mutable _shortId = shortId
+    let mutable _title = title
+    let mutable _message = message
+    let mutable _authorName = authorName
+    let mutable _authorEmail = authorEmail
+    let mutable _createdAt = createdAt
+    let mutable _webUrl : string option = webUrl
+
     /// The full 40-character commit SHA.
-    member val Id = id with get, set
+    member _.Id with get () = _id and set value = _id <- value
     /// The abbreviated commit SHA.
-    member val ShortId = shortId with get, set
+    member _.ShortId with get () = _shortId and set value = _shortId <- value
     /// The first line of the commit message.
-    member val Title = title with get, set
+    member _.Title with get () = _title and set value = _title <- value
     /// The full commit message.
-    member val Message = message with get, set
+    member _.Message with get () = _message and set value = _message <- value
     /// The display name of the commit author.
-    member val AuthorName = authorName with get, set
+    member _.AuthorName with get () = _authorName and set value = _authorName <- value
     /// The email address of the commit author.
-    member val AuthorEmail = authorEmail with get, set
+    member _.AuthorEmail with get () = _authorEmail and set value = _authorEmail <- value
     /// The commit timestamp as an ISO 8601 string.
-    member val CreatedAt = createdAt with get, set
+    member _.CreatedAt with get () = _createdAt and set value = _createdAt <- value
     /// The URL of the commit's web page, or <c>None</c> if not available.
-    member val WebUrl : string option = webUrl with get, set
+    member _.WebUrl with get () = _webUrl and set value = _webUrl <- value
 
     /// Decodes a <see cref="T:DataHubClient.Commit"/> from its GitLab JSON representation.
     static member Decoder : Decoder<Commit> =
