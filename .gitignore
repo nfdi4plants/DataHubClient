@@ -354,6 +354,9 @@ paket-files/
 **/__pycache__/
 *.pyc
 
+# uv-managed Python virtual environment (platform-specific, rebuilt on demand)
+.venv/
+
 # Cake - Uncomment if you are using it
 #tools/**
 #!tools/packages.config

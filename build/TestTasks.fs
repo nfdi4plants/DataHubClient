@@ -8,7 +8,7 @@ open ProjectInfo
 open BasicTasks
 
 
-let runTests = BuildTask.create "RunTests" [clean; buildSolution] {
+let runTestsDotNet = BuildTask.create "RunTestsDotNet" [clean; buildSolution] {
     testProjects
     |> Seq.iter (fun testProject ->
         let result =
@@ -63,3 +63,5 @@ let runTestsPython = BuildTask.create "RunTestsPython" [clean] {
     if run.ExitCode <> 0 then
         failwith "Python test suite failed"
 }
+
+let runTestsAll = BuildTask.createEmpty "RunTestsAll" [clean; buildSolution; runTestsJavaScript; runTestsPython; runTestsDotNet;]

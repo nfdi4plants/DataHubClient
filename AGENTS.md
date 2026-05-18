@@ -100,6 +100,8 @@ Python:  dotnet fable tests/DataHubClient.Python.Tests --lang python -o dist/py-
 
 The `RunTestsJavaScript` task in [build/TestTasks.fs](build/TestTasks.fs) wraps the JS flow (it also writes the `{"type":"module"}` marker node needs); `RunTestsPython` wraps the Python flow. The Python target needs the uv-managed dev environment — a `uv sync` from the repository root (`pyproject.toml`) installs `fable-library` and `httpx`; it requires Python 3.12+ because `fable-library` uses PEP 695 generics.
 
+> **⚠️ The `.venv` is OS-specific — rebuild it when you switch OS.** `uv` creates a platform-specific virtual environment in `.venv` (it is `.gitignore`d). A `.venv` carried over from another OS — e.g. from the Linux devcontainer onto a Windows host — makes `uv run` (and `RunTestsPython`) fail: uv tries to recreate the env and cannot delete the foreign layout (on Windows, the Linux `lib64` reparse point throws `Access is denied`). Fix: delete `.venv` and let `uv sync` / `uv run` rebuild it for the current OS.
+
 ## When adding a new resource API (Issues, MergeRequests, …)
 
 1. Add the model under `src/DataHubClient/Models/` as a `[<AttachMembers>]` class — data only, no JSON members.

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//tmp/**)",
+      "Bash(curl -s \"https://api.github.com/repos/nfdi4plants/ARCtrl/git/trees/main?recursive=1\")",
+      "Bash(./build.sh RunTestsJavaScript)",
+      "Bash(timeout 200 dotnet fable src/DataHubClient/DataHubClient.Javascript.fsproj --lang typescript -o dist/js --noCache)",
+      "WebFetch(domain:raw.githubusercontent.com)"
+    ]
+  }
+}
