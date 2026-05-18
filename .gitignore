@@ -431,3 +431,5 @@ FodyWeavers.xsd
 *.msm
 *.msp
 dist/
+.fsdocs/
+tmp/
