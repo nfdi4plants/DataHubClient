@@ -1,7 +1,6 @@
 namespace DataHubClient
 
 open Fable.Core
-open Thoth.Json.Core
 
 /// <summary>
 /// A branch in a DataHub repository, together with the commit it points at.
@@ -30,23 +29,3 @@ type Branch(name: string, isDefault: bool, isProtected: bool, merged: bool, comm
     member _.Merged with get () = _merged and set value = _merged <- value
     /// The commit the branch currently points at.
     member _.Commit with get () = _commit and set value = _commit <- value
-
-    /// Decodes a <see cref="T:DataHubClient.Branch"/> from its GitLab JSON representation.
-    static member Decoder : Decoder<Branch> =
-        Decode.object (fun get ->
-            Branch(
-                get.Required.Field "name" Decode.string,
-                get.Required.Field "default" Decode.bool,
-                get.Required.Field "protected" Decode.bool,
-                get.Required.Field "merged" Decode.bool,
-                get.Required.Field "commit" Commit.Decoder))
-
-    /// <summary>Encodes a <see cref="T:DataHubClient.Branch"/> to its GitLab JSON representation.</summary>
-    /// <param name="branch">The branch to encode.</param>
-    static member Encoder(branch: Branch) : IEncodable =
-        Encode.object [
-            "name", Encode.string branch.Name
-            "default", Encode.bool branch.Default
-            "protected", Encode.bool branch.Protected
-            "merged", Encode.bool branch.Merged
-            "commit", Commit.Encoder branch.Commit ]

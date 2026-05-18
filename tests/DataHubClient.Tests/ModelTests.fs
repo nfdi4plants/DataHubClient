@@ -2,6 +2,7 @@ module DataHubClient.Tests.ModelTests
 
 open Fable.Pyxpecto
 open DataHubClient
+open DataHubClient.Json
 open DataHubClient.Tests.TestJson
 
 let private sampleUser = User(7, "carl", "Carl Correns", "active", "https://hub/carl", "https://hub/avatar.png")
@@ -15,7 +16,7 @@ let tests =
     testList "Models" [
 
         testCase "User round-trips through JSON" <| fun () ->
-            let r = roundTrip User.Encoder User.Decoder sampleUser
+            let r = roundTrip User.encoder User.decoder sampleUser
             Expect.equal r.Id 7 "id"
             Expect.equal r.Username "carl" "username"
             Expect.equal r.Name "Carl Correns" "name"
@@ -24,7 +25,7 @@ let tests =
             Expect.equal r.AvatarUrl (Some "https://hub/avatar.png") "avatar url"
 
         testCase "User omitted avatar decodes to None" <| fun () ->
-            let r = roundTrip User.Encoder User.Decoder (User(1, "u", "U", "active", "https://hub/u"))
+            let r = roundTrip User.encoder User.decoder (User(1, "u", "U", "active", "https://hub/u"))
             Expect.equal r.AvatarUrl None "avatar url"
 
         testCase "Project round-trips through JSON" <| fun () ->
@@ -32,7 +33,7 @@ let tests =
                 Project(
                     42, "My ARC", "my-arc", "lab/my-arc", "private", "https://hub/lab/my-arc",
                     "An annotated research context", "main")
-            let r = roundTrip Project.Encoder Project.Decoder p
+            let r = roundTrip Project.encoder Project.decoder p
             Expect.equal r.Id 42 "id"
             Expect.equal r.PathWithNamespace "lab/my-arc" "path with namespace"
             Expect.equal r.Visibility "private" "visibility"
@@ -40,14 +41,14 @@ let tests =
             Expect.equal r.DefaultBranch (Some "main") "default branch"
 
         testCase "Commit round-trips through JSON" <| fun () ->
-            let r = roundTrip Commit.Encoder Commit.Decoder sampleCommit
+            let r = roundTrip Commit.encoder Commit.decoder sampleCommit
             Expect.equal r.Id "abc123def456" "id"
             Expect.equal r.ShortId "abc123de" "short id"
             Expect.equal r.AuthorEmail "carl@hub" "author email"
             Expect.equal r.WebUrl (Some "https://hub/commit/abc123de") "web url"
 
         testCase "Branch round-trips through JSON with nested commit" <| fun () ->
-            let r = roundTrip Branch.Encoder Branch.Decoder (Branch("main", true, true, false, sampleCommit))
+            let r = roundTrip Branch.encoder Branch.decoder (Branch("main", true, true, false, sampleCommit))
             Expect.equal r.Name "main" "name"
             Expect.isTrue r.Default "default"
             Expect.isTrue r.Protected "protected"
@@ -56,7 +57,7 @@ let tests =
 
         testCase "RepoFile round-trips through JSON" <| fun () ->
             let f = RepoFile("isa.investigation.xlsx", "isa.investigation.xlsx", 1024, "base64", "QVJD", "main", "blob1", "commit1")
-            let r = roundTrip RepoFile.Encoder RepoFile.Decoder f
+            let r = roundTrip RepoFile.encoder RepoFile.decoder f
             Expect.equal r.FilePath "isa.investigation.xlsx" "file path"
             Expect.equal r.Size 1024 "size"
             Expect.equal r.Encoding "base64" "encoding"
@@ -64,7 +65,7 @@ let tests =
             Expect.equal r.Ref "main" "ref"
 
         testCase "Note round-trips through JSON with nested author" <| fun () ->
-            let r = roundTrip Note.Encoder Note.Decoder (Note(5, "Looks good", sampleUser, false, "2026-05-02T09:00:00Z", "2026-05-02T09:00:00Z"))
+            let r = roundTrip Note.encoder Note.decoder (Note(5, "Looks good", sampleUser, false, "2026-05-02T09:00:00Z", "2026-05-02T09:00:00Z"))
             Expect.equal r.Id 5 "id"
             Expect.equal r.Body "Looks good" "body"
             Expect.isFalse r.System "system"
@@ -76,7 +77,7 @@ let tests =
                     100, 3, 42, "Missing assay metadata", "opened", sampleUser,
                     [| sampleUser |], [| "bug"; "metadata" |], "https://hub/issue/3",
                     "2026-05-01T00:00:00Z", "2026-05-03T00:00:00Z", "please fix")
-            let r = roundTrip Issue.Encoder Issue.Decoder issue
+            let r = roundTrip Issue.encoder Issue.decoder issue
             Expect.equal r.Iid 3 "iid"
             Expect.equal r.ProjectId 42 "project id"
             Expect.equal r.State "opened" "state"
@@ -91,14 +92,14 @@ let tests =
                     200, 8, 42, "Add assay", "opened", "feature/assay", "main", sampleUser,
                     "https://hub/mr/8", "2026-05-01T00:00:00Z", "2026-05-04T00:00:00Z",
                     "adds an assay", "can_be_merged")
-            let r = roundTrip MergeRequest.Encoder MergeRequest.Decoder mr
+            let r = roundTrip MergeRequest.encoder MergeRequest.decoder mr
             Expect.equal r.Iid 8 "iid"
             Expect.equal r.SourceBranch "feature/assay" "source branch"
             Expect.equal r.TargetBranch "main" "target branch"
             Expect.equal r.MergeStatus (Some "can_be_merged") "merge status"
 
         testCase "Package round-trips through JSON" <| fun () ->
-            let r = roundTrip Package.Encoder Package.Decoder (Package(9, "arc-bundle", "1.2.0", "generic", "default", "2026-05-01T00:00:00Z"))
+            let r = roundTrip Package.encoder Package.decoder (Package(9, "arc-bundle", "1.2.0", "generic", "default", "2026-05-01T00:00:00Z"))
             Expect.equal r.Name "arc-bundle" "name"
             Expect.equal r.Version "1.2.0" "version"
             Expect.equal r.PackageType "generic" "package type"

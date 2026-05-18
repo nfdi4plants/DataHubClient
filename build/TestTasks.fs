@@ -44,3 +44,22 @@ let runTestsJavaScript = BuildTask.create "RunTestsJavaScript" [clean] {
     if run.ExitCode <> 0 then
         failwith "JavaScript test suite failed"
 }
+
+/// Transpiles the Python Pyxpecto suite with Fable and runs it on the uv-managed
+/// interpreter. Fable — not `dotnet` — drives this target end to end: the suite,
+/// the httpx shim, and DataHubClient.Core.Python.fsproj are all transpiled
+/// together. `uv run` resolves the dev environment from the root pyproject.toml.
+let runTestsPython = BuildTask.create "RunTestsPython" [clean] {
+    let outDir = "dist/py-tests"
+
+    let transpile =
+        DotNet.exec id "fable" $"{pythonTestProject} --lang python -o {outDir} --noCache"
+    if not transpile.OK then
+        failwith "Fable transpilation of the Python test suite failed"
+
+    let run =
+        CreateProcess.fromRawCommand "uv" [ "run"; "python"; System.IO.Path.Combine(outDir, "program.py") ]
+        |> Proc.run
+    if run.ExitCode <> 0 then
+        failwith "Python test suite failed"
+}

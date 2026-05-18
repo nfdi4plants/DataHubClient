@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The Python test project. Fable transpiles it and the suite is run with
+    `python`. It compiles the shared Pyxpecto source from tests/DataHubClient.Tests
+    (so the same cases run on every target) and adds the two Python-only suites.
+    The FABLE_COMPILER* constants match the Core Python build and select the
+    Thoth.Json.Python runtime in tests/DataHubClient.Tests/TestJson.fs.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <DefineConstants>FABLE_COMPILER;FABLE_COMPILER_PYTHON</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\DataHubClient.Tests\TestJson.fs" />
+    <Compile Include="..\DataHubClient.Tests\Mock\MockHttpClient.fs" />
+    <Compile Include="..\DataHubClient.Tests\Mock\SampleData.fs" />
+    <Compile Include="..\DataHubClient.Tests\AuthenticationTests.fs" />
+    <Compile Include="..\DataHubClient.Tests\ModelTests.fs" />
+    <Compile Include="..\DataHubClient.Tests\ResourceTests.fs" />
+    <Compile Include="HttpxHttpClientTests.fs" />
+    <Compile Include="TranspileShapeTests.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fable.Core" Version="5.0.0" />
+    <PackageReference Include="Fable.Python" Version="5.0.0" />
+    <PackageReference Include="Fable.Pyxpecto" Version="2.0.0" />
+    <PackageReference Include="Thoth.Json.Core" Version="0.9.0" />
+    <PackageReference Include="Thoth.Json.Python" Version="0.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DataHubClient.Core\DataHubClient.Core.Python.fsproj" />
+  </ItemGroup>
+
+</Project>

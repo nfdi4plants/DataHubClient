@@ -1,7 +1,6 @@
 namespace DataHubClient
 
 open Fable.Core
-open Thoth.Json.Core
 
 /// <summary>
 /// A single file in a DataHub repository, as returned by the
@@ -53,29 +52,3 @@ type RepoFile
     member _.BlobId with get () = _blobId and set value = _blobId <- value
     /// The SHA of the last commit that touched the file.
     member _.CommitId with get () = _commitId and set value = _commitId <- value
-
-    /// Decodes a <see cref="T:DataHubClient.RepoFile"/> from its GitLab JSON representation.
-    static member Decoder : Decoder<RepoFile> =
-        Decode.object (fun get ->
-            RepoFile(
-                get.Required.Field "file_name" Decode.string,
-                get.Required.Field "file_path" Decode.string,
-                get.Required.Field "size" Decode.int,
-                get.Required.Field "encoding" Decode.string,
-                get.Required.Field "content" Decode.string,
-                get.Required.Field "ref" Decode.string,
-                get.Required.Field "blob_id" Decode.string,
-                get.Required.Field "commit_id" Decode.string))
-
-    /// <summary>Encodes a <see cref="T:DataHubClient.RepoFile"/> to its GitLab JSON representation.</summary>
-    /// <param name="file">The repository file to encode.</param>
-    static member Encoder(file: RepoFile) : IEncodable =
-        Encode.object [
-            "file_name", Encode.string file.FileName
-            "file_path", Encode.string file.FilePath
-            "size", Encode.int file.Size
-            "encoding", Encode.string file.Encoding
-            "content", Encode.string file.Content
-            "ref", Encode.string file.Ref
-            "blob_id", Encode.string file.BlobId
-            "commit_id", Encode.string file.CommitId ]

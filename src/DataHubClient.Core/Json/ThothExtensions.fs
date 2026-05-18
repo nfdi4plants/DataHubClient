@@ -1,9 +1,9 @@
-namespace DataHubClient
+namespace DataHubClient.Json
 
 open Thoth.Json.Core
 
 /// <summary>
-/// Shared Thoth.Json encoder helpers used by the model classes. Internal: not
+/// Shared Thoth.Json encoder helpers used by the JSON modules. Internal: not
 /// part of the public, transpiled API surface.
 /// </summary>
 module internal ThothExtensions =

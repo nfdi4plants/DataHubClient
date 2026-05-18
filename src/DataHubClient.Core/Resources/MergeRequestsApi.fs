@@ -1,6 +1,7 @@
 namespace DataHubClient
 
 open Fable.Core
+open DataHubClient.Json
 open Thoth.Json.Core
 
 /// <summary>
@@ -29,7 +30,7 @@ type MergeRequestsApi(baseUrl: string, auth: Authentication, http: IHttpClient) 
         async {
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" (mergeRequestSegments projectId) [ "state", state ]
             let! response = http.SendAsync req
-            return ResourceHelpers.decodeArray MergeRequest.Decoder response
+            return ResourceHelpers.decodeArray MergeRequest.decoder response
         }
 
     /// <summary>Gets a single merge request by project-local merge request number.</summary>
@@ -39,7 +40,7 @@ type MergeRequestsApi(baseUrl: string, auth: Authentication, http: IHttpClient) 
         async {
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" (mergeRequestSegmentsWithIid projectId iid) []
             let! response = http.SendAsync req
-            return ResourceHelpers.decode MergeRequest.Decoder response
+            return ResourceHelpers.decode MergeRequest.decoder response
         }
 
     /// <summary>Creates a new merge request.</summary>
@@ -60,7 +61,7 @@ type MergeRequestsApi(baseUrl: string, auth: Authentication, http: IHttpClient) 
 
             let req = ResourceHelpers.jsonRequest baseUrl auth "POST" (mergeRequestSegments projectId) [] body
             let! response = http.SendAsync req
-            return ResourceHelpers.decode MergeRequest.Decoder response
+            return ResourceHelpers.decode MergeRequest.decoder response
         }
 
     /// <summary>Updates a merge request.</summary>
@@ -80,7 +81,7 @@ type MergeRequestsApi(baseUrl: string, auth: Authentication, http: IHttpClient) 
 
             let req = ResourceHelpers.jsonRequest baseUrl auth "PUT" (mergeRequestSegmentsWithIid projectId iid) [] body
             let! response = http.SendAsync req
-            return ResourceHelpers.decode MergeRequest.Decoder response
+            return ResourceHelpers.decode MergeRequest.decoder response
         }
 
     /// <summary>Closes a merge request.</summary>
@@ -96,7 +97,7 @@ type MergeRequestsApi(baseUrl: string, auth: Authentication, http: IHttpClient) 
         async {
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" (noteSegments projectId iid) []
             let! response = http.SendAsync req
-            return ResourceHelpers.decodeArray Note.Decoder response
+            return ResourceHelpers.decodeArray Note.decoder response
         }
 
     /// <summary>Creates a note on a merge request.</summary>
@@ -115,5 +116,5 @@ type MergeRequestsApi(baseUrl: string, auth: Authentication, http: IHttpClient) 
                     (Encode.object [ "body", Encode.string body ])
 
             let! response = http.SendAsync req
-            return ResourceHelpers.decode Note.Decoder response
+            return ResourceHelpers.decode Note.decoder response
         }

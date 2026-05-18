@@ -1,6 +1,7 @@
 namespace DataHubClient
 
 open Fable.Core
+open DataHubClient.Json
 open Thoth.Json.Core
 
 /// <summary>
@@ -39,7 +40,7 @@ type FilesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
                     [ "ref", Some refName ]
 
             let! response = http.SendAsync req
-            return ResourceHelpers.decode RepoFile.Decoder response
+            return ResourceHelpers.decode RepoFile.decoder response
         }
 
     /// <summary>Creates a repository file.</summary>
@@ -61,7 +62,7 @@ type FilesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
                     (writeBody branch content commitMessage encoding)
 
             let! response = http.SendAsync req
-            return ResourceHelpers.decode RepoFile.Decoder response
+            return ResourceHelpers.decode RepoFile.decoder response
         }
 
     /// <summary>Updates a repository file.</summary>
@@ -83,7 +84,7 @@ type FilesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
                     (writeBody branch content commitMessage encoding)
 
             let! response = http.SendAsync req
-            return ResourceHelpers.decode RepoFile.Decoder response
+            return ResourceHelpers.decode RepoFile.decoder response
         }
 
     /// <summary>Deletes a repository file.</summary>

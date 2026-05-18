@@ -39,12 +39,13 @@ src/
       FetchHttpClient.fs             # IHttpClient over globalThis.fetch  — JS fsproj only
       HttpxHttpClient.fs             # IHttpClient over httpx.AsyncClient — Python fsproj only (Stage 6)
     Models/
-      Project.fs                     # all class, [<AttachMembers>], static Encoder/Decoder
+      Project.fs                     # data-only class, [<AttachMembers>]
       User.fs / Branch.fs / Commit.fs / RepoFile.fs / Issue.fs / Note.fs
       MergeRequest.fs / Package.fs
       Errors.fs                      # DataHubError class hierarchy
-    Json/
+    Json/                            # namespace DataHubClient.Json
       ThothExtensions.fs             # shared encoder helpers
+      Project.fs / User.fs / ...     # module <Model> with let decoder / let encoder
     Resources/
       ResourceHelpers.fs             # URL builder, JSON runtime switch, error mapping
       ProjectsApi.fs                 # class taking (baseUrl, auth, http)
@@ -55,6 +56,7 @@ tests/
   DataHubClient.Tests/               # single Fable.Pyxpecto suite — transpiled to all three targets
   DataHubClient.DotNet.Tests/        # .NET-only suite for the System.Net.Http transport
   DataHubClient.JavaScript.Tests/    # JS-only suite (FetchHttpClient + transpiled shape) + the shared suite
+  DataHubClient.Python.Tests/        # Python-only suite (HttpxHttpClient + transpiled shape) + the shared suite
 
 .config/
   dotnet-tools.json                  # fable (fantomas, fsdocs added later)
@@ -94,30 +96,40 @@ form outright, so a single primary constructor is the only shape that stays
 
 ### Classes over records, attached members
 
+The model class is **data only** (see the *transpilation-first* property rule in
+AGENTS.md — `let mutable` backing fields, not `member val`):
+
 ```fsharp
 [<AttachMembers>]
 type Project(id: int, name: string, path: string) =
-    member val Id = id with get, set
-    member val Name = name with get, set
-    member val Path = path with get, set
+    let mutable _id = id
+    member _.Id with get () = _id and set value = _id <- value
+    // … Name, Path …
+```
 
-    static member Decoder : Decoder<Project> =
+Its JSON `decoder`/`encoder` live in a separate `module Project` under
+`Json/Project.fs`, namespace `DataHubClient.Json`:
+
+```fsharp
+namespace DataHubClient.Json
+
+module Project =
+    let decoder : Decoder<Project> =
         Decode.object (fun get ->
             Project(
                 get.Required.Field "id" Decode.int,
                 get.Required.Field "name" Decode.string,
                 get.Required.Field "path" Decode.string))
 
-    static member Encoder (p: Project) : JsonValue =
+    let encoder (p: Project) : IEncodable =
         Encode.object [
             "id", Encode.int p.Id
             "name", Encode.string p.Name
             "path", Encode.string p.Path ]
 ```
 
-- `[<AttachMembers>]` makes methods land on the JS/Python class prototype, so consumers call `project.updateName(...)` naturally.
-- Static `Decoder`/`Encoder` members keep serialization discoverable per type, no module hunting.
-- Mutable `with get, set` is acceptable here — feels native in JS/Python and avoids `with`-record syntax that doesn't exist in those ecosystems.
+- `[<AttachMembers>]` makes methods land on the JS/Python class prototype, so consumers call `project.method(...)` naturally.
+- Coders are **module-level functions**, not static members — see *JSON via Thoth.Json* below for why this is mandatory on the Python target.
 
 ### Async at the boundary
 
@@ -125,7 +137,11 @@ All public methods return `Async<'T>`. The .NET shim exposes a `Task<'T>` wrappe
 
 ### JSON via Thoth.Json
 
-Hand-written encoders/decoders on each model class. Avoids reflection-based serialization (which is brittle under Fable) and is the de-facto choice in ARCtrl.
+Hand-written `decoder`/`encoder` as module-level `let` bindings in a `module <Model>`
+under the `DataHubClient.Json` namespace — ARCtrl's `ARCtrl.Json` structure. They are
+**not** static members on the model class: Fable's Python target miscompiles a
+class-body static `Decoder : Decoder<T>` property into a self-reference to the
+not-yet-bound class. See *Stage 6 → JSON coders as modules*.
 
 ## HTTP Abstraction
 
@@ -399,20 +415,48 @@ property — F# secondary constructors do not survive Fable as `new`-able forms.
 The Stage 4/5 checklists above describe the original shim layout; the *shape*
 they delivered (transports, tests, ergonomic construction) still holds.
 
-### Stage 6 — Python build
+### Stage 6 — Python build ✅ *done*
 
-- [ ] `DataHubClient.Core.Python.fsproj` — parallel project file, `FABLE_COMPILER`
+- [x] **Moved JSON coders off the model classes (prerequisite).** Core could not
+      transpile to Python: each model carried a `static member Decoder : Decoder<T>`,
+      which Fable's Python target emits as `StaticLazyProperty[Decoder_1[T]]` inside
+      the class body — a self-reference to the not-yet-bound class, so importing the
+      module raised `NameError`. Fixed by adopting ARCtrl's structure in full: every
+      `encoder`/`decoder` moved to a `module <Model>` under `Json/<Model>.fs` in a new
+      `DataHubClient.Json` namespace (module-level `let` bindings, whose type is a
+      deferred annotation). Models are now data-only; `ThothExtensions` moved into
+      `DataHubClient.Json` too. Analogous to the Stage 5 "Made Core transpilable"
+      prerequisite. See *JSON coders as modules* below.
+- [x] `DataHubClient.Core.Python.fsproj` — parallel project file, `FABLE_COMPILER`
       + `FABLE_COMPILER_PYTHON` constants, `Thoth.Json.Python` runtime
-- [ ] `Http/HttpxHttpClient.fs` — `IHttpClient` over `httpx.AsyncClient`,
+- [x] `Http/HttpxHttpClient.fs` — `IHttpClient` over `httpx.AsyncClient`,
       compiled only by the Python project file; wired as the `#if FABLE_COMPILER_PYTHON`
-      default transport in `DataHubClient.fs` (the branch is already in place)
-- [ ] `pyproject.toml` for the PyPI distribution
-- [ ] Transpile verification: `dotnet fable ... --lang python` emits classes
-- [ ] `tests/DataHubClient.Python.Tests` — parallel test project: the shared
-      Pyxpecto suite plus a target-only `HttpxHttpClient` test and a transpiled-shape
-      smoke test (`callable(...)`), mirroring `DataHubClient.JavaScript.Tests`
-- [ ] `RunTestsPython` build task — Fable transpile + `pytest`/`python` run
-- **Exit:** `./build.sh RunTestsPython` green — the transpiled suite passes under Python.
+      default transport in `DataHubClient.fs`. The transport's `async` block awaits
+      the native httpx coroutine via `Async.AwaitTask` (Fable's `await_task` bridges any
+      Python awaitable).
+- [x] `pyproject.toml` for the PyPI distribution (`src/DataHubClient.Core/`), plus a
+      root `pyproject.toml` for the uv-managed dev/test environment (`fable-library`,
+      `httpx`; Python 3.12+, required by `fable-library`'s PEP 695 generics)
+- [x] Transpile verification: `dotnet fable ... --lang python` emits `class` defs for
+      the Core models, resource APIs, facade, and `HttpxHttpClient`; the `Json/`
+      modules emit clean module-level `decoder`/`encoder` functions
+- [x] `tests/DataHubClient.Python.Tests` — parallel test project: the shared
+      Pyxpecto suite plus a target-only `HttpxHttpClient` test (fake `httpx.AsyncClient`)
+      and a transpiled-shape smoke test (`callable(...)`), mirroring `DataHubClient.JavaScript.Tests`
+- [x] `RunTestsPython` build task — Fable transpile + `uv run python`
+- **Exit:** `./build.sh RunTestsPython` green — the shared Pyxpecto suite (22 cases)
+  plus the two Python-only suites (7 cases) transpile via Fable and pass under
+  `python`, 29 in total. The JS suite stays green after the JSON refactor.
+
+#### JSON coders as modules
+
+`Thoth.Json` `decoder`/`encoder` are **module-level `let` bindings** in a
+`module <Model>` per `Json/<Model>.fs`, namespace `DataHubClient.Json` — *not*
+static members on the model class. This is ARCtrl's `ARCtrl.Json` structure, and
+it is mandatory on the Python target: a class-body static `Decoder` property
+self-references the enclosing class in its type annotation and Fable Python
+miscompiles it. The modules sit in `DataHubClient.Json` rather than the flat
+`DataHubClient` namespace so a `module Commit` does not collide with `type Commit`.
 
 ### Stage 7 — CI & packaging
 

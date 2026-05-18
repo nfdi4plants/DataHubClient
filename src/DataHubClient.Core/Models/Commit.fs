@@ -1,7 +1,6 @@
 namespace DataHubClient
 
 open Fable.Core
-open Thoth.Json.Core
 
 /// <summary>
 /// A single commit in a DataHub repository. See the
@@ -52,29 +51,3 @@ type Commit
     member _.CreatedAt with get () = _createdAt and set value = _createdAt <- value
     /// The URL of the commit's web page, or <c>None</c> if not available.
     member _.WebUrl with get () = _webUrl and set value = _webUrl <- value
-
-    /// Decodes a <see cref="T:DataHubClient.Commit"/> from its GitLab JSON representation.
-    static member Decoder : Decoder<Commit> =
-        Decode.object (fun get ->
-            Commit(
-                get.Required.Field "id" Decode.string,
-                get.Required.Field "short_id" Decode.string,
-                get.Required.Field "title" Decode.string,
-                get.Required.Field "message" Decode.string,
-                get.Required.Field "author_name" Decode.string,
-                get.Required.Field "author_email" Decode.string,
-                get.Required.Field "created_at" Decode.string,
-                ?webUrl = get.Optional.Field "web_url" Decode.string))
-
-    /// <summary>Encodes a <see cref="T:DataHubClient.Commit"/> to its GitLab JSON representation.</summary>
-    /// <param name="commit">The commit to encode.</param>
-    static member Encoder(commit: Commit) : IEncodable =
-        Encode.object [
-            "id", Encode.string commit.Id
-            "short_id", Encode.string commit.ShortId
-            "title", Encode.string commit.Title
-            "message", Encode.string commit.Message
-            "author_name", Encode.string commit.AuthorName
-            "author_email", Encode.string commit.AuthorEmail
-            "created_at", Encode.string commit.CreatedAt
-            "web_url", ThothExtensions.encodeOption Encode.string commit.WebUrl ]

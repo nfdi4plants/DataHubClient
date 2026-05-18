@@ -12,9 +12,9 @@ set -euo pipefail
 # echo "==> Installing npm dependencies"
 # npm install
 
-# echo "==> Rebuilding Python venv (drop any host-platform .venv)"
-# rm -rf .venv
-# uv sync
+echo "==> Rebuilding Python venv (drop any host-platform .venv)"
+rm -rf .venv
+uv sync
 
 echo "==> Installing agent CLIs globally (opencode, claude-code, codex)"
 npm install -g opencode-ai @anthropic-ai/claude-code @openai/codex

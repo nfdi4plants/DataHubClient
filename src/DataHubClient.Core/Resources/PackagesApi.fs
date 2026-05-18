@@ -1,6 +1,7 @@
 namespace DataHubClient
 
 open Fable.Core
+open DataHubClient.Json
 
 /// <summary>
 /// Client for GitLab Package Registry operations, focused on generic packages.
@@ -33,7 +34,7 @@ type PackagesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
                     [ "package_name", packageName; "package_type", packageType ]
 
             let! response = http.SendAsync req
-            return ResourceHelpers.decodeArray Package.Decoder response
+            return ResourceHelpers.decodeArray Package.decoder response
         }
 
     /// <summary>Gets a package by package identifier.</summary>
@@ -43,7 +44,7 @@ type PackagesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
         async {
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" (packageSegments projectId @ [ string packageId ]) []
             let! response = http.SendAsync req
-            return ResourceHelpers.decode Package.Decoder response
+            return ResourceHelpers.decode Package.decoder response
         }
 
     /// <summary>Uploads a generic package file.</summary>

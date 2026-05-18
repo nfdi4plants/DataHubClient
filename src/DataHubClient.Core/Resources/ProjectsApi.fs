@@ -1,6 +1,7 @@
 namespace DataHubClient
 
 open Fable.Core
+open DataHubClient.Json
 
 /// <summary>
 /// Client for the GitLab Projects API used by DataHubs.
@@ -25,7 +26,7 @@ type ProjectsApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
 
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" [ "projects" ] query
             let! response = http.SendAsync req
-            return ResourceHelpers.decodeArray Project.Decoder response
+            return ResourceHelpers.decodeArray Project.decoder response
         }
 
     /// <summary>Gets a project by numeric project identifier.</summary>
@@ -34,7 +35,7 @@ type ProjectsApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
         async {
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" [ "projects"; string projectId ] []
             let! response = http.SendAsync req
-            return ResourceHelpers.decode Project.Decoder response
+            return ResourceHelpers.decode Project.decoder response
         }
 
     /// <summary>Searches projects visible to the authenticated user.</summary>

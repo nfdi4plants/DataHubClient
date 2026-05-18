@@ -1,7 +1,6 @@
 namespace DataHubClient
 
 open Fable.Core
-open Thoth.Json.Core
 
 /// <summary>
 /// An issue on a DataHub project. <c>Iid</c> is the per-project number shown in
@@ -73,37 +72,3 @@ type Issue
     member _.UpdatedAt with get () = _updatedAt and set value = _updatedAt <- value
     /// The issue description, or <c>None</c> if none is set.
     member _.Description with get () = _description and set value = _description <- value
-
-    /// Decodes an <see cref="T:DataHubClient.Issue"/> from its GitLab JSON representation.
-    static member Decoder : Decoder<Issue> =
-        Decode.object (fun get ->
-            Issue(
-                get.Required.Field "id" Decode.int,
-                get.Required.Field "iid" Decode.int,
-                get.Required.Field "project_id" Decode.int,
-                get.Required.Field "title" Decode.string,
-                get.Required.Field "state" Decode.string,
-                get.Required.Field "author" User.Decoder,
-                get.Required.Field "assignees" (Decode.array User.Decoder),
-                get.Required.Field "labels" (Decode.array Decode.string),
-                get.Required.Field "web_url" Decode.string,
-                get.Required.Field "created_at" Decode.string,
-                get.Required.Field "updated_at" Decode.string,
-                ?description = get.Optional.Field "description" Decode.string))
-
-    /// <summary>Encodes an <see cref="T:DataHubClient.Issue"/> to its GitLab JSON representation.</summary>
-    /// <param name="issue">The issue to encode.</param>
-    static member Encoder(issue: Issue) : IEncodable =
-        Encode.object [
-            "id", Encode.int issue.Id
-            "iid", Encode.int issue.Iid
-            "project_id", Encode.int issue.ProjectId
-            "title", Encode.string issue.Title
-            "state", Encode.string issue.State
-            "author", User.Encoder issue.Author
-            "assignees", Encode.array (Array.map User.Encoder issue.Assignees)
-            "labels", Encode.array (Array.map Encode.string issue.Labels)
-            "web_url", Encode.string issue.WebUrl
-            "created_at", Encode.string issue.CreatedAt
-            "updated_at", Encode.string issue.UpdatedAt
-            "description", ThothExtensions.encodeOption Encode.string issue.Description ]

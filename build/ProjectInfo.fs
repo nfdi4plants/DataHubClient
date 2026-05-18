@@ -24,6 +24,12 @@ let buildProjects = sourceProjects @ testProjects
 let javaScriptTestProject =
     "tests/DataHubClient.JavaScript.Tests/DataHubClient.JavaScript.Tests.fsproj"
 
+/// The Python Pyxpecto suite. Fable transpiles it and the uv-managed `python`
+/// runs it — never `dotnet build`/`dotnet run` — so it stays out of buildProjects,
+/// the .NET build list. See the RunTestsPython task.
+let pythonTestProject =
+    "tests/DataHubClient.Python.Tests/DataHubClient.Python.Tests.fsproj"
+
 let solutionFile  = $"{project}.slnx"
 
 let configuration = "Release"

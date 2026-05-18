@@ -14,11 +14,12 @@ The full design plan lives at [plans/mvp.md](plans/mvp.md) — read it before ma
 src/DataHubClient.Core                  the whole library — models, IHttpClient, resource APIs, transports, facade
   DataHubClient.Core.fsproj               .NET build       (DotNetHttpClient + Thoth.Json.Newtonsoft)
   DataHubClient.Core.Javascript.fsproj    Fable JS/TS build (FetchHttpClient  + Thoth.Json.Javascript)
-  DataHubClient.Core.Python.fsproj        Fable Python build (HttpxHttpClient + Thoth.Json.Python) — planned
+  DataHubClient.Core.Python.fsproj        Fable Python build (HttpxHttpClient + Thoth.Json.Python)
   DataHubClient.Core.Compile.props        target-agnostic <Compile> list, shared by all three project files
 tests/DataHubClient.Tests               single Fable.Pyxpecto suite, runs on all targets
 tests/DataHubClient.DotNet.Tests        .NET-only suite for the System.Net.Http transport
 tests/DataHubClient.JavaScript.Tests    JS-only suite + the shared suite, transpiled and run under node
+tests/DataHubClient.Python.Tests        Python-only suite + the shared suite, transpiled and run under uv/python
 build                                   FAKE-based BuildProject orchestration
 plans/mvp.md                            full implementation plan
 ```
@@ -26,7 +27,7 @@ plans/mvp.md                            full implementation plan
 - **Core is the whole library.** Models, resource classes, all three HTTP transports, and the facade live in one source tree. There are **no separate per-target shim projects** — instead, parallel project files (`DataHubClient.Core.*.fsproj`) share `DataHubClient.Core.Compile.props` and differ only in `<DefineConstants>`, the one `Http/*HttpClient.fs` they compile, and the Thoth.Json runtime they reference. This is the ARCtrl pattern.
 - **One `DataHubClient` type on every target.** `new DataHubClient(url, auth)` reads identically in .NET, JS/TS, and Python; the default transport is `#if`-selected. A custom `IHttpClient` goes in via the settable `Http` property — not a constructor overload (Fable lowers F# secondary constructors to non-`new`-able static factories).
 - **HTTP transport is abstracted** via `IHttpClient` (see [src/DataHubClient.Core/Http/IHttpClient.fs](src/DataHubClient.Core/Http/IHttpClient.fs)). The concrete transports (`DotNetHttpClient`, `FetchHttpClient`, `HttpxHttpClient`) live in `Core/Http/`, but each is compiled only by its own per-target project file, behind `#if`. Target-agnostic Core files never import a concrete HTTP library.
-- **Public namespace is flat: `DataHubClient`.** Folder structure (Http/, Models/, Resources/) is for F# file organisation only — don't reflect it in namespaces.
+- **Public namespace is flat: `DataHubClient`.** Folder structure (Http/, Models/, Resources/) is for F# file organisation only — don't reflect it in namespaces. The **one exception is `Json/`**: each model's JSON `decoder`/`encoder` lives in a `module <Model>` under the `DataHubClient.Json` namespace, because a module cannot share the flat namespace with its same-named model type (this mirrors ARCtrl's `ARCtrl.Json`). See the JSON convention below.
 
 ## F# code conventions (transpilation-first)
 
@@ -34,13 +35,13 @@ These conventions are non-negotiable because the F# is consumed from JS and Pyth
 
 - **Classes, not records.** Record `{ with = … }` syntax doesn't exist in JS/Python consumers.
 - **`[<AttachMembers>]` on every public class.** Without it, Fable emits members as free functions and JS/Python consumers can't do `instance.method()`.
-- **Static members on classes instead of modules with functions.** Modules transpile to nested namespace objects; static members become natural class methods.
+- **Static members on classes instead of modules with functions.** Modules transpile to nested namespace objects; static members become natural class methods. (The JSON `decoder`/`encoder` are the one deliberate exception — see the no-reflection-JSON rule below.)
 - **`Async<'T>` at the public API boundary.** Fable maps Async to JS Promise and Python awaitable. Avoid `Task<'T>` in Core.
-- **No reflection-based JSON.** Use [Thoth.Json](https://github.com/thoth-org/Thoth.Json) with hand-written `Decoder`/`Encoder` as static members on each model class.
+- **No reflection-based JSON.** Use [Thoth.Json](https://github.com/thoth-org/Thoth.Json) with hand-written `decoder`/`encoder` as **module-level `let` bindings** in a `module <Model>` under `Json/<Model>.fs` (namespace `DataHubClient.Json`) — *not* as static members on the model class. Fable's Python target miscompiles a class-level static `Decoder` property: it emits `StaticLazyProperty[Decoder_1[Model]]` inside the class body, where `Model` is not yet bound, so importing the module raises `NameError`. A module-level `let decoder : Decoder<Model>` transpiles to a module global whose type is a deferred annotation — no self-reference at class-eval time. This is exactly ARCtrl's `ARCtrl.Json` structure.
 - **Avoid F#-only types (Option, Result, DU) in the public signature where a string/enum/class would do** — they transpile but are clunky to construct from JS/Python.
 - **For a settable property, use an explicit `let mutable` backing field + a hand-written `member` — not `member val … with get, set`.** Fable renders an auto-property's compiler-generated backing field as `this["Name@"]`; the `@` is not a valid JS identifier, so it surfaces as an ugly string-keyed access. **The backing field must not shadow a constructor parameter** — `let mutable id = id` makes F# disambiguate the field as `id@30` (binding name + line), just as bad. Prefix the field with `_`: `let mutable _id = id` paired with `member _.Id with get () = _id and set value = _id <- value` transpiles to a clean `this._id`. Use a plain get-only `member _.X = …` for computed/immutable properties (no backing field at all).
 - **After a large addition, transpile and read the generated code.** Run `dotnet fable src/DataHubClient.Core/DataHubClient.Core.Javascript.fsproj --lang typescript -o dist/js` and inspect the emitted classes for awkward API surfaces — `@`-suffixed backing fields, free functions where instance methods were expected, mangled or duplicated names. Fable produces these silently; only reading the output catches them. A clean transpiled surface is part of "done", not a follow-up.
-- **Full XML doc comments on all new code.** Every public type, member, constructor parameter, and static `Decoder`/`Encoder` gets a `///` comment — `<summary>` plus `<param>` tags on the primary constructor. Model classes must additionally link the relevant GitLab REST API page in their `<summary>` via `<see href="https://docs.gitlab.com/ee/api/...">`. Docs are part of every change, not a follow-up.
+- **Full XML doc comments on all new code.** Every public type, member, constructor parameter, and JSON `decoder`/`encoder` gets a `///` comment — `<summary>` plus `<param>` tags on the primary constructor. Model classes must additionally link the relevant GitLab REST API page in their `<summary>` via `<see href="https://docs.gitlab.com/ee/api/...">`. Docs are part of every change, not a follow-up.
 
 Example pattern (see [src/DataHubClient.Core/Http/Authentication.fs](src/DataHubClient.Core/Http/Authentication.fs)):
 
@@ -65,6 +66,7 @@ All build orchestration goes through the FAKE/BuildProject pipeline under [build
 ./build.sh                     # default target: buildSolution
 ./build.sh runtests            # build + run the .NET test projects
 ./build.sh RunTestsJavaScript  # Fable-transpile the suite and run it under node
+./build.sh RunTestsPython      # Fable-transpile the suite and run it under uv/python
 ./build.sh pack                # nuget pack
 ./build.sh release             # full release (clean, build, test, pack, tag, publish, docs)
 ```
@@ -87,24 +89,26 @@ Tests use **[Fable.Pyxpecto](https://github.com/Freymaurer/Fable.Pyxpecto)** —
 
 The shared suite (`tests/DataHubClient.Tests`) runs on .NET directly. For Fable
 targets it is compiled by a parallel test project — `tests/DataHubClient.JavaScript.Tests`
-(and, planned, `DataHubClient.Python.Tests`) — which pulls in the shared `.fs`
+and `tests/DataHubClient.Python.Tests` — which pulls in the shared `.fs`
 files plus its own target-only suites, then is transpiled and run:
 
 ```
 .NET:    dotnet run --project tests/DataHubClient.Tests
 JS:      dotnet fable tests/DataHubClient.JavaScript.Tests --lang javascript -o dist/js-tests && node dist/js-tests/Program.js
+Python:  dotnet fable tests/DataHubClient.Python.Tests --lang python -o dist/py-tests && uv run python dist/py-tests/program.py
 ```
 
-The `RunTestsJavaScript` task in [build/TestTasks.fs](build/TestTasks.fs) wraps the JS flow (it also writes the `{"type":"module"}` marker node needs).
+The `RunTestsJavaScript` task in [build/TestTasks.fs](build/TestTasks.fs) wraps the JS flow (it also writes the `{"type":"module"}` marker node needs); `RunTestsPython` wraps the Python flow. The Python target needs the uv-managed dev environment — a `uv sync` from the repository root (`pyproject.toml`) installs `fable-library` and `httpx`; it requires Python 3.12+ because `fable-library` uses PEP 695 generics.
 
 ## When adding a new resource API (Issues, MergeRequests, …)
 
-1. Add the model under `src/DataHubClient.Core/Models/` as a `[<AttachMembers>]` class with static `Decoder`/`Encoder`.
-2. Add the resource API under `src/DataHubClient.Core/Resources/` as a `[<AttachMembers>]` class taking `(baseUrl, auth, http)` in its constructor.
-3. Expose it as a property on the top-level `DataHubClient` facade.
-4. Add a unit test suite using an in-memory `IHttpClient` stub that records the outgoing request and returns canned JSON.
-5. Register the new `.fs` files in `DataHubClient.Core.Compile.props` (the shared `<Compile>` list, not the individual `.fsproj` files) in **dependency order** (F# files are compiled top-down).
-6. Transpile and inspect the output (see the F# code conventions above) before considering the addition done.
+1. Add the model under `src/DataHubClient.Core/Models/` as a `[<AttachMembers>]` class — data only, no JSON members.
+2. Add its JSON `decoder`/`encoder` under `src/DataHubClient.Core/Json/<Model>.fs` as a `module <Model>` in namespace `DataHubClient.Json` (see the no-reflection-JSON rule above).
+3. Add the resource API under `src/DataHubClient.Core/Resources/` as a `[<AttachMembers>]` class taking `(baseUrl, auth, http)` in its constructor; `open DataHubClient.Json` to reach the coders.
+4. Expose it as a property on the top-level `DataHubClient` facade.
+5. Add a unit test suite using an in-memory `IHttpClient` stub that records the outgoing request and returns canned JSON.
+6. Register the new `.fs` files in `DataHubClient.Core.Compile.props` (the shared `<Compile>` list, not the individual `.fsproj` files) in **dependency order** (F# files are compiled top-down) — the `Json/` file after every model it references.
+7. Transpile and inspect the output (see the F# code conventions above) before considering the addition done.
 
 ## Things to NOT do
 
@@ -114,7 +118,8 @@ The `RunTestsJavaScript` task in [build/TestTasks.fs](build/TestTasks.fs) wraps 
 - ❌ Don't write modules-with-functions for the public surface — use classes with static members.
 - ❌ Don't put concrete HTTP library calls in target-agnostic Core files — they belong in `Http/*HttpClient.fs`, each compiled only by its own per-target `.fsproj`, behind `#if`.
 - ❌ Don't expose a target-specific entry type (`DataHubClientDotNet`, etc.) — there is one `DataHubClient`; default the transport per target with `#if`.
-- ❌ Don't reflect F# folder structure into the namespace; everything public lives directly in `DataHubClient`.
+- ❌ Don't reflect F# folder structure into the namespace; everything public lives directly in `DataHubClient` — the sole exception is the JSON `decoder`/`encoder` modules in `DataHubClient.Json`.
+- ❌ Don't put JSON `Decoder`/`Encoder` as static members on a model class — Fable's Python target miscompiles a self-referential static decoder property; use a `module <Model>` in `DataHubClient.Json` instead.
 
 ## Useful pointers
 

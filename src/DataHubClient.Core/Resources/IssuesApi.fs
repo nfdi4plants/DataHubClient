@@ -1,6 +1,7 @@
 namespace DataHubClient
 
 open Fable.Core
+open DataHubClient.Json
 open Thoth.Json.Core
 
 /// <summary>
@@ -29,7 +30,7 @@ type IssuesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
         async {
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" (issueSegments projectId) [ "state", state ]
             let! response = http.SendAsync req
-            return ResourceHelpers.decodeArray Issue.Decoder response
+            return ResourceHelpers.decodeArray Issue.decoder response
         }
 
     /// <summary>Gets a single issue by project-local issue number.</summary>
@@ -39,7 +40,7 @@ type IssuesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
         async {
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" (issueSegmentsWithIid projectId iid) []
             let! response = http.SendAsync req
-            return ResourceHelpers.decode Issue.Decoder response
+            return ResourceHelpers.decode Issue.decoder response
         }
 
     /// <summary>Creates a new issue.</summary>
@@ -56,7 +57,7 @@ type IssuesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
 
             let req = ResourceHelpers.jsonRequest baseUrl auth "POST" (issueSegments projectId) [] body
             let! response = http.SendAsync req
-            return ResourceHelpers.decode Issue.Decoder response
+            return ResourceHelpers.decode Issue.decoder response
         }
 
     /// <summary>Updates an issue.</summary>
@@ -76,7 +77,7 @@ type IssuesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
 
             let req = ResourceHelpers.jsonRequest baseUrl auth "PUT" (issueSegmentsWithIid projectId iid) [] body
             let! response = http.SendAsync req
-            return ResourceHelpers.decode Issue.Decoder response
+            return ResourceHelpers.decode Issue.decoder response
         }
 
     /// <summary>Closes an issue.</summary>
@@ -92,7 +93,7 @@ type IssuesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
         async {
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" (noteSegments projectId iid) []
             let! response = http.SendAsync req
-            return ResourceHelpers.decodeArray Note.Decoder response
+            return ResourceHelpers.decodeArray Note.decoder response
         }
 
     /// <summary>Creates a note on an issue.</summary>
@@ -111,5 +112,5 @@ type IssuesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
                     (Encode.object [ "body", Encode.string body ])
 
             let! response = http.SendAsync req
-            return ResourceHelpers.decode Note.Decoder response
+            return ResourceHelpers.decode Note.decoder response
         }

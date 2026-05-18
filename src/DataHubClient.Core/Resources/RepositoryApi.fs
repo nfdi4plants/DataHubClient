@@ -1,6 +1,7 @@
 namespace DataHubClient
 
 open Fable.Core
+open DataHubClient.Json
 
 /// <summary>
 /// Client for repository branch and commit operations.
@@ -26,7 +27,7 @@ type RepositoryApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
                     [ "search", search ]
 
             let! response = http.SendAsync req
-            return ResourceHelpers.decodeArray Branch.Decoder response
+            return ResourceHelpers.decodeArray Branch.decoder response
         }
 
     /// <summary>Gets a single branch by name.</summary>
@@ -43,7 +44,7 @@ type RepositoryApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
                     []
 
             let! response = http.SendAsync req
-            return ResourceHelpers.decode Branch.Decoder response
+            return ResourceHelpers.decode Branch.decoder response
         }
 
     /// <summary>Lists commits for a project.</summary>
@@ -61,7 +62,7 @@ type RepositoryApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
                     [ "path", path; "ref_name", refName ]
 
             let! response = http.SendAsync req
-            return ResourceHelpers.decodeArray Commit.Decoder response
+            return ResourceHelpers.decodeArray Commit.decoder response
         }
 
     /// <summary>Gets a single commit by SHA.</summary>
@@ -78,5 +79,5 @@ type RepositoryApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
                     []
 
             let! response = http.SendAsync req
-            return ResourceHelpers.decode Commit.Decoder response
+            return ResourceHelpers.decode Commit.decoder response
         }
