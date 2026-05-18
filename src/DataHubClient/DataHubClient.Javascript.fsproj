@@ -13,6 +13,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsPackable>false</IsPackable>
+    <NuGetAudit>false</NuGetAudit>
     <DefineConstants>FABLE_COMPILER;FABLE_COMPILER_JAVASCRIPT;FABLE_COMPILER_TYPESCRIPT</DefineConstants>
   </PropertyGroup>
 
@@ -32,6 +34,7 @@
     <Compile Include="Http/HttpResponse.fs" />
     <Compile Include="Http/IHttpClient.fs" />
     <Compile Include="Http/Authentication.fs" />
+    <Compile Include="Version.fs" />
     <Compile Include="Json/ThothExtensions.fs" />
     <Compile Include="Models/Errors.fs" />
     <Compile Include="Models/User.fs" />

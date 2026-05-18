@@ -62,7 +62,12 @@ module internal ResourceHelpers =
         (contentType: string option)
         =
         let req = HttpRequest(url baseUrl segments query, method)
-        req.Headers <- [ auth.Header, auth.Value ]
+        req.Headers <-
+            [
+                auth.Header, auth.Value
+                DataHubClientVersion.HeaderName, DataHubClientVersion.Value
+            ]
+
         req.Body <- body
 
         match contentType, body with

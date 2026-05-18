@@ -254,7 +254,7 @@ Tests are written **once in F#** using **[Fable.Pyxpecto](https://github.com/Fre
 **Per-target HTTP shims are the exception to "write once."** `DotNetHttpClient`, `FetchHttpClient`, and `HttpxHttpClient` each wrap a concrete, non-transpilable HTTP library, so their tests cannot enter the shared Pyxpecto source. Each shim gets a small target-only test project — e.g. `tests/DataHubClient.DotNet.Tests`, a .NET Pyxpecto exe — exercising request/response mapping against a fake transport, never run through Fable.
 
 - **Unit / mock-API tests** in `DataHubClient.Tests` exercise resource APIs against an in-memory `IHttpClient` (see below). They validate URL construction, header injection, JSON encoding/decoding, error mapping, and `Async` plumbing identically on every target.
-- **Integration tests** in the same suite run against a docker-composed GitLab CE container with seeded data. The fixture stands up the container once per CI job; each transpiled output runs the same test cases against it.
+- **Integration tests** in the same suite run against a **live ARC DataHub** — the public DataPLANT dev instance in CI — with the target supplied via the `DATAHUB_TEST_URL` / `DATAHUB_TEST_TOKEN` env vars and skipped when those are unset. See *Stage 8* for the rationale (Docker-stack vs. dev-instance) and the guardrails.
 - **Transpiled-shape smoke tests** assert `[<AttachMembers>]` produced real prototype/class methods on the JS/Python outputs (e.g. `typeof project.updateName === 'function'`).
 
 ### Mock API testing strategy
@@ -460,17 +460,47 @@ miscompiles it. The modules sit in `DataHubClient.Json` rather than the flat
 
 ### Stage 7 — CI & packaging
 
-- [ ] `.github/workflows/ci.yml` (lint, dotnet-test, transpile, js-test, python-test, pack)
-- [ ] `pack` task produces `.nupkg`, `.tgz`, `.whl`
-- [ ] Tag-triggered `publish` job (NuGet + npm + PyPI)
-- **Exit:** CI green on a PR; artifacts downloadable from the run.
+- [x] `.github/workflows/ci.yml` (dotnet-test, js-test, python-test; pack/publish only on release tags)
+- [x] `pack` task produces `.nupkg`, `.tgz`, `.whl`
+- [x] One generated `DataHubClientVersion` type feeds all three packages and request headers
+- [x] Tag-triggered `publish` job (NuGet + npm + PyPI), guarded by tag/version equality with `RELEASE_NOTES.md`
+- **Exit:** PR CI runs the three test lanes; release tags matching the top release-notes version produce package artifacts and publish them.
 
 ### Stage 8 — Integration tests
 
-- [ ] docker-compose GitLab CE container with seeded ARC data
-- [ ] Integration suite reusing the Pyxpecto cases against the live container
-- [ ] Wire the container fixture into CI
-- **Exit:** integration job green on all three targets.
+Integration tests run against a **live ARC DataHub**, not a Docker container stood
+up in CI. Decided with the user:
+
+- The DataHUB Docker stack ([`nfdi4plants/DataHUB`](https://github.com/nfdi4plants/DataHUB))
+  *is* representative — it ships GitLab with the DataPLANT customizations baked in —
+  but it is a full GitLab Omnibus image: minutes to a healthy state per run, plus
+  non-declarative post-boot provisioning (root password, API token, test group,
+  optional runner). Too heavy and fiddly to stand up per CI job.
+- The **public DataPLANT dev instance** is the real customized GitLab, so it is
+  both the lighter *and* the most representative CI target.
+- The integration suite reads its target from `DATAHUB_TEST_URL` /
+  `DATAHUB_TEST_TOKEN` env vars (trivial — `IHttpClient` already takes a base URL).
+  CI points them at the dev instance; a developer can point the **same** suite at
+  a local `docker-compose` DataHUB stack with no code change. The Docker stack
+  stays a free opt-in local backstop without being a CI burden.
+
+Tasks:
+
+- [ ] Integration suite reusing the Pyxpecto cases; target from `DATAHUB_TEST_URL` /
+      `DATAHUB_TEST_TOKEN`, **skipped (not failed)** when unset — so it no-ops on
+      fork PRs and on local runs without credentials.
+- [ ] A dedicated bot account + **scoped** PAT on the dev instance, stored as
+      GitHub Actions secrets; a dedicated test group/namespace so tests never touch
+      real ARCs.
+- [ ] Tests are self-cleaning: write tests create resources with uuid/timestamp-
+      suffixed names and tear them down in a `finally`, so parallel runs and
+      leftover state don't collide; read-only and write/destructive cases separated.
+- [ ] Separate, **non-PR-gating** CI job — `schedule` (nightly) + `workflow_dispatch`
+      (optionally a `run-integration` label). A dev-instance outage must not turn
+      unrelated PRs red.
+- **Exit:** integration job green on all three targets against the dev instance;
+  the same suite runnable locally against a docker-compose DataHUB by setting the
+  two env vars.
 
 ## Verification
 

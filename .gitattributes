@@ -1,0 +1,10 @@
+*.md text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+*.slnx text eol=lf
+*.sh text eol=lf
+
+src/**/*.fs text eol=lf
+src/**/*.fsproj text eol=lf
+tests/**/*.fs text eol=lf
+tests/**/*.fsproj text eol=lf

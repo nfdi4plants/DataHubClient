@@ -13,6 +13,15 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NuGetAudit>false</NuGetAudit>
+    <PackageId>DataHubClient</PackageId>
+    <Authors>DataPLANT</Authors>
+    <Description>A polyglot client library for ARC DataHubs.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/nfdi4plants/DataHubClient</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/nfdi4plants/DataHubClient.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>ARC;DataPLANT;nfdi4plants;GitLab;DataHub</PackageTags>
   </PropertyGroup>
 
   <!--
@@ -31,6 +40,7 @@
     <Compile Include="Http/HttpResponse.fs" />
     <Compile Include="Http/IHttpClient.fs" />
     <Compile Include="Http/Authentication.fs" />
+    <Compile Include="Version.fs" />
     <Compile Include="Json/ThothExtensions.fs" />
     <Compile Include="Models/Errors.fs" />
     <Compile Include="Models/User.fs" />

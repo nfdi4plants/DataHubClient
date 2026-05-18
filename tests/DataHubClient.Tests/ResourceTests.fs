@@ -19,6 +19,9 @@ let private makeClient () =
 
 let private expectAuthHeader (request: HttpRequest) =
     Expect.equal request.Headers.[0] ("PRIVATE-TOKEN", "token") "auth header"
+    Expect.isTrue
+        (request.Headers |> List.contains (DataHubClientVersion.HeaderName, DataHubClientVersion.Value))
+        "client version header"
 
 let private expectJsonHeader (request: HttpRequest) =
     Expect.isTrue (request.Headers |> List.contains ("Content-Type", "application/json")) "content type"

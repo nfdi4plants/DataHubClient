@@ -1,0 +1,154 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+      - "[0-9]+.[0-9]+.[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+-*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  dotnet-test:
+    name: .NET Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore local tools
+        run: dotnet tool restore
+      - name: Run .NET tests
+        run: ./build.sh RunTestsDotNet
+
+  js-test:
+    name: JavaScript Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Restore local tools
+        run: dotnet tool restore
+      - name: Run JavaScript tests
+        run: ./build.sh RunTestsJavaScript
+
+  python-test:
+    name: Python Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v5
+      - name: Restore local tools
+        run: dotnet tool restore
+      - name: Sync Python dev environment
+        run: uv sync
+      - name: Run Python tests
+        run: ./build.sh RunTestsPython
+
+  pack:
+    name: Pack
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    needs:
+      - dotnet-test
+      - js-test
+      - python-test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v5
+      - name: Restore local tools
+        run: dotnet tool restore
+      - name: Sync Python dev environment
+        run: uv sync
+      - name: Validate release version
+        shell: bash
+        run: |
+          tag_version="${GITHUB_REF_NAME#v}"
+          release_notes_version="$(grep -m1 -E '^### [0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?' RELEASE_NOTES.md | sed -E 's/^### ([^ ]+).*/\1/')"
+          if [ -z "$release_notes_version" ]; then
+            echo "Could not find a release version in RELEASE_NOTES.md." >&2
+            exit 1
+          fi
+          if [ "$tag_version" != "$release_notes_version" ]; then
+            echo "Tag version '$tag_version' does not match RELEASE_NOTES.md version '$release_notes_version'." >&2
+            exit 1
+          fi
+          echo "DATAHUBCLIENT_VERSION=$tag_version" >> "$GITHUB_ENV"
+      - name: Build packages
+        run: ./build.sh Pack
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: pkg/*
+
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    needs:
+      - pack
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: packages
+          path: pkg
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+          scope: "@nfdi4plants"
+      - name: Publish NuGet package
+        run: dotnet nuget push pkg/*.nupkg --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      - name: Publish npm package
+        run: npm publish pkg/*.tgz --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Stage PyPI distributions
+        run: |
+          mkdir pypi-dist
+          cp pkg/*.whl pypi-dist/
+      - name: Publish PyPI package
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: pypi-dist
+          skip-existing: true

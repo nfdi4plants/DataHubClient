@@ -6,15 +6,16 @@ open Fake.Core
 let project = "DataHubClient"
 
 let testProjects =
-    [
-        "tests/DataHubClient.Tests/DataHubClient.Tests.fsproj"
-        "tests/DataHubClient.DotNet.Tests/DataHubClient.DotNet.Tests.fsproj"
-    ]
+    [ "tests/DataHubClient.Tests/DataHubClient.Tests.fsproj"
+      "tests/DataHubClient.DotNet.Tests/DataHubClient.DotNet.Tests.fsproj" ]
 
-let sourceProjects =
-    [
-        "src/DataHubClient/DataHubClient.fsproj"
-    ]
+let dotNetSourceProject = "src/DataHubClient/DataHubClient.fsproj"
+
+let javaScriptSourceProject = "src/DataHubClient/DataHubClient.Javascript.fsproj"
+
+let pythonSourceProject = "src/DataHubClient/DataHubClient.Python.fsproj"
+
+let sourceProjects = [ dotNetSourceProject ]
 
 let buildProjects = sourceProjects @ testProjects
 
@@ -30,7 +31,7 @@ let javaScriptTestProject =
 let pythonTestProject =
     "tests/DataHubClient.Python.Tests/DataHubClient.Python.Tests.fsproj"
 
-let solutionFile  = $"{project}.slnx"
+let solutionFile = $"{project}.slnx"
 
 let configuration = "Release"
 
@@ -42,15 +43,18 @@ let projectRepo = $"https://github.com/{gitOwner}/{project}"
 
 let pkgDir = "pkg"
 
+let versionSourceFile = "src/DataHubClient/Version.fs"
+
 
 // Create RELEASE_NOTES.md if not existing. Or "release" would throw an error.
-Fake.Extensions.Release.ReleaseNotes.ensure()
+Fake.Extensions.Release.ReleaseNotes.ensure ()
 
 let release = ReleaseNotes.load "RELEASE_NOTES.md"
 
 let stableVersion = SemVer.parse release.NugetVersion
 
-let stableVersionTag = (sprintf "%i.%i.%i" stableVersion.Major stableVersion.Minor stableVersion.Patch )
+let stableVersionTag =
+    (sprintf "%i.%i.%i" stableVersion.Major stableVersion.Minor stableVersion.Patch)
 
 let mutable prereleaseSuffix = ""
 
@@ -58,3 +62,13 @@ let mutable prereleaseTag = ""
 
 let mutable isPrerelease = false
 
+let packageVersion () =
+    let environmentVersion =
+        System.Environment.GetEnvironmentVariable("DATAHUBCLIENT_VERSION")
+
+    if not (System.String.IsNullOrWhiteSpace environmentVersion) then
+        environmentVersion
+    elif isPrerelease then
+        prereleaseTag
+    else
+        stableVersionTag
