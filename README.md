@@ -3,6 +3,22 @@ A Polyglot client library for ARC Data Hubs.
 
 ## Development
 
+### Prerequisites
+
+- .NET 10 SDK
+- python >= 3.12
+- `uv` for Python environment management (see [uv docs](https://docs.astral.sh/uv/))
+- `node` and `npm` for JavaScript environment management
+
+Run once:
+
+```sh
+uv sync
+npm install
+```
+
+### Tests
+
 Build and test orchestration runs through the FAKE pipeline — see [AGENTS.md](AGENTS.md) for the full layout and conventions.
 
 ```sh
