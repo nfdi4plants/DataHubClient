@@ -1,7 +1,7 @@
 [project]
 name = "datahub-client-dev"
 version = "0.0.0"
-description = "uv-managed dev environment for transpiling and running the DataHubClient Python build and test suite. Not published — the PyPI distribution metadata lives in src/DataHubClient.Core/pyproject.toml."
+description = "uv-managed dev environment for transpiling and running the DataHubClient Python build and test suite. Not published — the PyPI distribution metadata lives in src/DataHubClient/pyproject.toml."
 requires-python = ">=3.12"
 dependencies = [
     "fable-library==5.0.0",

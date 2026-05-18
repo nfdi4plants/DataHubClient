@@ -1,0 +1,81 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The Fable JavaScript/TypeScript build of DataHubClient. This project file is never run
+    through `dotnet run`; it is the input Fable transpiles, and the npm package is
+    produced from its output. It carries the global-fetch transport
+    (Http/FetchHttpClient.fs), so the single DataHubClient type works out of the
+    box in JS/TS. The FABLE_COMPILER* constants activate the Thoth.Json.JavaScript
+    and FetchHttpClient branches of the #if switches in ResourceHelpers.fs and
+    DataHubClient.fs; only the JS runtime is referenced, so Fable never sees
+    Thoth.Json.Newtonsoft or System.Net.Http, neither of which transpiles.
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <DefineConstants>FABLE_COMPILER;FABLE_COMPILER_JAVASCRIPT;FABLE_COMPILER_TYPESCRIPT</DefineConstants>
+  </PropertyGroup>
+
+  <!--
+    Target-agnostic source list. This list is duplicated verbatim — and in
+    identical order, because F# compilation is order-sensitive — across
+    DataHubClient.fsproj, DataHubClient.Javascript.fsproj, and
+    DataHubClient.Python.fsproj. It is inlined into each project on purpose
+    rather than factored into a shared DataHubClient.Compile.props <Import>: a
+    shared .props carrying <Compile> items desyncs from per-project evaluation
+    and produces downstream bugs — most visibly broken NuGet restore and
+    project references. Keep the three copies in sync when adding a model or
+    resource.
+  -->
+  <ItemGroup>
+    <Compile Include="Http/HttpRequest.fs" />
+    <Compile Include="Http/HttpResponse.fs" />
+    <Compile Include="Http/IHttpClient.fs" />
+    <Compile Include="Http/Authentication.fs" />
+    <Compile Include="Json/ThothExtensions.fs" />
+    <Compile Include="Models/Errors.fs" />
+    <Compile Include="Models/User.fs" />
+    <Compile Include="Models/Project.fs" />
+    <Compile Include="Models/Commit.fs" />
+    <Compile Include="Models/Branch.fs" />
+    <Compile Include="Models/RepoFile.fs" />
+    <Compile Include="Models/Note.fs" />
+    <Compile Include="Models/Issue.fs" />
+    <Compile Include="Models/MergeRequest.fs" />
+    <Compile Include="Models/Package.fs" />
+    <Compile Include="Json/User.fs" />
+    <Compile Include="Json/Project.fs" />
+    <Compile Include="Json/Commit.fs" />
+    <Compile Include="Json/Branch.fs" />
+    <Compile Include="Json/RepoFile.fs" />
+    <Compile Include="Json/Note.fs" />
+    <Compile Include="Json/Issue.fs" />
+    <Compile Include="Json/MergeRequest.fs" />
+    <Compile Include="Json/Package.fs" />
+    <Compile Include="Resources/ResourceHelpers.fs" />
+    <Compile Include="Resources/ProjectsApi.fs" />
+    <Compile Include="Resources/RepositoryApi.fs" />
+    <Compile Include="Resources/FilesApi.fs" />
+    <Compile Include="Resources/IssuesApi.fs" />
+    <Compile Include="Resources/MergeRequestsApi.fs" />
+    <Compile Include="Resources/PackagesApi.fs" />
+  </ItemGroup>
+
+  <!--
+    Target-specific source: the global-fetch HTTP transport followed by
+    DataHubClient.fs, the facade whose default-transport constructor
+    #if-selects that transport.
+  -->
+  <ItemGroup>
+    <Compile Include="Http/FetchHttpClient.fs" />
+    <Compile Include="DataHubClient.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fable.Core" Version="5.0.0" />
+    <PackageReference Include="Fable.Promise" Version="3.2.0" />
+    <PackageReference Include="Thoth.Json.Core" Version="0.9.0" />
+    <PackageReference Include="Thoth.Json.Javascript" Version="0.5.0" />
+  </ItemGroup>
+
+</Project>

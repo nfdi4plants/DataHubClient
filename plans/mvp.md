@@ -15,7 +15,7 @@ Design priorities locked with the user:
 
 ## Solution Layout
 
-There are **no separate per-target shim projects.** One `DataHubClient.Core`
+There are **no separate per-target shim projects.** One `DataHubClient`
 source tree is compiled by parallel project files, one per target; each sets its
 own `FABLE_COMPILER*` constants and carries its own `IHttpClient` implementation
 and Thoth.Json runtime. The single `DataHubClient` type is the entry point
@@ -24,11 +24,10 @@ everywhere — see *One DataHubClient, every language* below.
 ```
 DataHubClient.slnx
 src/
-  DataHubClient.Core/                  # the whole library — models, IHttpClient, resource APIs, transports
-    DataHubClient.Core.fsproj            # .NET build      (DotNetHttpClient, Thoth.Json.Newtonsoft)
-    DataHubClient.Core.Javascript.fsproj # Fable JS/TS build (FetchHttpClient,  Thoth.Json.Javascript)
-    DataHubClient.Core.Python.fsproj     # Fable Python build (HttpxHttpClient, Thoth.Json.Python) — Stage 6
-    DataHubClient.Core.Compile.props     # target-agnostic <Compile> list shared by all three
+  DataHubClient/                  # the whole library — models, IHttpClient, resource APIs, transports
+    DataHubClient.fsproj            # .NET build      (DotNetHttpClient, Thoth.Json.Newtonsoft)
+    DataHubClient.Javascript.fsproj # Fable JS/TS build (FetchHttpClient,  Thoth.Json.Javascript)
+    DataHubClient.Python.fsproj     # Fable Python build (HttpxHttpClient, Thoth.Json.Python) — Stage 6
     package.json                         # npm distribution metadata (Fable 5 needs no fable.config.json)
     Http/
       HttpRequest.fs                 # class, [<AttachMembers>]
@@ -80,11 +79,13 @@ form outright, so a single primary constructor is the only shape that stays
 - **Core *is* the library.** Models, resource classes, all three HTTP transports,
   and the facade live in one source tree, compiled once per target. There is
   nothing downstream of Core to ship.
-- **Parallel project files, not shims.** `DataHubClient.Core.fsproj` /
-  `.Javascript.fsproj` / `.Python.fsproj` share `DataHubClient.Core.Compile.props`
-  and differ only in `<DefineConstants>`, the one `Http/*HttpClient.fs` they
-  compile, and the Thoth.Json runtime they reference. This is the ARCtrl pattern;
-  it is also how the per-target JSON runtime is selected (see Stage 5).
+- **Parallel project files, not shims.** `DataHubClient.fsproj` /
+  `.Javascript.fsproj` / `.Python.fsproj` each inline their own `<Compile>` list
+  (a target-agnostic `<ItemGroup>` identical across all three, plus a
+  target-specific one) and differ only in `<DefineConstants>`, the one
+  `Http/*HttpClient.fs` they compile, and the Thoth.Json runtime they reference.
+  This is the ARCtrl pattern; it is also how the per-target JSON runtime is
+  selected (see Stage 5).
 - **One `DataHubClient` type, `new`-able everywhere.** A caller on any target
   writes `new DataHubClient(url, auth)` and gets a working client; a custom
   `IHttpClient` goes in via the settable `Http` property (see *One DataHubClient,
@@ -146,7 +147,7 @@ not-yet-bound class. See *Stage 6 → JSON coders as modules*.
 ## HTTP Abstraction
 
 ```fsharp
-// DataHubClient.Core/Http/IHttpClient.fs
+// DataHubClient/Http/IHttpClient.fs
 [<AttachMembers>]
 type HttpRequest(url: string, methd: string) =
     member val Url = url with get, set
@@ -232,7 +233,7 @@ Build commands (encoded in `build.fsproj` or a simple script):
 # .NET build + test + pack
 dotnet build
 dotnet test
-dotnet pack -c Release src/DataHubClient.Core
+dotnet pack -c Release src/DataHubClient
 dotnet pack -c Release src/DataHubClient.DotNet
 
 # JS/TS transpile
@@ -307,19 +308,19 @@ test suite green before the next begins. Check items off as they land.
 
 - [x] `DataHubClient.slnx` + BuildProject pipeline (`build/`, `build.sh`/`build.cmd`)
 - [x] `.devcontainer` (.NET 10 / Node 20 / Python 3.11)
-- [x] `DataHubClient.Core` project (`netstandard2.0`, `Fable.Core`)
+- [x] `DataHubClient` project (`netstandard2.0`, `Fable.Core`)
 - [x] `Http/HttpRequest.fs`, `Http/HttpResponse.fs`, `Http/IHttpClient.fs`
 - [x] `Http/Authentication.fs` (PAT / OAuth / JobToken factories)
 - [x] Pyxpecto test harness (`tests/DataHubClient.Tests`) + `AuthenticationTests`
 
 ### Stage 2 — Core models & JSON ✅ *done*
 
-- [x] Add `Thoth.Json.Core` package reference to `DataHubClient.Core`
+- [x] Add `Thoth.Json.Core` package reference to `DataHubClient`
 - [x] `Models/Errors.fs` — `DataHubError` class hierarchy
 - [x] `Json/ThothExtensions.fs` — shared encoder/decoder helpers
 - [x] Model classes with static `Decoder`/`Encoder`: `Project`, `User`, `Branch`,
       `Commit`, `RepoFile`, `Issue`, `Note`, `MergeRequest`, `Package`
-- [x] Register all new `.fs` files in `DataHubClient.Core.fsproj` (dependency order)
+- [x] Register all new `.fs` files in `DataHubClient.fsproj` (dependency order)
 - [x] Encoder/decoder round-trip tests for each model
 - **Exit:** `./build.sh runtests` green on .NET (13 tests). JS/Python runtime is
   wired in `tests/.../TestJson.fs` via `#if` but only verified once Fable runs
@@ -364,11 +365,10 @@ test suite green before the next begins. Check items off as they land.
       referenced `Thoth.Json.Newtonsoft`, whose `System.IO` use Fable rejects, and
       never referenced `Thoth.Json.JavaScript`. Fixed with the ARCtrl pattern —
       parallel project files over one source tree, see *JSON runtime selection*
-      below: `DataHubClient.Core.Compile.props` (shared `<Compile>` list) plus
-      `DataHubClient.Core.fsproj` (.NET, Newtonsoft) and the new
-      `DataHubClient.Core.Javascript.fsproj` (`FABLE_COMPILER*` constants,
-      `Thoth.Json.Javascript`). The `#if` switch in `ResourceHelpers.fs` was
-      already correct.
+      below: `DataHubClient.fsproj` (.NET, Newtonsoft) and the new
+      `DataHubClient.Javascript.fsproj` (`FABLE_COMPILER*` constants,
+      `Thoth.Json.Javascript`), each inlining its own `<Compile>` list. The
+      `#if` switch in `ResourceHelpers.fs` was already correct.
 - [x] `.config/dotnet-tools.json` pinning `fable` 5.0.0
 - [x] `DataHubClient.JavaScript` project + `FetchHttpClient.fs` (`IHttpClient`
       over the global `fetch`) + `DataHubClientJavaScript` convenience subclass
@@ -399,7 +399,7 @@ JS/TS, `Python` on Python — and Newtonsoft cannot transpile. Following ARCtrl,
 one Core source tree is compiled by **parallel project files**, each setting its
 own `<DefineConstants>` and referencing only its own runtime. `ResourceHelpers.fs`
 switches on `#if FABLE_COMPILER_*`; the `.fsproj` decides which branch is live
-and which package Fable sees. Stage 6 adds `DataHubClient.Core.Python.fsproj`
+and which package Fable sees. Stage 6 adds `DataHubClient.Python.fsproj`
 the same way.
 
 #### Stages 4–5 revised — shims folded into Core (post-Stage-5)
@@ -427,14 +427,14 @@ they delivered (transports, tests, ergonomic construction) still holds.
       deferred annotation). Models are now data-only; `ThothExtensions` moved into
       `DataHubClient.Json` too. Analogous to the Stage 5 "Made Core transpilable"
       prerequisite. See *JSON coders as modules* below.
-- [x] `DataHubClient.Core.Python.fsproj` — parallel project file, `FABLE_COMPILER`
+- [x] `DataHubClient.Python.fsproj` — parallel project file, `FABLE_COMPILER`
       + `FABLE_COMPILER_PYTHON` constants, `Thoth.Json.Python` runtime
 - [x] `Http/HttpxHttpClient.fs` — `IHttpClient` over `httpx.AsyncClient`,
       compiled only by the Python project file; wired as the `#if FABLE_COMPILER_PYTHON`
       default transport in `DataHubClient.fs`. The transport's `async` block awaits
       the native httpx coroutine via `Async.AwaitTask` (Fable's `await_task` bridges any
       Python awaitable).
-- [x] `pyproject.toml` for the PyPI distribution (`src/DataHubClient.Core/`), plus a
+- [x] `pyproject.toml` for the PyPI distribution (`src/DataHubClient/`), plus a
       root `pyproject.toml` for the uv-managed dev/test environment (`fable-library`,
       `httpx`; Python 3.12+, required by `fable-library`'s PEP 695 generics)
 - [x] Transpile verification: `dotnet fable ... --lang python` emits `class` defs for
@@ -485,15 +485,14 @@ After the first implementation pass, this checks the design holds end-to-end:
 ## Critical Files (all new)
 
 - `DataHubClient.sln`
-- `src/DataHubClient.Core/DataHubClient.Core.fsproj`
-- `src/DataHubClient.Core/Http/IHttpClient.fs`
-- `src/DataHubClient.Core/Http/Authentication.fs`
-- `src/DataHubClient.Core/Models/Project.fs` (template for the other models)
-- `src/DataHubClient.Core/Resources/IssuesApi.fs` (template for other resource APIs)
-- `src/DataHubClient.Core/DataHubClient.fs` (facade, `#if`-selected default transport)
-- `src/DataHubClient.Core/DataHubClient.Core.Compile.props` (shared `<Compile>` list)
-- `src/DataHubClient.Core/DataHubClient.Core.fsproj` / `.Javascript.fsproj` / `.Python.fsproj`
-- `src/DataHubClient.Core/Http/DotNetHttpClient.fs` / `FetchHttpClient.fs` / `HttpxHttpClient.fs`
-- `src/DataHubClient.Core/package.json` (npm) + `pyproject.toml` (PyPI, Stage 6)
+- `src/DataHubClient/DataHubClient.fsproj`
+- `src/DataHubClient/Http/IHttpClient.fs`
+- `src/DataHubClient/Http/Authentication.fs`
+- `src/DataHubClient/Models/Project.fs` (template for the other models)
+- `src/DataHubClient/Resources/IssuesApi.fs` (template for other resource APIs)
+- `src/DataHubClient/DataHubClient.fs` (facade, `#if`-selected default transport)
+- `src/DataHubClient/DataHubClient.fsproj` / `.Javascript.fsproj` / `.Python.fsproj` (each inlines its own `<Compile>` list)
+- `src/DataHubClient/Http/DotNetHttpClient.fs` / `FetchHttpClient.fs` / `HttpxHttpClient.fs`
+- `src/DataHubClient/package.json` (npm) + `pyproject.toml` (PyPI, Stage 6)
 - `.config/dotnet-tools.json`
 - `.github/workflows/ci.yml`

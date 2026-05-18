@@ -26,7 +26,7 @@ let runTests = BuildTask.create "RunTests" [clean; buildSolution] {
 
 /// Transpiles the JavaScript/TypeScript Pyxpecto suite with Fable and runs it on
 /// node. Fable — not `dotnet` — drives this target end to end: the suite, the
-/// JS shim, and DataHubClient.Core.Javascript.fsproj are all transpiled together.
+/// JS shim, and DataHubClient.Javascript.fsproj are all transpiled together.
 let runTestsJavaScript = BuildTask.create "RunTestsJavaScript" [clean] {
     let outDir = "dist/js-tests"
 
@@ -47,7 +47,7 @@ let runTestsJavaScript = BuildTask.create "RunTestsJavaScript" [clean] {
 
 /// Transpiles the Python Pyxpecto suite with Fable and runs it on the uv-managed
 /// interpreter. Fable — not `dotnet` — drives this target end to end: the suite,
-/// the httpx shim, and DataHubClient.Core.Python.fsproj are all transpiled
+/// the httpx shim, and DataHubClient.Python.fsproj are all transpiled
 /// together. `uv run` resolves the dev environment from the root pyproject.toml.
 let runTestsPython = BuildTask.create "RunTestsPython" [clean] {
     let outDir = "dist/py-tests"

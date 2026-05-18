@@ -1,6 +1,6 @@
 # PyPI distribution metadata for the Fable Python build of DataHubClient.
 # The npm counterpart is package.json in this directory; both are templates
-# consumed by the Stage 7 packaging pipeline, which transpiles Core to dist/py
+# consumed by the Stage 7 packaging pipeline, which transpiles the library to dist/py
 # and builds the wheel from there. The uv-managed dev/test environment is the
 # separate pyproject.toml at the repository root.
 [project]

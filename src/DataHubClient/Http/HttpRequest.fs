@@ -5,7 +5,7 @@ open Fable.Core
 /// <summary>
 /// A transport-agnostic HTTP request. Resource APIs assemble these and hand
 /// them to an <see cref="T:DataHubClient.IHttpClient"/> implementation, keeping
-/// <c>DataHubClient.Core</c> free of any concrete HTTP library.
+/// <c>DataHubClient</c> free of any concrete HTTP library.
 /// </summary>
 /// <param name="url">The fully-qualified request URL, including query string.</param>
 /// <param name="method">The HTTP verb (e.g. <c>GET</c>, <c>POST</c>, <c>PUT</c>, <c>DELETE</c>).</param>

@@ -4,7 +4,7 @@ namespace DataHubClient
 /// The HTTP transport abstraction for <c>DataHubClient</c>. Each distribution
 /// target supplies its own implementation — <c>System.Net.Http</c> on .NET,
 /// <c>fetch</c> on JavaScript/TypeScript, <c>httpx</c> on Python — so that
-/// <c>DataHubClient.Core</c> never depends on a concrete HTTP library.
+/// <c>DataHubClient</c> never depends on a concrete HTTP library.
 /// Callers may also inject a custom implementation for retries, proxies, or tests.
 /// </summary>
 type IHttpClient =

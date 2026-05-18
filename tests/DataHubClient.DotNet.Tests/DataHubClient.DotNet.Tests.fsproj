@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\DataHubClient.Core\DataHubClient.Core.fsproj" />
+    <ProjectReference Include="..\..\src\DataHubClient\DataHubClient.fsproj" />
   </ItemGroup>
 
 </Project>

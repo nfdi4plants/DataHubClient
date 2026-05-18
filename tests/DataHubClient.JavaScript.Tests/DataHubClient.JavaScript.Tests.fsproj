@@ -4,7 +4,7 @@
     The JavaScript/TypeScript test project. Fable transpiles it and the suite is
     run with `node`. It compiles the shared Pyxpecto source from
     tests/DataHubClient.Tests (so the same cases run on every target) and adds the
-    two JS-only suites. The FABLE_COMPILER* constants match the Core JS build and
+    two JS-only suites. The FABLE_COMPILER* constants match the DataHubClient JS build and
     select the Thoth.Json.JavaScript runtime in tests/DataHubClient.Tests/TestJson.fs.
   -->
   <PropertyGroup>
@@ -34,7 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\DataHubClient.Core\DataHubClient.Core.Javascript.fsproj" />
+    <ProjectReference Include="..\..\src\DataHubClient\DataHubClient.Javascript.fsproj" />
   </ItemGroup>
 
 </Project>
