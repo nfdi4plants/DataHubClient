@@ -1,10 +1,8 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="src/DataHubClient/DataHubClient.fsproj" />
-  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/DataHubClient.Tests/DataHubClient.Tests.fsproj" />
     <Project Path="tests/DataHubClient.DotNet.Tests/DataHubClient.DotNet.Tests.fsproj" />
-    <Project Path="tests/DataHubClient.Integration.Tests/DataHubClient.Integration.Tests.fsproj" />
+    <Project Path="tests/DataHubClient.JavaScript.Tests/DataHubClient.JavaScript.Tests.fsproj" />
+    <Project Path="tests/DataHubClient.Python.Tests/DataHubClient.Python.Tests.fsproj" />
   </Folder>
 </Solution>

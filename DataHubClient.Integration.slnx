@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/tests/">
+    <Project Path="tests/DataHubClient.Integration.Tests/DataHubClient.Integration.Tests.fsproj" />
+    <Project Path="tests/DataHubClient.Integration.JavaScript.Tests/DataHubClient.Integration.JavaScript.Tests.fsproj" />
+    <Project Path="tests/DataHubClient.Integration.Python.Tests/DataHubClient.Integration.Python.Tests.fsproj" />
+  </Folder>
+</Solution>

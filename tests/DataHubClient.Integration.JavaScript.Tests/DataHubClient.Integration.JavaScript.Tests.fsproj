@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The JavaScript/TypeScript integration test project. Fable transpiles it and
+    the suite is run with `node`. It compiles the shared integration source from
+    tests/DataHubClient.Integration.Tests (so the same cases run on every
+    target). The FABLE_COMPILER* constants match the DataHubClient JS build and
+    select the process.env environment lookup in LiveConfig.fs.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <NuGetAudit>false</NuGetAudit>
+    <DefineConstants>FABLE_COMPILER;FABLE_COMPILER_JAVASCRIPT;FABLE_COMPILER_TYPESCRIPT</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\DataHubClient.Integration.Tests\LiveConfig.fs" />
+    <Compile Include="..\DataHubClient.Integration.Tests\IntegrationTests.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fable.Core" Version="5.0.0" />
+    <PackageReference Include="Fable.Pyxpecto" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DataHubClient\DataHubClient.Javascript.fsproj" />
+  </ItemGroup>
+
+</Project>

@@ -486,9 +486,14 @@ up in CI. Decided with the user:
 
 Tasks:
 
-- [ ] Integration suite reusing the Pyxpecto cases; target from `DATAHUB_TEST_URL` /
+- [x] Integration suite reusing the Pyxpecto cases; target from `DATAHUB_TEST_URL` /
       `DATAHUB_TEST_TOKEN`, **skipped (not failed)** when unset — so it no-ops on
-      fork PRs and on local runs without credentials.
+      fork PRs and on local runs without credentials. Three parallel project files
+      over one source tree (`tests/DataHubClient.Integration.Tests` +
+      `.JavaScript`/`.Python` variants), mirroring the unit suite; env vars are
+      read per target by `LiveConfig.fs` via `#if`. Read-only for now (List/Get,
+      no resource creation). A third var `DATAHUB_TEST_PROJECT` (numeric id) gates
+      the project-scoped cases. Build tasks: `RunIntegrationTests{DotNet,JavaScript,Python,All}`.
 - [ ] A dedicated bot account + **scoped** PAT on the dev instance, stored as
       GitHub Actions secrets; a dedicated test group/namespace so tests never touch
       real ARCs.

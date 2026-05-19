@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The shared integration test suite. It runs against a live ARC DataHub —
+    targeted by the DATAHUB_TEST_URL / DATAHUB_TEST_TOKEN / DATAHUB_TEST_PROJECT
+    environment variables — and is skipped (not failed) when they are unset.
+    This project file is the .NET build; the parallel
+    DataHubClient.Integration.JavaScript.Tests and .Python.Tests projects compile
+    this same source for the Fable targets.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsPackable>false</IsPackable>
+    <NuGetAudit>false</NuGetAudit>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="LiveConfig.fs" />
+    <Compile Include="IntegrationTests.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fable.Pyxpecto" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DataHubClient\DataHubClient.fsproj" />
+  </ItemGroup>
+
+</Project>

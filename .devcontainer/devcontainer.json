@@ -14,7 +14,10 @@
     "DOTNET_CLI_TELEMETRY_OPTOUT": "1",
     "DOTNET_NOLOGO": "1",
     "NODE_OPTIONS": "--max-old-space-size=4096",
-    "POWERSHELL_TELEMETRY_OPTOUT": "1"
+    "POWERSHELL_TELEMETRY_OPTOUT": "1", 
+    "DATAHUB_TEST_URL": "${localEnv:DATAHUB_TEST_URL}",
+    "DATAHUB_TEST_TOKEN": "${localEnv:DATAHUB_TEST_TOKEN}",
+    "DATAHUB_TEST_PROJECT": "${localEnv:DATAHUB_TEST_PROJECT}"
   },
   "features": {
     "ghcr.io/devcontainers/features/node:2.0.0": {

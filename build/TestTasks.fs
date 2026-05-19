@@ -73,3 +73,65 @@ let runTestsPython =
 
 let runTestsAll =
     BuildTask.createEmpty "RunTestsAll" [ clean; buildSolution; runTestsJavaScript; runTestsPython; runTestsDotNet ]
+
+/// Runs the shared live integration suite on .NET. The suite targets the
+/// DataHub named by DATAHUB_TEST_URL / DATAHUB_TEST_TOKEN and skips every case
+/// when they are unset, so this task is safe to run without credentials.
+let runIntegrationTestsDotNet =
+    BuildTask.create "RunIntegrationTestsDotNet" [ generateVersionSource ] {
+        let result =
+            DotNet.exec
+                (fun opts -> { opts with CustomParams = Some "-tl" })
+                "run"
+                $"--project {integrationTestProject} --configuration {configuration}"
+
+        if not result.OK then
+            failwith "Integration tests failed (.NET)"
+    }
+
+/// Transpiles the live integration suite with Fable and runs it on node.
+let runIntegrationTestsJavaScript =
+    BuildTask.create "RunIntegrationTestsJavaScript" [ generateVersionSource ] {
+        let outDir = "dist/js-integration-tests"
+
+        let transpile =
+            DotNet.exec id "fable" $"{integrationJavaScriptTestProject} --lang javascript -o {outDir} --noCache"
+
+        if not transpile.OK then
+            failwith "Fable transpilation of the JavaScript integration suite failed"
+
+        // node executes the ESM output only when the directory is marked as a module.
+        System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "package.json"), "{ \"type\": \"module\" }")
+
+        let run =
+            CreateProcess.fromRawCommand "node" [ System.IO.Path.Combine(outDir, "Program.js") ]
+            |> Proc.run
+
+        if run.ExitCode <> 0 then
+            failwith "JavaScript integration suite failed"
+    }
+
+/// Transpiles the live integration suite with Fable and runs it on the
+/// uv-managed interpreter.
+let runIntegrationTestsPython =
+    BuildTask.create "RunIntegrationTestsPython" [ generateVersionSource ] {
+        let outDir = "dist/py-integration-tests"
+
+        let transpile =
+            DotNet.exec id "fable" $"{integrationPythonTestProject} --lang python -o {outDir} --noCache"
+
+        if not transpile.OK then
+            failwith "Fable transpilation of the Python integration suite failed"
+
+        let run =
+            CreateProcess.fromRawCommand "uv" (uvArgs [ "run"; "python"; System.IO.Path.Combine(outDir, "program.py") ])
+            |> Proc.run
+
+        if run.ExitCode <> 0 then
+            failwith "Python integration suite failed"
+    }
+
+let runIntegrationTestsAll =
+    BuildTask.createEmpty
+        "RunIntegrationTestsAll"
+        [ runIntegrationTestsJavaScript; runIntegrationTestsPython; runIntegrationTestsDotNet ]

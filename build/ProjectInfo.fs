@@ -31,6 +31,22 @@ let javaScriptTestProject =
 let pythonTestProject =
     "tests/DataHubClient.Python.Tests/DataHubClient.Python.Tests.fsproj"
 
+/// The shared live integration suite (.NET build). It runs against a live
+/// DataHub and is non-PR-gating, so it stays out of buildProjects and
+/// testProjects; the RunIntegrationTests* tasks build and run it directly.
+let integrationTestProject =
+    "tests/DataHubClient.Integration.Tests/DataHubClient.Integration.Tests.fsproj"
+
+/// The JavaScript/TypeScript integration suite, transpiled by Fable and run on
+/// node. See the RunIntegrationTestsJavaScript task.
+let integrationJavaScriptTestProject =
+    "tests/DataHubClient.Integration.JavaScript.Tests/DataHubClient.Integration.JavaScript.Tests.fsproj"
+
+/// The Python integration suite, transpiled by Fable and run on the uv-managed
+/// interpreter. See the RunIntegrationTestsPython task.
+let integrationPythonTestProject =
+    "tests/DataHubClient.Integration.Python.Tests/DataHubClient.Integration.Python.Tests.fsproj"
+
 let solutionFile = $"{project}.slnx"
 
 let configuration = "Release"
