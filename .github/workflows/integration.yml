@@ -1,0 +1,87 @@
+name: IntegrationTests
+
+# The live integration suite runs against a real ARC DataHub, so it is kept out
+# of ci.yml: it must never gate a pull request, and a dev-instance outage must
+# not turn unrelated PRs red. It runs on a weekly schedule and on demand.
+on:
+  schedule:
+    # Mondays at 03:00 UTC.
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  integration-dotnet:
+    name: Integration tests .NET
+    runs-on: ubuntu-latest
+    environment: integration_tests
+    env:
+      DATAHUB_TEST_URL: ${{ vars.DATAHUB_TEST_URL }}
+      DATAHUB_TEST_TOKEN: ${{ secrets.DATAHUB_TEST_TOKEN }}
+      DATAHUB_TEST_PROJECT: ${{ vars.DATAHUB_TEST_PROJECT }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore local tools
+        run: dotnet tool restore
+      - name: make build script executable
+        run: chmod +x build.sh
+      - name: Run .NET integration tests
+        run: ./build.sh RunIntegrationTestsDotNet
+
+  integration-js:
+    name: Integration tests JavaScript
+    runs-on: ubuntu-latest
+    environment: integration_tests
+    env:
+      DATAHUB_TEST_URL: ${{ vars.DATAHUB_TEST_URL }}
+      DATAHUB_TEST_TOKEN: ${{ secrets.DATAHUB_TEST_TOKEN }}
+      DATAHUB_TEST_PROJECT: ${{ vars.DATAHUB_TEST_PROJECT }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Restore local tools
+        run: dotnet tool restore
+      - name: make build script executable
+        run: chmod +x build.sh
+      - name: Run JavaScript integration tests
+        run: ./build.sh RunIntegrationTestsJavaScript
+
+  integration-python:
+    name: Integration tests Python
+    runs-on: ubuntu-latest
+    environment: integration_tests
+    env:
+      DATAHUB_TEST_URL: ${{ vars.DATAHUB_TEST_URL }}
+      DATAHUB_TEST_TOKEN: ${{ secrets.DATAHUB_TEST_TOKEN }}
+      DATAHUB_TEST_PROJECT: ${{ vars.DATAHUB_TEST_PROJECT }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v5
+      - name: Restore local tools
+        run: dotnet tool restore
+      - name: make build script executable
+        run: chmod +x build.sh
+      - name: Sync Python dev environment
+        run: uv sync
+      - name: Run Python integration tests
+        run: ./build.sh RunIntegrationTestsPython

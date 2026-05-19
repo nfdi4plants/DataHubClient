@@ -500,9 +500,13 @@ Tasks:
 - [ ] Tests are self-cleaning: write tests create resources with uuid/timestamp-
       suffixed names and tear them down in a `finally`, so parallel runs and
       leftover state don't collide; read-only and write/destructive cases separated.
-- [ ] Separate, **non-PR-gating** CI job — `schedule` (nightly) + `workflow_dispatch`
-      (optionally a `run-integration` label). A dev-instance outage must not turn
-      unrelated PRs red.
+- [x] Separate, **non-PR-gating** CI job — its own `.github/workflows/integration.yml`
+      with `schedule` (weekly, Mondays 03:00 UTC) + `workflow_dispatch`, kept out of
+      `ci.yml` so a dev-instance outage cannot turn unrelated PRs red. Three jobs
+      (.NET / JS / Python), each bound to the `integration_tests` GitHub Environment;
+      `DATAHUB_TEST_URL` / `DATAHUB_TEST_PROJECT` are environment **variables**,
+      `DATAHUB_TEST_TOKEN` an environment **secret**. The optional `run-integration`
+      PR label was not wired up.
 - **Exit:** integration job green on all three targets against the dev instance;
   the same suite runnable locally against a docker-compose DataHUB by setting the
   two env vars.
