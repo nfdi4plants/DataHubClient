@@ -297,6 +297,15 @@ GitHub Actions:
 - **Error model:** custom `DataHubError` subclasses (`Unauthorized`, `NotFound`, `RateLimited`, `Server`) wrapping the raw response — better cross-language ergonomics than throwing raw HTTP exceptions.
 - **Retry/backoff:** keep out of Core. Provide a decorator `IHttpClient` impl (`RetryingHttpClient(inner, policy)`) ship-able per target.
 - **Logging:** inject an `ILogger`-style minimal interface; default no-op.
+- **Text file content:** GitLab's file endpoint returns `content` base64-encoded,
+  so every caller of `Files.Get` decodes it by hand (the integration suite's
+  `decodeBase64` is a stopgap). Add `FilesApi.GetText(projectId, path, ref) :
+  Async<string>` to Core — ideally backed by GitLab's raw endpoint
+  (`GET /repository/files/:path/raw`), which returns the plain body and avoids
+  decoding entirely. If it instead decodes `content`, it needs the per-target
+  `#if` switch (`System.Text.Encoding` is broken on Fable Python — use an Emit
+  `base64.b64decode` there), the same pattern `ResourceHelpers.fs` uses for the
+  JSON runtime. Once shipped, the integration suite drops `decodeBase64`.
 - **fsdocs site:** add later, once the API stabilizes.
 
 ## Implementation Stages
@@ -493,10 +502,17 @@ Tasks:
       `.JavaScript`/`.Python` variants), mirroring the unit suite; env vars are
       read per target by `LiveConfig.fs` via `#if`. Read-only for now (List/Get,
       no resource creation). A third var `DATAHUB_TEST_PROJECT` (numeric id) gates
-      the project-scoped cases. Build tasks: `RunIntegrationTests{DotNet,JavaScript,Python,All}`.
-- [ ] A dedicated bot account + **scoped** PAT on the dev instance, stored as
-      GitHub Actions secrets; a dedicated test group/namespace so tests never touch
-      real ARCs.
+      the project-scoped cases. Content-assertion cases that hardcode expected
+      values for a deliberately-provisioned project (currently
+      `integration_tests/test_1` on the DataPLANT dev instance) are gated by
+      matching `DATAHUB_TEST_URL` against known fixture hosts — no extra env var.
+      Build tasks: `RunIntegrationTests{DotNet,JavaScript,Python,All}`.
+- The suite is **credential-agnostic**: it targets whatever PAT and project are
+  supplied via `DATAHUB_TEST_TOKEN` / `DATAHUB_TEST_PROJECT`, stored as a GitHub
+  Environment secret + variable. No dedicated bot account or test namespace —
+  operators point it at a project they are comfortable exercising. Since the
+  current cases are read-only, this is safe; introducing write/destructive cases
+  later would revisit this.
 - [ ] Tests are self-cleaning: write tests create resources with uuid/timestamp-
       suffixed names and tear them down in a `finally`, so parallel runs and
       leftover state don't collide; read-only and write/destructive cases separated.
