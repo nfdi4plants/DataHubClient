@@ -49,11 +49,11 @@ let private decodeObjectFields json =
 let tests =
     testList "Resources" [
 
-        testCaseAsync "Projects.List builds sorted query and decodes response" <| async {
+        testCaseAsync "Projects.ListAsync builds sorted query and decodes response" <| async {
             let client, mock = makeClient ()
             mock.Add("GET", apiUrl "projects?search=arc&simple=true", 200, SampleData.projects)
 
-            let! projects = client.Projects.List(search = "arc", simple = true)
+            let! projects = client.Projects.ListAsync(search = "arc", simple = true)
 
             Expect.equal projects.Length 1 "project count"
             Expect.equal projects.[0].PathWithNamespace "lab/my-arc" "decoded project"
@@ -63,12 +63,12 @@ let tests =
             expectAuthHeader request
         }
 
-        testCaseAsync "Projects.Get maps 404 to NotFoundError" <| async {
+        testCaseAsync "Projects.GetAsync maps 404 to NotFoundError" <| async {
             let client, mock = makeClient ()
             mock.Add("GET", apiUrl "projects/404", 404, """{"message":"404 Project Not Found"}""")
 
             try
-                let! _ = client.Projects.Get 404
+                let! _ = client.Projects.GetAsync 404
                 failwith "expected NotFoundError"
             with
             | :? NotFoundError as err ->
@@ -81,8 +81,8 @@ let tests =
             mock.Add("GET", apiUrl "projects/42/repository/branches?search=main", 200, SampleData.branches)
             mock.Add("GET", apiUrl "projects/42/repository/commits?path=isa.investigation.xlsx&ref_name=main", 200, SampleData.commits)
 
-            let! branches = client.Repository.ListBranches(42, search = "main")
-            let! commits = client.Repository.ListCommits(42, refName = "main", path = "isa.investigation.xlsx")
+            let! branches = client.Repository.ListBranchesAsync(42, search = "main")
+            let! commits = client.Repository.ListCommitsAsync(42, refName = "main", path = "isa.investigation.xlsx")
 
             Expect.equal branches.[0].Name "main" "branch name"
             Expect.equal branches.[0].Commit.ShortId "abc123de" "branch commit"
@@ -91,23 +91,23 @@ let tests =
             Expect.equal mock.Requests.[1].Url (apiUrl "projects/42/repository/commits?path=isa.investigation.xlsx&ref_name=main") "commit url"
         }
 
-        testCaseAsync "Files.Get encodes file path and query ref" <| async {
+        testCaseAsync "Files.GetAsync encodes file path and query ref" <| async {
             let client, mock = makeClient ()
             mock.Add("GET", apiUrl "projects/42/repository/files/assays%2Fa%2Fisa.assay.xlsx?ref=main", 200, SampleData.repoFile)
 
-            let! file = client.Files.Get(42, "assays/a/isa.assay.xlsx", "main")
+            let! file = client.Files.GetAsync(42, "assays/a/isa.assay.xlsx", "main")
 
             Expect.equal file.FilePath "assays/a/isa.assay.xlsx" "file path"
             Expect.equal mock.LastRequest.Url (apiUrl "projects/42/repository/files/assays%2Fa%2Fisa.assay.xlsx?ref=main") "url"
             expectAuthHeader mock.LastRequest
         }
 
-        testCaseAsync "Files.Create sends JSON body" <| async {
+        testCaseAsync "Files.CreateAsync sends JSON body" <| async {
             let client, mock = makeClient ()
             mock.Add("POST", apiUrl "projects/42/repository/files/assays%2Fa%2Fisa.assay.xlsx", 201, SampleData.repoFile)
 
             let! file =
-                client.Files.Create(
+                client.Files.CreateAsync(
                     42,
                     "assays/a/isa.assay.xlsx",
                     "main",
@@ -132,12 +132,12 @@ let tests =
             mock.Add("GET", apiUrl "projects/42/issues/3/notes", 200, SampleData.notes)
             mock.Add("PUT", apiUrl "projects/42/issues/3", 200, SampleData.closedIssue)
 
-            let! issue = client.Issues.Create(42, "Missing assay metadata", description = "please fix")
+            let! issue = client.Issues.CreateAsync(42, "Missing assay metadata", description = "please fix")
             let createBody = decodeObjectFields (requestBody mock.LastRequest)
             let createTitle, createDescription, _, _, _, _, _, _, _, _ = createBody
 
-            let! notes = client.Issues.Notes(42, 3)
-            let! closed = client.Issues.Close(42, 3)
+            let! notes = client.Issues.NotesAsync(42, 3)
+            let! closed = client.Issues.CloseAsync(42, 3)
             let _, _, stateEvent, _, _, _, _, _, _, _ = decodeObjectFields (requestBody mock.LastRequest)
 
             Expect.equal issue.Iid 3 "issue iid"
@@ -148,11 +148,11 @@ let tests =
             Expect.equal stateEvent (Some "close") "state event"
         }
 
-        testCaseAsync "MergeRequests.Create sends source and target branches" <| async {
+        testCaseAsync "MergeRequests.CreateAsync sends source and target branches" <| async {
             let client, mock = makeClient ()
             mock.Add("POST", apiUrl "projects/42/merge_requests", 201, SampleData.mergeRequest)
 
-            let! mr = client.MergeRequests.Create(42, "feature/assay", "main", "Add assay", description = "adds an assay")
+            let! mr = client.MergeRequests.CreateAsync(42, "feature/assay", "main", "Add assay", description = "adds an assay")
             let _, description, _, _, _, _, _, sourceBranch, targetBranch, _ = decodeObjectFields (requestBody mock.LastRequest)
 
             Expect.equal mr.Iid 8 "merge request iid"
@@ -161,11 +161,11 @@ let tests =
             Expect.equal description (Some "adds an assay") "description"
         }
 
-        testCaseAsync "MergeRequests.Notes decodes notes" <| async {
+        testCaseAsync "MergeRequests.NotesAsync decodes notes" <| async {
             let client, mock = makeClient ()
             mock.Add("GET", apiUrl "projects/42/merge_requests/8/notes", 200, SampleData.notes)
 
-            let! notes = client.MergeRequests.Notes(42, 8)
+            let! notes = client.MergeRequests.NotesAsync(42, 8)
 
             Expect.equal notes.Length 1 "note count"
             Expect.equal notes.[0].Author.Username "carl" "note author"
@@ -178,10 +178,10 @@ let tests =
             mock.Add("PUT", apiUrl "projects/42/packages/generic/arc-bundle/1.2.0/arc.zip", 201, """{"message":"201 Created"}""")
             mock.Add("GET", apiUrl "projects/42/packages/generic/arc-bundle/1.2.0/arc.zip", 200, "zip-content")
 
-            let! packages = client.Packages.List(42, packageType = "generic", packageName = "arc-bundle")
-            let! uploadResponse = client.Packages.UploadGenericFile(42, "arc-bundle", "1.2.0", "arc.zip", "zip-content")
+            let! packages = client.Packages.ListAsync(42, packageType = "generic", packageName = "arc-bundle")
+            let! uploadResponse = client.Packages.UploadGenericFileAsync(42, "arc-bundle", "1.2.0", "arc.zip", "zip-content")
             let uploadRequest = mock.Requests.[1]
-            let! downloadResponse = client.Packages.DownloadGenericFile(42, "arc-bundle", "1.2.0", "arc.zip")
+            let! downloadResponse = client.Packages.DownloadGenericFileAsync(42, "arc-bundle", "1.2.0", "arc.zip")
 
             Expect.equal packages.[0].PackageType "generic" "package type"
             Expect.equal uploadRequest.Method "PUT" "upload method"

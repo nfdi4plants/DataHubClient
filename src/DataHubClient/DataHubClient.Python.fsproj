@@ -81,4 +81,10 @@
     <PackageReference Include="Thoth.Json.Python" Version="0.6.0" />
   </ItemGroup>
 
+ <PropertyGroup>
+    <PythonDependencies>
+      <Package Name="httpx" Version="&gt;= 0.27" ResolutionStrategy="Max" />
+    </PythonDependencies>
+  </PropertyGroup>
+
 </Project>

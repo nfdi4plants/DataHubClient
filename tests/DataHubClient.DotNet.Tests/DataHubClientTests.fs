@@ -26,7 +26,7 @@ let tests =
             let client = DataHubClient(baseUrl, auth)
             client.Http <- DotNetHttpClient(httpClient)
 
-            let! project = client.Projects.Get(42)
+            let! project = client.Projects.GetAsync(42)
 
             Expect.equal project.Id 42 "decoded project id"
             Expect.equal project.PathWithNamespace "lab/my-arc" "decoded project path"

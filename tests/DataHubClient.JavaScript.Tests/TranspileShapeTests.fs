@@ -30,9 +30,9 @@ let tests =
 
         testCase "resource API methods attach as callable members" <| fun () ->
             let client = makeClient ()
-            Expect.equal (memberType client.Projects "List") "function" "Projects.List is a function"
-            Expect.equal (memberType client.Issues "Create") "function" "Issues.Create is a function"
-            Expect.equal (memberType client.Files "Get") "function" "Files.Get is a function"
+            Expect.equal (memberType client.Projects "ListAsync") "function" "Projects.ListAsync is a function"
+            Expect.equal (memberType client.Issues "CreateAsync") "function" "Issues.CreateAsync is a function"
+            Expect.equal (memberType client.Files "GetAsync") "function" "Files.GetAsync is a function"
 
         testCase "model scalar members attach as readable properties" <| fun () ->
             let project = Project(42, "My ARC", "my-arc", "lab/my-arc", "private", "https://hub/lab/my-arc")

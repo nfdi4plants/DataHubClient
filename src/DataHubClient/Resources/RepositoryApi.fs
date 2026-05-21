@@ -16,7 +16,7 @@ type RepositoryApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
     /// <summary>Lists branches for a project.</summary>
     /// <param name="projectId">The project identifier.</param>
     /// <param name="search">Optional branch-name search term.</param>
-    member _.ListBranches(projectId: int, ?search: string) : Async<Branch array> =
+    member _.ListBranchesAsync(projectId: int, ?search: string) : Async<Branch array> =
         async {
             let req =
                 ResourceHelpers.emptyRequest
@@ -33,7 +33,7 @@ type RepositoryApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
     /// <summary>Gets a single branch by name.</summary>
     /// <param name="projectId">The project identifier.</param>
     /// <param name="branch">The branch name.</param>
-    member _.GetBranch(projectId: int, branch: string) : Async<Branch> =
+    member _.GetBranchAsync(projectId: int, branch: string) : Async<Branch> =
         async {
             let req =
                 ResourceHelpers.emptyRequest
@@ -51,7 +51,7 @@ type RepositoryApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
     /// <param name="projectId">The project identifier.</param>
     /// <param name="refName">Optional branch, tag, or commit SHA to list from.</param>
     /// <param name="path">Optional repository path used to filter commits.</param>
-    member _.ListCommits(projectId: int, ?refName: string, ?path: string) : Async<Commit array> =
+    member _.ListCommitsAsync(projectId: int, ?refName: string, ?path: string) : Async<Commit array> =
         async {
             let req =
                 ResourceHelpers.emptyRequest
@@ -68,7 +68,7 @@ type RepositoryApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
     /// <summary>Gets a single commit by SHA.</summary>
     /// <param name="projectId">The project identifier.</param>
     /// <param name="sha">The commit SHA.</param>
-    member _.GetCommit(projectId: int, sha: string) : Async<Commit> =
+    member _.GetCommitAsync(projectId: int, sha: string) : Async<Commit> =
         async {
             let req =
                 ResourceHelpers.emptyRequest

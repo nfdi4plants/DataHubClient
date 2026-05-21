@@ -50,15 +50,19 @@ let private writeVersionedPackageJson version outputDirectory =
 
     File.WriteAllText(target, text)
 
-let private writeVersionedPyproject version outputDirectory =
-    let source = "src/DataHubClient/pyproject.toml"
-    let target = Path.Combine(outputDirectory, "pyproject.toml")
+/// Stamp the wheel's project version in the root pyproject.toml in place. The
+/// build derives `version` from RELEASE_NOTES.md; this is the same regex-based
+/// override we use for package.json, just pointed at the single root pyproject
+/// that drives the wheel build (no template/copy step — Fable transpiles into
+/// `src/DataHubClient/py/` and hatchling picks the version up from here).
+let private setRootPyprojectVersion version =
+    let path = "pyproject.toml"
 
     let text =
-        File.ReadAllText(source)
+        File.ReadAllText(path)
         |> replaceFirst "(?m)^version\\s*=\\s*\"[^\"]+\"" $"version = \"{version}\""
 
-    File.WriteAllText(target, text)
+    File.WriteAllText(path, text)
 
 let private removeFableModulesGitIgnore outputDirectory =
     let path = Path.Combine(outputDirectory, "fable_modules", ".gitignore")
@@ -100,12 +104,16 @@ let private packNpm version =
     runCommand "npm" (npmArgs [ "pack"; $"./{outputDirectory}"; "--pack-destination"; pkgDir ]) "."
 
 let private packPython version =
-    let outputDirectory = "dist/py"
+    // Fable lands inside the source tree (sibling of the .fs files), so the
+    // hand-written src/DataHubClient/__init__.py survives the transpile and
+    // hatchling can pack `src/DataHubClient/` → `datahub_client/` whole. This
+    // mirrors ARCtrl's Python build layout.
+    let outputDirectory = "src/DataHubClient/py"
     transpile pythonSourceProject "python" outputDirectory
     removeFableModulesGitIgnore outputDirectory
-    writeVersionedPyproject version outputDirectory
+    setRootPyprojectVersion version
     Directory.CreateDirectory(pkgDir) |> ignore
-    runCommand "uv" (uvArgs [ "build"; outputDirectory; "--wheel"; "--out-dir"; Path.GetFullPath(pkgDir) ]) "."
+    runCommand "uv" (uvArgs [ "build"; "--wheel"; "--out-dir"; Path.GetFullPath(pkgDir) ]) "."
 
 let private packAll version versionSuffix =
     Directory.CreateDirectory(pkgDir) |> ignore

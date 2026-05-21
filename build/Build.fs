@@ -14,11 +14,15 @@ initializeContext()
 open BasicTasks
 open TestTasks
 open PackageTasks
+open TestPackageTasks
 open DocumentationTasks
 open ReleaseTasks
 
+// Force TestPackageTasks module init so its BuildTask.create calls register the targets.
+let _testPackages = testPackages
+
 /// Full release of nuget package, git tag, and documentation for the stable version.
-let _release = 
+let _release =
     BuildTask.createEmpty 
         "Release" 
         [clean; buildSolution; runTestsAll; pack; buildDocs; createTag; publishNuget; releaseDocs]

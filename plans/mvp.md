@@ -298,8 +298,8 @@ GitHub Actions:
 - **Retry/backoff:** keep out of Core. Provide a decorator `IHttpClient` impl (`RetryingHttpClient(inner, policy)`) ship-able per target.
 - **Logging:** inject an `ILogger`-style minimal interface; default no-op.
 - **Text file content:** GitLab's file endpoint returns `content` base64-encoded,
-  so every caller of `Files.Get` decodes it by hand (the integration suite's
-  `decodeBase64` is a stopgap). Add `FilesApi.GetText(projectId, path, ref) :
+  so every caller of `Files.GetAsync` decodes it by hand (the integration suite's
+  `decodeBase64` is a stopgap). Add `FilesApi.GetTextAsync(projectId, path, ref) :
   Async<string>` to Core — ideally backed by GitLab's raw endpoint
   (`GET /repository/files/:path/raw`), which returns the plain body and avoids
   decoding entirely. If it instead decodes `content`, it needs the per-target

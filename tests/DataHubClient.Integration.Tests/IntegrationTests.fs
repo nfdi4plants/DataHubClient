@@ -26,9 +26,9 @@ let private decodeBase64 (value: string) : string =
 /// Instance-level read calls — only need a reachable DataHub and a valid token.
 let private instanceCases = [
 
-    testCaseAsync "Projects.List returns a project array" <| async {
+    testCaseAsync "Projects.ListAsync returns a project array" <| async {
         let client = makeClient ()
-        let! projects = client.Projects.List()
+        let! projects = client.Projects.ListAsync()
         Expect.isTrue (projects.Length >= 0) "a project array is returned"
         for project in projects do
             Expect.isTrue (project.Id > 0) "each project has an id"
@@ -39,40 +39,40 @@ let private instanceCases = [
 /// Project-scoped read calls — additionally need DATAHUB_TEST_PROJECT.
 let private projectCases = [
 
-    testCaseAsync "Projects.Get returns the configured project" <| async {
+    testCaseAsync "Projects.GetAsync returns the configured project" <| async {
         let client = makeClient ()
-        let! project = client.Projects.Get LiveConfig.projectId
+        let! project = client.Projects.GetAsync LiveConfig.projectId
         Expect.equal project.Id LiveConfig.projectId "the requested project id round-trips"
         Expect.notEqual project.Name "" "the project has a name"
     }
 
-    testCaseAsync "Repository.ListBranches returns branches" <| async {
+    testCaseAsync "Repository.ListBranchesAsync returns branches" <| async {
         let client = makeClient ()
-        let! branches = client.Repository.ListBranches LiveConfig.projectId
+        let! branches = client.Repository.ListBranchesAsync LiveConfig.projectId
         Expect.isTrue (branches.Length >= 0) "a branch array is returned"
         for branch in branches do
             Expect.notEqual branch.Name "" "each branch has a name"
     }
 
-    testCaseAsync "Repository.ListCommits returns commits" <| async {
+    testCaseAsync "Repository.ListCommitsAsync returns commits" <| async {
         let client = makeClient ()
-        let! commits = client.Repository.ListCommits LiveConfig.projectId
+        let! commits = client.Repository.ListCommitsAsync LiveConfig.projectId
         Expect.isTrue (commits.Length >= 0) "a commit array is returned"
         for commit in commits do
             Expect.notEqual commit.Id "" "each commit has an id"
     }
 
-    testCaseAsync "Issues.List returns issues" <| async {
+    testCaseAsync "Issues.ListAsync returns issues" <| async {
         let client = makeClient ()
-        let! issues = client.Issues.List LiveConfig.projectId
+        let! issues = client.Issues.ListAsync LiveConfig.projectId
         Expect.isTrue (issues.Length >= 0) "an issue array is returned"
         for issue in issues do
             Expect.equal issue.ProjectId LiveConfig.projectId "each issue belongs to the project"
     }
 
-    testCaseAsync "MergeRequests.List returns merge requests" <| async {
+    testCaseAsync "MergeRequests.ListAsync returns merge requests" <| async {
         let client = makeClient ()
-        let! mergeRequests = client.MergeRequests.List LiveConfig.projectId
+        let! mergeRequests = client.MergeRequests.ListAsync LiveConfig.projectId
         Expect.isTrue (mergeRequests.Length >= 0) "a merge request array is returned"
         for mr in mergeRequests do
             Expect.equal mr.ProjectId LiveConfig.projectId "each merge request belongs to the project"
@@ -83,63 +83,63 @@ let private projectCases = [
     // passes without an assertion — the corresponding List case covers the
     // empty path.
 
-    testCaseAsync "Repository.GetBranch round-trips a listed branch" <| async {
+    testCaseAsync "Repository.GetBranchAsync round-trips a listed branch" <| async {
         let client = makeClient ()
-        let! branches = client.Repository.ListBranches LiveConfig.projectId
+        let! branches = client.Repository.ListBranchesAsync LiveConfig.projectId
         if branches.Length > 0 then
             let name = branches.[0].Name
-            let! branch = client.Repository.GetBranch(LiveConfig.projectId, name)
+            let! branch = client.Repository.GetBranchAsync(LiveConfig.projectId, name)
             Expect.equal branch.Name name "the requested branch round-trips"
     }
 
-    testCaseAsync "Repository.GetCommit round-trips a listed commit" <| async {
+    testCaseAsync "Repository.GetCommitAsync round-trips a listed commit" <| async {
         let client = makeClient ()
-        let! commits = client.Repository.ListCommits LiveConfig.projectId
+        let! commits = client.Repository.ListCommitsAsync LiveConfig.projectId
         if commits.Length > 0 then
             let sha = commits.[0].Id
-            let! commit = client.Repository.GetCommit(LiveConfig.projectId, sha)
+            let! commit = client.Repository.GetCommitAsync(LiveConfig.projectId, sha)
             Expect.equal commit.Id sha "the requested commit round-trips"
     }
 
-    testCaseAsync "Issues.Get round-trips a listed issue" <| async {
+    testCaseAsync "Issues.GetAsync round-trips a listed issue" <| async {
         let client = makeClient ()
-        let! issues = client.Issues.List LiveConfig.projectId
+        let! issues = client.Issues.ListAsync LiveConfig.projectId
         if issues.Length > 0 then
             let iid = issues.[0].Iid
-            let! issue = client.Issues.Get(LiveConfig.projectId, iid)
+            let! issue = client.Issues.GetAsync(LiveConfig.projectId, iid)
             Expect.equal issue.Iid iid "the requested issue round-trips"
             Expect.equal issue.ProjectId LiveConfig.projectId "the issue belongs to the project"
     }
 
-    testCaseAsync "Issues.Notes returns notes for a listed issue" <| async {
+    testCaseAsync "Issues.NotesAsync returns notes for a listed issue" <| async {
         let client = makeClient ()
-        let! issues = client.Issues.List LiveConfig.projectId
+        let! issues = client.Issues.ListAsync LiveConfig.projectId
         if issues.Length > 0 then
-            let! notes = client.Issues.Notes(LiveConfig.projectId, issues.[0].Iid)
+            let! notes = client.Issues.NotesAsync(LiveConfig.projectId, issues.[0].Iid)
             Expect.isTrue (notes.Length >= 0) "a note array is returned"
     }
 
-    testCaseAsync "MergeRequests.Get round-trips a listed merge request" <| async {
+    testCaseAsync "MergeRequests.GetAsync round-trips a listed merge request" <| async {
         let client = makeClient ()
-        let! mergeRequests = client.MergeRequests.List LiveConfig.projectId
+        let! mergeRequests = client.MergeRequests.ListAsync LiveConfig.projectId
         if mergeRequests.Length > 0 then
             let iid = mergeRequests.[0].Iid
-            let! mr = client.MergeRequests.Get(LiveConfig.projectId, iid)
+            let! mr = client.MergeRequests.GetAsync(LiveConfig.projectId, iid)
             Expect.equal mr.Iid iid "the requested merge request round-trips"
             Expect.equal mr.ProjectId LiveConfig.projectId "the merge request belongs to the project"
     }
 
-    testCaseAsync "MergeRequests.Notes returns notes for a listed merge request" <| async {
+    testCaseAsync "MergeRequests.NotesAsync returns notes for a listed merge request" <| async {
         let client = makeClient ()
-        let! mergeRequests = client.MergeRequests.List LiveConfig.projectId
+        let! mergeRequests = client.MergeRequests.ListAsync LiveConfig.projectId
         if mergeRequests.Length > 0 then
-            let! notes = client.MergeRequests.Notes(LiveConfig.projectId, mergeRequests.[0].Iid)
+            let! notes = client.MergeRequests.NotesAsync(LiveConfig.projectId, mergeRequests.[0].Iid)
             Expect.isTrue (notes.Length >= 0) "a note array is returned"
     }
 
-    testCaseAsync "Packages.List returns packages" <| async {
+    testCaseAsync "Packages.ListAsync returns packages" <| async {
         let client = makeClient ()
-        let! packages = client.Packages.List LiveConfig.projectId
+        let! packages = client.Packages.ListAsync LiveConfig.projectId
         Expect.isTrue (packages.Length >= 0) "a package array is returned"
         for package in packages do
             Expect.notEqual package.Name "" "each package has a name"
@@ -157,7 +157,7 @@ let private dataplantDevCases = [
 
     testCaseAsync "Fixture: project metadata matches dataplant-dev" <| async {
         let client = makeClient ()
-        let! project = client.Projects.Get LiveConfig.projectId
+        let! project = client.Projects.GetAsync LiveConfig.projectId
         Expect.equal project.Name "Test_1" "project name"
         Expect.equal project.Path "test_1" "project path"
         Expect.equal project.PathWithNamespace "integration_tests/test_1" "project namespace path"
@@ -167,7 +167,7 @@ let private dataplantDevCases = [
 
     testCaseAsync "Fixture: main branch is default and protected" <| async {
         let client = makeClient ()
-        let! branch = client.Repository.GetBranch(LiveConfig.projectId, "main")
+        let! branch = client.Repository.GetBranchAsync(LiveConfig.projectId, "main")
         Expect.equal branch.Name "main" "branch name"
         Expect.isTrue branch.Default "main is the default branch"
         Expect.isTrue branch.Protected "main is protected"
@@ -175,7 +175,7 @@ let private dataplantDevCases = [
 
     testCaseAsync "Fixture: issue 1 is Test_Issue_1" <| async {
         let client = makeClient ()
-        let! issue = client.Issues.Get(LiveConfig.projectId, 1)
+        let! issue = client.Issues.GetAsync(LiveConfig.projectId, 1)
         Expect.equal issue.Iid 1 "issue iid"
         Expect.equal issue.Title "Test_Issue_1" "issue title"
         Expect.equal issue.State "opened" "issue state"
@@ -190,7 +190,7 @@ let private dataplantDevCases = [
 
     testCaseAsync "Fixture: README.md has the expected content" <| async {
         let client = makeClient ()
-        let! file = client.Files.Get(LiveConfig.projectId, "README.md", "main")
+        let! file = client.Files.GetAsync(LiveConfig.projectId, "README.md", "main")
         Expect.equal file.FilePath "README.md" "file path"
         Expect.equal file.Ref "main" "file ref"
         // Content is compared trimmed — a committed file may or may not carry a

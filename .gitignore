@@ -433,3 +433,6 @@ FodyWeavers.xsd
 dist/
 .fsdocs/
 tmp/
+
+# Fable Python output (lives next to the F# source for hatchling to package).
+src/DataHubClient/py/

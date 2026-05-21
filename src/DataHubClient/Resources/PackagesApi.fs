@@ -23,7 +23,7 @@ type PackagesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
     /// <param name="projectId">The project identifier.</param>
     /// <param name="packageType">Optional package type filter, such as <c>generic</c>.</param>
     /// <param name="packageName">Optional package-name filter.</param>
-    member _.List(projectId: int, ?packageType: string, ?packageName: string) : Async<Package array> =
+    member _.ListAsync(projectId: int, ?packageType: string, ?packageName: string) : Async<Package array> =
         async {
             let req =
                 ResourceHelpers.emptyRequest
@@ -40,7 +40,7 @@ type PackagesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
     /// <summary>Gets a package by package identifier.</summary>
     /// <param name="projectId">The project identifier.</param>
     /// <param name="packageId">The package identifier.</param>
-    member _.Get(projectId: int, packageId: int) : Async<Package> =
+    member _.GetAsync(projectId: int, packageId: int) : Async<Package> =
         async {
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" (packageSegments projectId @ [ string packageId ]) []
             let! response = http.SendAsync req
@@ -53,7 +53,7 @@ type PackagesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
     /// <param name="version">The generic package version.</param>
     /// <param name="fileName">The package file name.</param>
     /// <param name="content">The file content to upload.</param>
-    member _.UploadGenericFile(projectId: int, packageName: string, version: string, fileName: string, content: string) : Async<string> =
+    member _.UploadGenericFileAsync(projectId: int, packageName: string, version: string, fileName: string, content: string) : Async<string> =
         async {
             let req =
                 ResourceHelpers.textRequest
@@ -74,7 +74,7 @@ type PackagesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
     /// <param name="packageName">The generic package name.</param>
     /// <param name="version">The generic package version.</param>
     /// <param name="fileName">The package file name.</param>
-    member _.DownloadGenericFile(projectId: int, packageName: string, version: string, fileName: string) : Async<string> =
+    member _.DownloadGenericFileAsync(projectId: int, packageName: string, version: string, fileName: string) : Async<string> =
         async {
             let req =
                 ResourceHelpers.emptyRequest

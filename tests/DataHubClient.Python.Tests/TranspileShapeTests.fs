@@ -34,9 +34,9 @@ let tests =
 
         testCase "resource API methods attach as callable members" <| fun () ->
             let client = makeClient ()
-            Expect.isTrue (isCallable client.Projects "List") "Projects.List is callable"
-            Expect.isTrue (isCallable client.Issues "Create") "Issues.Create is callable"
-            Expect.isTrue (isCallable client.Files "Get") "Files.Get is callable"
+            Expect.isTrue (isCallable client.Projects "ListAsync") "Projects.ListAsync is callable"
+            Expect.isTrue (isCallable client.Issues "CreateAsync") "Issues.CreateAsync is callable"
+            Expect.isTrue (isCallable client.Files "GetAsync") "Files.GetAsync is callable"
 
         testCase "model scalar members attach as readable properties" <| fun () ->
             let project = Project(42, "My ARC", "my-arc", "lab/my-arc", "private", "https://hub/lab/my-arc")

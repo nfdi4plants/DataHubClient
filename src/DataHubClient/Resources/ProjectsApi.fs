@@ -16,7 +16,7 @@ type ProjectsApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
     /// <summary>Lists projects visible to the authenticated user.</summary>
     /// <param name="search">Optional search term used to filter projects.</param>
     /// <param name="simple">Whether GitLab should return the compact project representation.</param>
-    member _.List(?search: string, ?simple: bool) : Async<Project array> =
+    member _.ListAsync(?search: string, ?simple: bool) : Async<Project array> =
         async {
             let query =
                 [
@@ -31,7 +31,7 @@ type ProjectsApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
 
     /// <summary>Gets a project by numeric project identifier.</summary>
     /// <param name="projectId">The project identifier.</param>
-    member _.Get(projectId: int) : Async<Project> =
+    member _.GetAsync(projectId: int) : Async<Project> =
         async {
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" [ "projects"; string projectId ] []
             let! response = http.SendAsync req
@@ -40,5 +40,5 @@ type ProjectsApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
 
     /// <summary>Searches projects visible to the authenticated user.</summary>
     /// <param name="search">The search term used to filter projects.</param>
-    member this.Search(search: string) : Async<Project array> =
-        this.List(search = search)
+    member this.SearchAsync(search: string) : Async<Project array> =
+        this.ListAsync(search = search)

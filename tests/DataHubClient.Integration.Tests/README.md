@@ -23,7 +23,7 @@ The suite reads its target from environment variables:
 
 When `DATAHUB_TEST_URL` or `DATAHUB_TEST_TOKEN` is unset, every case is
 **skipped, not failed**, so the suite no-ops on local runs and fork PRs. When
-`DATAHUB_TEST_PROJECT` is unset, only the instance-level case (`Projects.List`)
+`DATAHUB_TEST_PROJECT` is unset, only the instance-level case (`Projects.ListAsync`)
 runs.
 
 The lookup is target-specific (`System.Environment` on .NET, `process.env` on
