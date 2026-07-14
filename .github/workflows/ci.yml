@@ -145,8 +145,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: https://registry.npmjs.org
-          scope: "@nfdi4plants"
+      # npm trusted publishing needs npm >= 11.5.1; Node 20 ships npm 10.
+      - name: Update npm for trusted publishing
+        run: npm install -g npm@latest
       # Trusted publishing: exchanges this job's OIDC token for a temporary
       # (1 h, single-use) API key, per the policy configured on nuget.org.
       # NUGET_USER is the nuget.org profile name the policy belongs to.
@@ -157,10 +158,11 @@ jobs:
           user: ${{ secrets.NUGET_USER }}
       - name: Publish NuGet package
         run: dotnet nuget push pkg/*.nupkg --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      # Keyless via the job's OIDC token; the trusted publisher configured on
+      # npmjs.com must match this repo, ci.yml, and the release environment.
+      # Provenance attestations are generated automatically.
       - name: Publish npm package
         run: npm publish pkg/*.tgz --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Stage PyPI distributions
         run: |
           mkdir pypi-dist
