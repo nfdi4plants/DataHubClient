@@ -26,22 +26,24 @@ type MergeRequestsApi(baseUrl: string, auth: Authentication, http: IHttpClient) 
     /// <summary>Lists merge requests for a project.</summary>
     /// <param name="projectId">The project identifier.</param>
     /// <param name="state">Optional state filter, such as <c>opened</c>, <c>merged</c>, or <c>closed</c>.</param>
-    member _.ListAsync(projectId: int, ?state: string) : Async<MergeRequest array> =
+    member _.ListAsync(projectId: int, ?state: string) =
         async {
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" (mergeRequestSegments projectId) [ "state", state ]
             let! response = http.SendAsync req
             return ResourceHelpers.decodeArray MergeRequest.decoder response
         }
+        |> ResourceHelpers.toPublic
 
     /// <summary>Gets a single merge request by project-local merge request number.</summary>
     /// <param name="projectId">The project identifier.</param>
     /// <param name="iid">The project-local merge request number.</param>
-    member _.GetAsync(projectId: int, iid: int) : Async<MergeRequest> =
+    member _.GetAsync(projectId: int, iid: int) =
         async {
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" (mergeRequestSegmentsWithIid projectId iid) []
             let! response = http.SendAsync req
             return ResourceHelpers.decode MergeRequest.decoder response
         }
+        |> ResourceHelpers.toPublic
 
     /// <summary>Creates a new merge request.</summary>
     /// <param name="projectId">The project identifier.</param>
@@ -49,7 +51,7 @@ type MergeRequestsApi(baseUrl: string, auth: Authentication, http: IHttpClient) 
     /// <param name="targetBranch">The branch that should receive the changes.</param>
     /// <param name="title">The merge request title.</param>
     /// <param name="description">Optional merge request description.</param>
-    member _.CreateAsync(projectId: int, sourceBranch: string, targetBranch: string, title: string, ?description: string) : Async<MergeRequest> =
+    member _.CreateAsync(projectId: int, sourceBranch: string, targetBranch: string, title: string, ?description: string) =
         async {
             let body =
                 ThothExtensions.objectSkipNull [
@@ -63,6 +65,7 @@ type MergeRequestsApi(baseUrl: string, auth: Authentication, http: IHttpClient) 
             let! response = http.SendAsync req
             return ResourceHelpers.decode MergeRequest.decoder response
         }
+        |> ResourceHelpers.toPublic
 
     /// <summary>Updates a merge request.</summary>
     /// <param name="projectId">The project identifier.</param>
@@ -70,7 +73,7 @@ type MergeRequestsApi(baseUrl: string, auth: Authentication, http: IHttpClient) 
     /// <param name="title">Optional replacement title.</param>
     /// <param name="description">Optional replacement description.</param>
     /// <param name="stateEvent">Optional state transition, such as <c>close</c> or <c>reopen</c>.</param>
-    member _.UpdateAsync(projectId: int, iid: int, ?title: string, ?description: string, ?stateEvent: string) : Async<MergeRequest> =
+    member _.UpdateAsync(projectId: int, iid: int, ?title: string, ?description: string, ?stateEvent: string) =
         async {
             let body =
                 ThothExtensions.objectSkipNull [
@@ -83,28 +86,30 @@ type MergeRequestsApi(baseUrl: string, auth: Authentication, http: IHttpClient) 
             let! response = http.SendAsync req
             return ResourceHelpers.decode MergeRequest.decoder response
         }
+        |> ResourceHelpers.toPublic
 
     /// <summary>Closes a merge request.</summary>
     /// <param name="projectId">The project identifier.</param>
     /// <param name="iid">The project-local merge request number.</param>
-    member this.CloseAsync(projectId: int, iid: int) : Async<MergeRequest> =
+    member this.CloseAsync(projectId: int, iid: int) =
         this.UpdateAsync(projectId, iid, stateEvent = "close")
 
     /// <summary>Lists notes on a merge request.</summary>
     /// <param name="projectId">The project identifier.</param>
     /// <param name="iid">The project-local merge request number.</param>
-    member _.NotesAsync(projectId: int, iid: int) : Async<Note array> =
+    member _.NotesAsync(projectId: int, iid: int) =
         async {
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" (noteSegments projectId iid) []
             let! response = http.SendAsync req
             return ResourceHelpers.decodeArray Note.decoder response
         }
+        |> ResourceHelpers.toPublic
 
     /// <summary>Creates a note on a merge request.</summary>
     /// <param name="projectId">The project identifier.</param>
     /// <param name="iid">The project-local merge request number.</param>
     /// <param name="body">The note text.</param>
-    member _.CreateNoteAsync(projectId: int, iid: int, body: string) : Async<Note> =
+    member _.CreateNoteAsync(projectId: int, iid: int, body: string) =
         async {
             let req =
                 ResourceHelpers.jsonRequest
@@ -118,3 +123,4 @@ type MergeRequestsApi(baseUrl: string, auth: Authentication, http: IHttpClient) 
             let! response = http.SendAsync req
             return ResourceHelpers.decode Note.decoder response
         }
+        |> ResourceHelpers.toPublic

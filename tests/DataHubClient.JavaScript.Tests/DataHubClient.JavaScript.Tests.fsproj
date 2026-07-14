@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <Compile Include="..\DataHubClient.Tests\TestJson.fs" />
+    <Compile Include="..\DataHubClient.Tests\TestHelpers.fs" />
     <Compile Include="..\DataHubClient.Tests\Mock\MockHttpClient.fs" />
     <Compile Include="..\DataHubClient.Tests\Mock\SampleData.fs" />
     <Compile Include="..\DataHubClient.Tests\AuthenticationTests.fs" />

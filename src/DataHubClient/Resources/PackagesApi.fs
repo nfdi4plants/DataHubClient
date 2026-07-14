@@ -23,7 +23,7 @@ type PackagesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
     /// <param name="projectId">The project identifier.</param>
     /// <param name="packageType">Optional package type filter, such as <c>generic</c>.</param>
     /// <param name="packageName">Optional package-name filter.</param>
-    member _.ListAsync(projectId: int, ?packageType: string, ?packageName: string) : Async<Package array> =
+    member _.ListAsync(projectId: int, ?packageType: string, ?packageName: string) =
         async {
             let req =
                 ResourceHelpers.emptyRequest
@@ -36,16 +36,18 @@ type PackagesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
             let! response = http.SendAsync req
             return ResourceHelpers.decodeArray Package.decoder response
         }
+        |> ResourceHelpers.toPublic
 
     /// <summary>Gets a package by package identifier.</summary>
     /// <param name="projectId">The project identifier.</param>
     /// <param name="packageId">The package identifier.</param>
-    member _.GetAsync(projectId: int, packageId: int) : Async<Package> =
+    member _.GetAsync(projectId: int, packageId: int) =
         async {
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" (packageSegments projectId @ [ string packageId ]) []
             let! response = http.SendAsync req
             return ResourceHelpers.decode Package.decoder response
         }
+        |> ResourceHelpers.toPublic
 
     /// <summary>Uploads a generic package file.</summary>
     /// <param name="projectId">The project identifier.</param>
@@ -53,7 +55,7 @@ type PackagesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
     /// <param name="version">The generic package version.</param>
     /// <param name="fileName">The package file name.</param>
     /// <param name="content">The file content to upload.</param>
-    member _.UploadGenericFileAsync(projectId: int, packageName: string, version: string, fileName: string, content: string) : Async<string> =
+    member _.UploadGenericFileAsync(projectId: int, packageName: string, version: string, fileName: string, content: string) =
         async {
             let req =
                 ResourceHelpers.textRequest
@@ -68,13 +70,14 @@ type PackagesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
             let! response = http.SendAsync req
             return ResourceHelpers.responseBody response
         }
+        |> ResourceHelpers.toPublic
 
     /// <summary>Downloads a generic package file as text.</summary>
     /// <param name="projectId">The project identifier.</param>
     /// <param name="packageName">The generic package name.</param>
     /// <param name="version">The generic package version.</param>
     /// <param name="fileName">The package file name.</param>
-    member _.DownloadGenericFileAsync(projectId: int, packageName: string, version: string, fileName: string) : Async<string> =
+    member _.DownloadGenericFileAsync(projectId: int, packageName: string, version: string, fileName: string) =
         async {
             let req =
                 ResourceHelpers.emptyRequest
@@ -87,3 +90,4 @@ type PackagesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
             let! response = http.SendAsync req
             return ResourceHelpers.responseBody response
         }
+        |> ResourceHelpers.toPublic

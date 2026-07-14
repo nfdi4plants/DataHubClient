@@ -4,6 +4,7 @@ open Fable.Pyxpecto
 open Thoth.Json.Core
 open DataHubClient
 open DataHubClient.Tests.TestJson
+open DataHubClient.Tests.TestHelpers
 open DataHubClient.Tests.Mock.MockHttpClient
 open DataHubClient.Tests.Mock
 
@@ -53,7 +54,7 @@ let tests =
             let client, mock = makeClient ()
             mock.Add("GET", apiUrl "projects?search=arc&simple=true", 200, SampleData.projects)
 
-            let! projects = client.Projects.ListAsync(search = "arc", simple = true)
+            let! projects = client.Projects.ListAsync(search = "arc", simple = true) |> awaitApi
 
             Expect.equal projects.Length 1 "project count"
             Expect.equal projects.[0].PathWithNamespace "lab/my-arc" "decoded project"
@@ -68,7 +69,7 @@ let tests =
             mock.Add("GET", apiUrl "projects/404", 404, """{"message":"404 Project Not Found"}""")
 
             try
-                let! _ = client.Projects.GetAsync 404
+                let! _ = client.Projects.GetAsync 404 |> awaitApi
                 failwith "expected NotFoundError"
             with
             | :? NotFoundError as err ->
@@ -81,8 +82,8 @@ let tests =
             mock.Add("GET", apiUrl "projects/42/repository/branches?search=main", 200, SampleData.branches)
             mock.Add("GET", apiUrl "projects/42/repository/commits?path=isa.investigation.xlsx&ref_name=main", 200, SampleData.commits)
 
-            let! branches = client.Repository.ListBranchesAsync(42, search = "main")
-            let! commits = client.Repository.ListCommitsAsync(42, refName = "main", path = "isa.investigation.xlsx")
+            let! branches = client.Repository.ListBranchesAsync(42, search = "main") |> awaitApi
+            let! commits = client.Repository.ListCommitsAsync(42, refName = "main", path = "isa.investigation.xlsx") |> awaitApi
 
             Expect.equal branches.[0].Name "main" "branch name"
             Expect.equal branches.[0].Commit.ShortId "abc123de" "branch commit"
@@ -95,7 +96,7 @@ let tests =
             let client, mock = makeClient ()
             mock.Add("GET", apiUrl "projects/42/repository/files/assays%2Fa%2Fisa.assay.xlsx?ref=main", 200, SampleData.repoFile)
 
-            let! file = client.Files.GetAsync(42, "assays/a/isa.assay.xlsx", "main")
+            let! file = client.Files.GetAsync(42, "assays/a/isa.assay.xlsx", "main") |> awaitApi
 
             Expect.equal file.FilePath "assays/a/isa.assay.xlsx" "file path"
             Expect.equal mock.LastRequest.Url (apiUrl "projects/42/repository/files/assays%2Fa%2Fisa.assay.xlsx?ref=main") "url"
@@ -114,6 +115,7 @@ let tests =
                     "QVJD",
                     "Add assay file",
                     encoding = "base64")
+                |> awaitApi
 
             let request = mock.LastRequest
             let _, _, _, branch, content, commitMessage, encoding, _, _, _ = decodeObjectFields (requestBody request)
@@ -132,12 +134,12 @@ let tests =
             mock.Add("GET", apiUrl "projects/42/issues/3/notes", 200, SampleData.notes)
             mock.Add("PUT", apiUrl "projects/42/issues/3", 200, SampleData.closedIssue)
 
-            let! issue = client.Issues.CreateAsync(42, "Missing assay metadata", description = "please fix")
+            let! issue = client.Issues.CreateAsync(42, "Missing assay metadata", description = "please fix") |> awaitApi
             let createBody = decodeObjectFields (requestBody mock.LastRequest)
             let createTitle, createDescription, _, _, _, _, _, _, _, _ = createBody
 
-            let! notes = client.Issues.NotesAsync(42, 3)
-            let! closed = client.Issues.CloseAsync(42, 3)
+            let! notes = client.Issues.NotesAsync(42, 3) |> awaitApi
+            let! closed = client.Issues.CloseAsync(42, 3) |> awaitApi
             let _, _, stateEvent, _, _, _, _, _, _, _ = decodeObjectFields (requestBody mock.LastRequest)
 
             Expect.equal issue.Iid 3 "issue iid"
@@ -152,7 +154,7 @@ let tests =
             let client, mock = makeClient ()
             mock.Add("POST", apiUrl "projects/42/merge_requests", 201, SampleData.mergeRequest)
 
-            let! mr = client.MergeRequests.CreateAsync(42, "feature/assay", "main", "Add assay", description = "adds an assay")
+            let! mr = client.MergeRequests.CreateAsync(42, "feature/assay", "main", "Add assay", description = "adds an assay") |> awaitApi
             let _, description, _, _, _, _, _, sourceBranch, targetBranch, _ = decodeObjectFields (requestBody mock.LastRequest)
 
             Expect.equal mr.Iid 8 "merge request iid"
@@ -165,7 +167,7 @@ let tests =
             let client, mock = makeClient ()
             mock.Add("GET", apiUrl "projects/42/merge_requests/8/notes", 200, SampleData.notes)
 
-            let! notes = client.MergeRequests.NotesAsync(42, 8)
+            let! notes = client.MergeRequests.NotesAsync(42, 8) |> awaitApi
 
             Expect.equal notes.Length 1 "note count"
             Expect.equal notes.[0].Author.Username "carl" "note author"
@@ -178,10 +180,10 @@ let tests =
             mock.Add("PUT", apiUrl "projects/42/packages/generic/arc-bundle/1.2.0/arc.zip", 201, """{"message":"201 Created"}""")
             mock.Add("GET", apiUrl "projects/42/packages/generic/arc-bundle/1.2.0/arc.zip", 200, "zip-content")
 
-            let! packages = client.Packages.ListAsync(42, packageType = "generic", packageName = "arc-bundle")
-            let! uploadResponse = client.Packages.UploadGenericFileAsync(42, "arc-bundle", "1.2.0", "arc.zip", "zip-content")
+            let! packages = client.Packages.ListAsync(42, packageType = "generic", packageName = "arc-bundle") |> awaitApi
+            let! uploadResponse = client.Packages.UploadGenericFileAsync(42, "arc-bundle", "1.2.0", "arc.zip", "zip-content") |> awaitApi
             let uploadRequest = mock.Requests.[1]
-            let! downloadResponse = client.Packages.DownloadGenericFileAsync(42, "arc-bundle", "1.2.0", "arc.zip")
+            let! downloadResponse = client.Packages.DownloadGenericFileAsync(42, "arc-bundle", "1.2.0", "arc.zip") |> awaitApi
 
             Expect.equal packages.[0].PackageType "generic" "package type"
             Expect.equal uploadRequest.Method "PUT" "upload method"

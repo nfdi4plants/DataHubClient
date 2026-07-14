@@ -16,7 +16,7 @@ type RepositoryApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
     /// <summary>Lists branches for a project.</summary>
     /// <param name="projectId">The project identifier.</param>
     /// <param name="search">Optional branch-name search term.</param>
-    member _.ListBranchesAsync(projectId: int, ?search: string) : Async<Branch array> =
+    member _.ListBranchesAsync(projectId: int, ?search: string) =
         async {
             let req =
                 ResourceHelpers.emptyRequest
@@ -29,11 +29,12 @@ type RepositoryApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
             let! response = http.SendAsync req
             return ResourceHelpers.decodeArray Branch.decoder response
         }
+        |> ResourceHelpers.toPublic
 
     /// <summary>Gets a single branch by name.</summary>
     /// <param name="projectId">The project identifier.</param>
     /// <param name="branch">The branch name.</param>
-    member _.GetBranchAsync(projectId: int, branch: string) : Async<Branch> =
+    member _.GetBranchAsync(projectId: int, branch: string) =
         async {
             let req =
                 ResourceHelpers.emptyRequest
@@ -46,12 +47,13 @@ type RepositoryApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
             let! response = http.SendAsync req
             return ResourceHelpers.decode Branch.decoder response
         }
+        |> ResourceHelpers.toPublic
 
     /// <summary>Lists commits for a project.</summary>
     /// <param name="projectId">The project identifier.</param>
     /// <param name="refName">Optional branch, tag, or commit SHA to list from.</param>
     /// <param name="path">Optional repository path used to filter commits.</param>
-    member _.ListCommitsAsync(projectId: int, ?refName: string, ?path: string) : Async<Commit array> =
+    member _.ListCommitsAsync(projectId: int, ?refName: string, ?path: string) =
         async {
             let req =
                 ResourceHelpers.emptyRequest
@@ -64,11 +66,12 @@ type RepositoryApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
             let! response = http.SendAsync req
             return ResourceHelpers.decodeArray Commit.decoder response
         }
+        |> ResourceHelpers.toPublic
 
     /// <summary>Gets a single commit by SHA.</summary>
     /// <param name="projectId">The project identifier.</param>
     /// <param name="sha">The commit SHA.</param>
-    member _.GetCommitAsync(projectId: int, sha: string) : Async<Commit> =
+    member _.GetCommitAsync(projectId: int, sha: string) =
         async {
             let req =
                 ResourceHelpers.emptyRequest
@@ -81,3 +84,4 @@ type RepositoryApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
             let! response = http.SendAsync req
             return ResourceHelpers.decode Commit.decoder response
         }
+        |> ResourceHelpers.toPublic

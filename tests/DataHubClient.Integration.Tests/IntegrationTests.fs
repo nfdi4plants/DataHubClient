@@ -3,6 +3,7 @@ module DataHubClient.Integration.Tests.IntegrationTests
 open Fable.Pyxpecto
 open DataHubClient
 open DataHubClient.Integration.Tests
+open DataHubClient.Tests.TestHelpers
 
 /// Builds a client pointed at the configured live DataHub. The transport is the
 /// per-target default — DotNetHttpClient / FetchHttpClient / HttpxHttpClient —
@@ -28,7 +29,7 @@ let private instanceCases = [
 
     testCaseAsync "Projects.ListAsync returns a project array" <| async {
         let client = makeClient ()
-        let! projects = client.Projects.ListAsync()
+        let! projects = client.Projects.ListAsync() |> awaitApi
         Expect.isTrue (projects.Length >= 0) "a project array is returned"
         for project in projects do
             Expect.isTrue (project.Id > 0) "each project has an id"
@@ -41,14 +42,14 @@ let private projectCases = [
 
     testCaseAsync "Projects.GetAsync returns the configured project" <| async {
         let client = makeClient ()
-        let! project = client.Projects.GetAsync LiveConfig.projectId
+        let! project = client.Projects.GetAsync LiveConfig.projectId |> awaitApi
         Expect.equal project.Id LiveConfig.projectId "the requested project id round-trips"
         Expect.notEqual project.Name "" "the project has a name"
     }
 
     testCaseAsync "Repository.ListBranchesAsync returns branches" <| async {
         let client = makeClient ()
-        let! branches = client.Repository.ListBranchesAsync LiveConfig.projectId
+        let! branches = client.Repository.ListBranchesAsync LiveConfig.projectId |> awaitApi
         Expect.isTrue (branches.Length >= 0) "a branch array is returned"
         for branch in branches do
             Expect.notEqual branch.Name "" "each branch has a name"
@@ -56,7 +57,7 @@ let private projectCases = [
 
     testCaseAsync "Repository.ListCommitsAsync returns commits" <| async {
         let client = makeClient ()
-        let! commits = client.Repository.ListCommitsAsync LiveConfig.projectId
+        let! commits = client.Repository.ListCommitsAsync LiveConfig.projectId |> awaitApi
         Expect.isTrue (commits.Length >= 0) "a commit array is returned"
         for commit in commits do
             Expect.notEqual commit.Id "" "each commit has an id"
@@ -64,7 +65,7 @@ let private projectCases = [
 
     testCaseAsync "Issues.ListAsync returns issues" <| async {
         let client = makeClient ()
-        let! issues = client.Issues.ListAsync LiveConfig.projectId
+        let! issues = client.Issues.ListAsync LiveConfig.projectId |> awaitApi
         Expect.isTrue (issues.Length >= 0) "an issue array is returned"
         for issue in issues do
             Expect.equal issue.ProjectId LiveConfig.projectId "each issue belongs to the project"
@@ -72,7 +73,7 @@ let private projectCases = [
 
     testCaseAsync "MergeRequests.ListAsync returns merge requests" <| async {
         let client = makeClient ()
-        let! mergeRequests = client.MergeRequests.ListAsync LiveConfig.projectId
+        let! mergeRequests = client.MergeRequests.ListAsync LiveConfig.projectId |> awaitApi
         Expect.isTrue (mergeRequests.Length >= 0) "a merge request array is returned"
         for mr in mergeRequests do
             Expect.equal mr.ProjectId LiveConfig.projectId "each merge request belongs to the project"
@@ -85,61 +86,61 @@ let private projectCases = [
 
     testCaseAsync "Repository.GetBranchAsync round-trips a listed branch" <| async {
         let client = makeClient ()
-        let! branches = client.Repository.ListBranchesAsync LiveConfig.projectId
+        let! branches = client.Repository.ListBranchesAsync LiveConfig.projectId |> awaitApi
         if branches.Length > 0 then
             let name = branches.[0].Name
-            let! branch = client.Repository.GetBranchAsync(LiveConfig.projectId, name)
+            let! branch = client.Repository.GetBranchAsync(LiveConfig.projectId, name) |> awaitApi
             Expect.equal branch.Name name "the requested branch round-trips"
     }
 
     testCaseAsync "Repository.GetCommitAsync round-trips a listed commit" <| async {
         let client = makeClient ()
-        let! commits = client.Repository.ListCommitsAsync LiveConfig.projectId
+        let! commits = client.Repository.ListCommitsAsync LiveConfig.projectId |> awaitApi
         if commits.Length > 0 then
             let sha = commits.[0].Id
-            let! commit = client.Repository.GetCommitAsync(LiveConfig.projectId, sha)
+            let! commit = client.Repository.GetCommitAsync(LiveConfig.projectId, sha) |> awaitApi
             Expect.equal commit.Id sha "the requested commit round-trips"
     }
 
     testCaseAsync "Issues.GetAsync round-trips a listed issue" <| async {
         let client = makeClient ()
-        let! issues = client.Issues.ListAsync LiveConfig.projectId
+        let! issues = client.Issues.ListAsync LiveConfig.projectId |> awaitApi
         if issues.Length > 0 then
             let iid = issues.[0].Iid
-            let! issue = client.Issues.GetAsync(LiveConfig.projectId, iid)
+            let! issue = client.Issues.GetAsync(LiveConfig.projectId, iid) |> awaitApi
             Expect.equal issue.Iid iid "the requested issue round-trips"
             Expect.equal issue.ProjectId LiveConfig.projectId "the issue belongs to the project"
     }
 
     testCaseAsync "Issues.NotesAsync returns notes for a listed issue" <| async {
         let client = makeClient ()
-        let! issues = client.Issues.ListAsync LiveConfig.projectId
+        let! issues = client.Issues.ListAsync LiveConfig.projectId |> awaitApi
         if issues.Length > 0 then
-            let! notes = client.Issues.NotesAsync(LiveConfig.projectId, issues.[0].Iid)
+            let! notes = client.Issues.NotesAsync(LiveConfig.projectId, issues.[0].Iid) |> awaitApi
             Expect.isTrue (notes.Length >= 0) "a note array is returned"
     }
 
     testCaseAsync "MergeRequests.GetAsync round-trips a listed merge request" <| async {
         let client = makeClient ()
-        let! mergeRequests = client.MergeRequests.ListAsync LiveConfig.projectId
+        let! mergeRequests = client.MergeRequests.ListAsync LiveConfig.projectId |> awaitApi
         if mergeRequests.Length > 0 then
             let iid = mergeRequests.[0].Iid
-            let! mr = client.MergeRequests.GetAsync(LiveConfig.projectId, iid)
+            let! mr = client.MergeRequests.GetAsync(LiveConfig.projectId, iid) |> awaitApi
             Expect.equal mr.Iid iid "the requested merge request round-trips"
             Expect.equal mr.ProjectId LiveConfig.projectId "the merge request belongs to the project"
     }
 
     testCaseAsync "MergeRequests.NotesAsync returns notes for a listed merge request" <| async {
         let client = makeClient ()
-        let! mergeRequests = client.MergeRequests.ListAsync LiveConfig.projectId
+        let! mergeRequests = client.MergeRequests.ListAsync LiveConfig.projectId |> awaitApi
         if mergeRequests.Length > 0 then
-            let! notes = client.MergeRequests.NotesAsync(LiveConfig.projectId, mergeRequests.[0].Iid)
+            let! notes = client.MergeRequests.NotesAsync(LiveConfig.projectId, mergeRequests.[0].Iid) |> awaitApi
             Expect.isTrue (notes.Length >= 0) "a note array is returned"
     }
 
     testCaseAsync "Packages.ListAsync returns packages" <| async {
         let client = makeClient ()
-        let! packages = client.Packages.ListAsync LiveConfig.projectId
+        let! packages = client.Packages.ListAsync LiveConfig.projectId |> awaitApi
         Expect.isTrue (packages.Length >= 0) "a package array is returned"
         for package in packages do
             Expect.notEqual package.Name "" "each package has a name"
@@ -157,7 +158,7 @@ let private dataplantDevCases = [
 
     testCaseAsync "Fixture: project metadata matches dataplant-dev" <| async {
         let client = makeClient ()
-        let! project = client.Projects.GetAsync LiveConfig.projectId
+        let! project = client.Projects.GetAsync LiveConfig.projectId |> awaitApi
         Expect.equal project.Name "Test_1" "project name"
         Expect.equal project.Path "test_1" "project path"
         Expect.equal project.PathWithNamespace "integration_tests/test_1" "project namespace path"
@@ -167,7 +168,7 @@ let private dataplantDevCases = [
 
     testCaseAsync "Fixture: main branch is default and protected" <| async {
         let client = makeClient ()
-        let! branch = client.Repository.GetBranchAsync(LiveConfig.projectId, "main")
+        let! branch = client.Repository.GetBranchAsync(LiveConfig.projectId, "main") |> awaitApi
         Expect.equal branch.Name "main" "branch name"
         Expect.isTrue branch.Default "main is the default branch"
         Expect.isTrue branch.Protected "main is protected"
@@ -175,7 +176,7 @@ let private dataplantDevCases = [
 
     testCaseAsync "Fixture: issue 1 is Test_Issue_1" <| async {
         let client = makeClient ()
-        let! issue = client.Issues.GetAsync(LiveConfig.projectId, 1)
+        let! issue = client.Issues.GetAsync(LiveConfig.projectId, 1) |> awaitApi
         Expect.equal issue.Iid 1 "issue iid"
         Expect.equal issue.Title "Test_Issue_1" "issue title"
         Expect.equal issue.State "opened" "issue state"
@@ -190,7 +191,7 @@ let private dataplantDevCases = [
 
     testCaseAsync "Fixture: README.md has the expected content" <| async {
         let client = makeClient ()
-        let! file = client.Files.GetAsync(LiveConfig.projectId, "README.md", "main")
+        let! file = client.Files.GetAsync(LiveConfig.projectId, "README.md", "main") |> awaitApi
         Expect.equal file.FilePath "README.md" "file path"
         Expect.equal file.Ref "main" "file ref"
         // Content is compared trimmed — a committed file may or may not carry a

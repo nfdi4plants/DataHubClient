@@ -16,6 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\DataHubClient.Tests\TestHelpers.fs" />
     <Compile Include="..\DataHubClient.Integration.Tests\LiveConfig.fs" />
     <Compile Include="..\DataHubClient.Integration.Tests\IntegrationTests.fs" />
     <Compile Include="Program.fs" />

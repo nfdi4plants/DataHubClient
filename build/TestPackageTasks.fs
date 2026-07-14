@@ -122,20 +122,22 @@ let testPackagesJavaScript =
 // --- Python smoke --------------------------------------------------------
 
 let private pySmoke =
-    """import os
+    """import asyncio
+import os
 
 from datahub_client import DataHubClient, Authentication
-# Fable F# `Async<T>` transpiles to fable-library's own Async — not a Python
-# coroutine, so asyncio.run() rejects it. `run_synchronously` is the Python
-# equivalent of F#'s `Async.RunSynchronously`.
-from fable_library.async_ import run_synchronously
 
-url = os.environ["DATAHUB_TEST_URL"]
-token = os.environ["DATAHUB_TEST_TOKEN"]
-auth = Authentication.PersonalAccessToken(token)
-client = DataHubClient(url, auth)
-projects = run_synchronously(client.Projects.ListAsync())
-print(f"python smoke OK: {len(projects)} projects at {url}")
+
+async def main() -> None:
+    url = os.environ["DATAHUB_TEST_URL"]
+    token = os.environ["DATAHUB_TEST_TOKEN"]
+    auth = Authentication.PersonalAccessToken(token)
+    client = DataHubClient(url, auth)
+    projects = await client.Projects.ListAsync()
+    print(f"python smoke OK: {len(projects)} projects at {url}")
+
+
+asyncio.run(main())
 """
 
 let testPackagesPython =

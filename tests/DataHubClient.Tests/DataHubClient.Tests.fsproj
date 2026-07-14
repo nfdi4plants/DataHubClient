@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <Compile Include="TestJson.fs" />
+    <Compile Include="TestHelpers.fs" />
     <Compile Include="Mock/MockHttpClient.fs" />
     <Compile Include="Mock/SampleData.fs" />
     <Compile Include="AuthenticationTests.fs" />

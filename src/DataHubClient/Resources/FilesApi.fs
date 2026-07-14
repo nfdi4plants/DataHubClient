@@ -29,7 +29,7 @@ type FilesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
     /// <param name="projectId">The project identifier.</param>
     /// <param name="filePath">The repository-relative file path.</param>
     /// <param name="refName">The branch, tag, or commit SHA to read from.</param>
-    member _.GetAsync(projectId: int, filePath: string, refName: string) : Async<RepoFile> =
+    member _.GetAsync(projectId: int, filePath: string, refName: string) =
         async {
             let req =
                 ResourceHelpers.emptyRequest
@@ -42,6 +42,7 @@ type FilesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
             let! response = http.SendAsync req
             return ResourceHelpers.decode RepoFile.decoder response
         }
+        |> ResourceHelpers.toPublic
 
     /// <summary>Creates a repository file.</summary>
     /// <param name="projectId">The project identifier.</param>
@@ -50,7 +51,7 @@ type FilesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
     /// <param name="content">The file content.</param>
     /// <param name="commitMessage">The commit message GitLab should create.</param>
     /// <param name="encoding">Optional content encoding, such as <c>base64</c>.</param>
-    member _.CreateAsync(projectId: int, filePath: string, branch: string, content: string, commitMessage: string, ?encoding: string) : Async<RepoFile> =
+    member _.CreateAsync(projectId: int, filePath: string, branch: string, content: string, commitMessage: string, ?encoding: string) =
         async {
             let req =
                 ResourceHelpers.jsonRequest
@@ -64,6 +65,7 @@ type FilesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
             let! response = http.SendAsync req
             return ResourceHelpers.decode RepoFile.decoder response
         }
+        |> ResourceHelpers.toPublic
 
     /// <summary>Updates a repository file.</summary>
     /// <param name="projectId">The project identifier.</param>
@@ -72,7 +74,7 @@ type FilesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
     /// <param name="content">The replacement file content.</param>
     /// <param name="commitMessage">The commit message GitLab should create.</param>
     /// <param name="encoding">Optional content encoding, such as <c>base64</c>.</param>
-    member _.UpdateAsync(projectId: int, filePath: string, branch: string, content: string, commitMessage: string, ?encoding: string) : Async<RepoFile> =
+    member _.UpdateAsync(projectId: int, filePath: string, branch: string, content: string, commitMessage: string, ?encoding: string) =
         async {
             let req =
                 ResourceHelpers.jsonRequest
@@ -86,13 +88,14 @@ type FilesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
             let! response = http.SendAsync req
             return ResourceHelpers.decode RepoFile.decoder response
         }
+        |> ResourceHelpers.toPublic
 
     /// <summary>Deletes a repository file.</summary>
     /// <param name="projectId">The project identifier.</param>
     /// <param name="filePath">The repository-relative file path.</param>
     /// <param name="branch">The target branch.</param>
     /// <param name="commitMessage">The commit message GitLab should create.</param>
-    member _.DeleteAsync(projectId: int, filePath: string, branch: string, commitMessage: string) : Async<unit> =
+    member _.DeleteAsync(projectId: int, filePath: string, branch: string, commitMessage: string) =
         async {
             let body =
                 Encode.object [
@@ -112,3 +115,4 @@ type FilesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
             let! response = http.SendAsync req
             ResourceHelpers.ensureSuccess response
         }
+        |> ResourceHelpers.toPublic

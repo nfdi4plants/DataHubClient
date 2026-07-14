@@ -102,3 +102,23 @@ module internal ResourceHelpers =
     let responseBody (response: HttpResponse) =
         ensureSuccess response
         response.Body
+
+    /// <summary>
+    /// Converts a resource computation to the public async type of the host
+    /// runtime — a JS <c>Promise</c> on JavaScript/TypeScript, a coroutine-backed
+    /// <c>Task</c> on Python, and F#'s native <c>Async</c> on .NET. Every public
+    /// resource method funnels its <c>async { }</c> body through this so callers
+    /// <c>await</c> the value with their host's native idiom; the bridge is here
+    /// because Fable does not compile <c>Async&lt;T&gt;</c> to a native Promise
+    /// or coroutine on its own. Tests do the reverse bridge with
+    /// <c>TestHelpers.awaitApi</c>.
+    /// </summary>
+    #if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT
+    let toPublic (work: Async<'T>) : JS.Promise<'T> = Async.StartAsPromise work
+    #endif
+    #if FABLE_COMPILER_PYTHON
+    let toPublic (work: Async<'T>) : System.Threading.Tasks.Task<'T> = Async.StartAsTask work
+    #endif
+    #if !FABLE_COMPILER
+    let toPublic (work: Async<'T>) : Async<'T> = work
+    #endif
