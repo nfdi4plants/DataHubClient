@@ -50,3 +50,21 @@ let package =
 
 let packages =
     "[" + package + "]"
+
+let validationBranchTree =
+    """[{"id":"t1","name":"main","type":"tree","path":"main","mode":"040000","ignored":"ok"},{"id":"t2","name":"dev","type":"tree","path":"dev","mode":"040000","ignored":"ok"},{"id":"t3","name":"README.md","type":"blob","path":"README.md","mode":"100644","ignored":"ok"}]"""
+
+let validationPackageTree =
+    """[{"id":"t4","name":"invenio@3.1.0","type":"tree","path":"main/invenio@3.1.0","mode":"040000","ignored":"ok"},{"id":"t5","name":"pride@1.0.2","type":"tree","path":"main/pride@1.0.2","mode":"040000","ignored":"ok"},{"id":"t6","name":"unversioned","type":"tree","path":"main/unversioned","mode":"040000","ignored":"ok"},{"id":"t7","name":"badge.svg","type":"blob","path":"main/badge.svg","mode":"100644","ignored":"ok"}]"""
+
+let validationSummary =
+    """{"Critical":{"HasFailures":false,"Total":10,"Passed":10,"Failed":0,"Errored":0,"ignored":"ok"},"NonCritical":{"HasFailures":true,"Total":4,"Passed":2,"Failed":1,"Errored":1},"ValidationPackage":{"Name":"invenio","Version":"3.1.0","Summary":"Validates invenio publishability","Description":"Checks the ARC against invenio requirements","CQCHookEndpoint":"https://hub.example/hooks/invenio","ignored":"ok"},"ignored":"ok"}"""
+
+let prideValidationSummary =
+    validationSummary.Replace("\"Name\":\"invenio\"", "\"Name\":\"pride\"")
+
+let validationReport =
+    """<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="invenio" tests="10"/></testsuites>"""
+
+let validationBadge =
+    """<svg xmlns="http://www.w3.org/2000/svg"><text>passed</text></svg>"""

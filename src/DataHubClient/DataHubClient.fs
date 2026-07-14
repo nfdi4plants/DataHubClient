@@ -47,3 +47,5 @@ type DataHubClient(baseUrl: string, auth: Authentication) =
     member _.MergeRequests = MergeRequestsApi(baseUrl, auth, http)
     /// Package Registry operations.
     member _.Packages = PackagesApi(baseUrl, auth, http)
+    /// ARC validation (CQC) results operations.
+    member _.Validation = ValidationApi(baseUrl, auth, http)

@@ -174,6 +174,104 @@ let tests =
             Expect.equal mock.LastRequest.Url (apiUrl "projects/42/merge_requests/8/notes") "url"
         }
 
+        testCaseAsync "Validation.ListValidatedBranchesAsync lists cqc tree folders" <| async {
+            let client, mock = makeClient ()
+            mock.Add("GET", apiUrl "projects/42/repository/tree?per_page=100&ref=cqc", 200, SampleData.validationBranchTree)
+
+            let! branches = client.Validation.ListValidatedBranchesAsync(42) |> awaitApi
+
+            Expect.equal branches [| "main"; "dev" |] "folders only, blobs skipped"
+            Expect.equal mock.LastRequest.Url (apiUrl "projects/42/repository/tree?per_page=100&ref=cqc") "url"
+            expectAuthHeader mock.LastRequest
+        }
+
+        testCaseAsync "Validation.ListPackagesAsync parses package folders and skips others" <| async {
+            let client, mock = makeClient ()
+            mock.Add("GET", apiUrl "projects/42/repository/tree?path=main&per_page=100&ref=cqc", 200, SampleData.validationPackageTree)
+
+            let! packages = client.Validation.ListPackagesAsync(42) |> awaitApi
+
+            Expect.equal packages.Length 2 "unversioned folders and blobs skipped"
+            Expect.equal packages.[0].Name "invenio" "name"
+            Expect.equal packages.[0].Version "3.1.0" "version"
+            Expect.equal packages.[0].Branch "main" "branch"
+            Expect.equal packages.[0].Path "main/invenio@3.1.0" "path"
+            Expect.equal packages.[1].Name "pride" "second name"
+            Expect.equal mock.LastRequest.Url (apiUrl "projects/42/repository/tree?path=main&per_page=100&ref=cqc") "url"
+        }
+
+        testCaseAsync "Validation.GetSummaryAsync fetches raw file and decodes summary" <| async {
+            let client, mock = makeClient ()
+            mock.Add(
+                "GET",
+                apiUrl "projects/42/repository/files/main%2Finvenio%403.1.0%2Fvalidation_summary.json/raw?ref=cqc",
+                200,
+                SampleData.validationSummary)
+
+            let package = ValidationPackageRef.Create("invenio", "3.1.0")
+            let! summary = client.Validation.GetSummaryAsync(42, package) |> awaitApi
+
+            Expect.equal summary.Critical.Total 10 "critical total"
+            Expect.isFalse summary.Critical.HasFailures "critical has failures"
+            Expect.equal summary.NonCritical.Failed 1 "non-critical failed"
+            Expect.equal summary.ValidationPackage.Name "invenio" "package name"
+            Expect.equal summary.ValidationPackage.CQCHookEndpoint (Some "https://hub.example/hooks/invenio") "hook endpoint"
+            expectAuthHeader mock.LastRequest
+        }
+
+        testCaseAsync "Validation.GetReportAsync and GetBadgeAsync return raw text" <| async {
+            let client, mock = makeClient ()
+            mock.Add(
+                "GET",
+                apiUrl "projects/42/repository/files/main%2Finvenio%403.1.0%2Fvalidation_report.xml/raw?ref=cqc",
+                200,
+                SampleData.validationReport)
+            mock.Add(
+                "GET",
+                apiUrl "projects/42/repository/files/main%2Finvenio%403.1.0%2Fbadge.svg/raw?ref=abc123def456",
+                200,
+                SampleData.validationBadge)
+
+            let package = ValidationPackageRef.Create("invenio", "3.1.0")
+            let! report = client.Validation.GetReportAsync(42, package) |> awaitApi
+            let! badge = client.Validation.GetBadgeAsync(42, package, ref = "abc123def456") |> awaitApi
+
+            Expect.equal report SampleData.validationReport "report body"
+            Expect.equal badge SampleData.validationBadge "badge body at historic ref"
+        }
+
+        testCaseAsync "Validation.GetAllSummariesAsync discovers packages then fetches every summary" <| async {
+            let client, mock = makeClient ()
+            mock.Add("GET", apiUrl "projects/42/repository/tree?path=main&per_page=100&ref=cqc", 200, SampleData.validationPackageTree)
+            mock.Add(
+                "GET",
+                apiUrl "projects/42/repository/files/main%2Finvenio%403.1.0%2Fvalidation_summary.json/raw?ref=cqc",
+                200,
+                SampleData.validationSummary)
+            mock.Add(
+                "GET",
+                apiUrl "projects/42/repository/files/main%2Fpride%401.0.2%2Fvalidation_summary.json/raw?ref=cqc",
+                200,
+                SampleData.prideValidationSummary)
+
+            let! summaries = client.Validation.GetAllSummariesAsync(42) |> awaitApi
+
+            Expect.equal summaries.Length 2 "summary count"
+            let names = summaries |> Array.map (fun s -> s.ValidationPackage.Name) |> Array.sort
+            Expect.equal names [| "invenio"; "pride" |] "summary package names"
+            Expect.equal mock.Requests.Length 3 "one tree listing plus one fetch per package"
+        }
+
+        testCaseAsync "Validation.ListHistoryAsync lists cqc commits scoped to a branch folder" <| async {
+            let client, mock = makeClient ()
+            mock.Add("GET", apiUrl "projects/42/repository/commits?path=main&ref_name=cqc", 200, SampleData.commits)
+
+            let! commits = client.Validation.ListHistoryAsync(42, branch = "main") |> awaitApi
+
+            Expect.equal commits.[0].Id "abc123def456" "commit id"
+            Expect.equal mock.LastRequest.Url (apiUrl "projects/42/repository/commits?path=main&ref_name=cqc") "url"
+        }
+
         testCaseAsync "Packages APIs list and transfer generic files" <| async {
             let client, mock = makeClient ()
             mock.Add("GET", apiUrl "projects/42/packages?package_name=arc-bundle&package_type=generic", 200, SampleData.packages)

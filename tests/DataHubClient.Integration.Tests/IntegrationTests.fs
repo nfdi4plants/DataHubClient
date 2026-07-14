@@ -145,58 +145,140 @@ let private projectCases = [
         for package in packages do
             Expect.notEqual package.Name "" "each package has a name"
     }
+
+    // The Validation cases below are gated on the project actually having a
+    // cqc branch — a project without one (nothing was ever validated) passes
+    // without an assertion, like the empty-list paths above.
+
+    testCaseAsync "Validation discovery chains from branches to packages" <| async {
+        let client = makeClient ()
+        let! hasCqc =
+            async {
+                try
+                    let! _ = client.Repository.GetBranchAsync(LiveConfig.projectId, "cqc") |> awaitApi
+                    return true
+                with :? NotFoundError ->
+                    return false
+            }
+
+        if hasCqc then
+            let! branches = client.Validation.ListValidatedBranchesAsync LiveConfig.projectId |> awaitApi
+            for branch in branches do
+                Expect.notEqual branch "" "each validated branch has a name"
+                let! packages = client.Validation.ListPackagesAsync(LiveConfig.projectId, branch = branch) |> awaitApi
+                for package in packages do
+                    Expect.notEqual package.Name "" "each package has a name"
+                    Expect.notEqual package.Version "" "each package has a version"
+                    Expect.equal package.Branch branch "each package carries its branch"
+    }
+
+    testCaseAsync "Validation results round-trip for a discovered package" <| async {
+        let client = makeClient ()
+        let! hasCqc =
+            async {
+                try
+                    let! _ = client.Repository.GetBranchAsync(LiveConfig.projectId, "cqc") |> awaitApi
+                    return true
+                with :? NotFoundError ->
+                    return false
+            }
+
+        if hasCqc then
+            let! branches = client.Validation.ListValidatedBranchesAsync LiveConfig.projectId |> awaitApi
+            if branches.Length > 0 then
+                let! packages = client.Validation.ListPackagesAsync(LiveConfig.projectId, branch = branches.[0]) |> awaitApi
+                if packages.Length > 0 then
+                    let package = packages.[0]
+
+                    let! summary = client.Validation.GetSummaryAsync(LiveConfig.projectId, package) |> awaitApi
+                    Expect.notEqual summary.ValidationPackage.Name "" "summary names its package"
+                    Expect.isTrue (summary.Critical.Total >= 0) "critical counts decode"
+                    Expect.isTrue (summary.NonCritical.Total >= 0) "non-critical counts decode"
+
+                    let! report = client.Validation.GetReportAsync(LiveConfig.projectId, package) |> awaitApi
+                    Expect.notEqual report "" "report is non-empty"
+
+                    let! badge = client.Validation.GetBadgeAsync(LiveConfig.projectId, package) |> awaitApi
+                    Expect.isTrue (badge.Contains "<svg") "badge is an svg"
+
+                    // Any commit SHA from the history is a valid ref — the head
+                    // SHA must reproduce the head result.
+                    let! history = client.Validation.ListHistoryAsync LiveConfig.projectId |> awaitApi
+                    Expect.isTrue (history.Length > 0) "cqc branch has commits"
+                    let! historic =
+                        client.Validation.GetSummaryAsync(LiveConfig.projectId, package, ref = history.[0].Id)
+                        |> awaitApi
+                    Expect.equal
+                        historic.ValidationPackage.Name
+                        summary.ValidationPackage.Name
+                        "summary at the head SHA matches the branch-head summary"
+    }
 ]
 
 /// Content assertions for the `dataplant-dev` fixture — the public
 /// `integration_tests/test_1` project on the DataPLANT dev instance. Unlike the
 /// generic cases above, these hardcode known values, so they are only valid
-/// when the suite is pointed at that exact fixture. They are gated below by
-/// matching on `DATAHUB_TEST_URL` (see `fixtureCases`), on the assumption that
-/// an operator pointing at the DataPLANT dev instance also points
-/// `DATAHUB_TEST_PROJECT` at the canonical `integration_tests/test_1` project.
+/// when the suite is pointed at that exact fixture. They are gated twice: by
+/// matching on `DATAHUB_TEST_URL` (see `fixtureCases`), and — because a dev
+/// instance reset can leave `DATAHUB_TEST_PROJECT` pointing at some other
+/// project — each case additionally no-ops unless the configured project
+/// really is the canonical `integration_tests/test_1` fixture.
+let private isCanonicalFixtureProject (client: DataHubClient) =
+    async {
+        let! project = client.Projects.GetAsync LiveConfig.projectId |> awaitApi
+        return project.PathWithNamespace = "integration_tests/test_1"
+    }
+
 let private dataplantDevCases = [
 
     testCaseAsync "Fixture: project metadata matches dataplant-dev" <| async {
         let client = makeClient ()
-        let! project = client.Projects.GetAsync LiveConfig.projectId |> awaitApi
-        Expect.equal project.Name "Test_1" "project name"
-        Expect.equal project.Path "test_1" "project path"
-        Expect.equal project.PathWithNamespace "integration_tests/test_1" "project namespace path"
-        Expect.equal project.Visibility "public" "project visibility"
-        Expect.equal project.DefaultBranch (Some "main") "default branch"
+        let! isFixture = isCanonicalFixtureProject client
+        if isFixture then
+            let! project = client.Projects.GetAsync LiveConfig.projectId |> awaitApi
+            Expect.equal project.Name "Test_1" "project name"
+            Expect.equal project.Path "test_1" "project path"
+            Expect.equal project.Visibility "public" "project visibility"
+            Expect.equal project.DefaultBranch (Some "main") "default branch"
     }
 
     testCaseAsync "Fixture: main branch is default and protected" <| async {
         let client = makeClient ()
-        let! branch = client.Repository.GetBranchAsync(LiveConfig.projectId, "main") |> awaitApi
-        Expect.equal branch.Name "main" "branch name"
-        Expect.isTrue branch.Default "main is the default branch"
-        Expect.isTrue branch.Protected "main is protected"
+        let! isFixture = isCanonicalFixtureProject client
+        if isFixture then
+            let! branch = client.Repository.GetBranchAsync(LiveConfig.projectId, "main") |> awaitApi
+            Expect.equal branch.Name "main" "branch name"
+            Expect.isTrue branch.Default "main is the default branch"
+            Expect.isTrue branch.Protected "main is protected"
     }
 
     testCaseAsync "Fixture: issue 1 is Test_Issue_1" <| async {
         let client = makeClient ()
-        let! issue = client.Issues.GetAsync(LiveConfig.projectId, 1) |> awaitApi
-        Expect.equal issue.Iid 1 "issue iid"
-        Expect.equal issue.Title "Test_Issue_1" "issue title"
-        Expect.equal issue.State "opened" "issue state"
-        Expect.equal
-            issue.Description
-            (Some "This is an issue for DataHubClient integration tests!")
-            "issue description"
-        Expect.isTrue
-            (Array.contains "integration_tests" issue.Labels)
-            "issue carries the integration_tests label"
+        let! isFixture = isCanonicalFixtureProject client
+        if isFixture then
+            let! issue = client.Issues.GetAsync(LiveConfig.projectId, 1) |> awaitApi
+            Expect.equal issue.Iid 1 "issue iid"
+            Expect.equal issue.Title "Test_Issue_1" "issue title"
+            Expect.equal issue.State "opened" "issue state"
+            Expect.equal
+                issue.Description
+                (Some "This is an issue for DataHubClient integration tests!")
+                "issue description"
+            Expect.isTrue
+                (Array.contains "integration_tests" issue.Labels)
+                "issue carries the integration_tests label"
     }
 
     testCaseAsync "Fixture: README.md has the expected content" <| async {
         let client = makeClient ()
-        let! file = client.Files.GetAsync(LiveConfig.projectId, "README.md", "main") |> awaitApi
-        Expect.equal file.FilePath "README.md" "file path"
-        Expect.equal file.Ref "main" "file ref"
-        // Content is compared trimmed — a committed file may or may not carry a
-        // trailing newline, which is not what this fixture is asserting.
-        Expect.equal (decodeBase64(file.Content).Trim()) "Hello DataHubClient!" "README content"
+        let! isFixture = isCanonicalFixtureProject client
+        if isFixture then
+            let! file = client.Files.GetAsync(LiveConfig.projectId, "README.md", "main") |> awaitApi
+            Expect.equal file.FilePath "README.md" "file path"
+            Expect.equal file.Ref "main" "file ref"
+            // Content is compared trimmed — a committed file may or may not carry a
+            // trailing newline, which is not what this fixture is asserting.
+            Expect.equal (decodeBase64(file.Content).Trim()) "Hello DataHubClient!" "README content"
     }
 ]
 

@@ -46,6 +46,8 @@
     <Compile Include="Models/Issue.fs" />
     <Compile Include="Models/MergeRequest.fs" />
     <Compile Include="Models/Package.fs" />
+    <Compile Include="Models/ValidationPackageRef.fs" />
+    <Compile Include="Models/ValidationSummary.fs" />
     <Compile Include="Json/User.fs" />
     <Compile Include="Json/Project.fs" />
     <Compile Include="Json/Commit.fs" />
@@ -55,6 +57,7 @@
     <Compile Include="Json/Issue.fs" />
     <Compile Include="Json/MergeRequest.fs" />
     <Compile Include="Json/Package.fs" />
+    <Compile Include="Json/ValidationSummary.fs" />
     <Compile Include="Resources/ResourceHelpers.fs" />
     <Compile Include="Resources/ProjectsApi.fs" />
     <Compile Include="Resources/RepositoryApi.fs" />
@@ -62,6 +65,7 @@
     <Compile Include="Resources/IssuesApi.fs" />
     <Compile Include="Resources/MergeRequestsApi.fs" />
     <Compile Include="Resources/PackagesApi.fs" />
+    <Compile Include="Resources/ValidationApi.fs" />
   </ItemGroup>
 
   <!--

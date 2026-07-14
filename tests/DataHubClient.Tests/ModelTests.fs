@@ -104,4 +104,24 @@ let tests =
             Expect.equal r.Version "1.2.0" "version"
             Expect.equal r.PackageType "generic" "package type"
             Expect.equal r.WebUrl None "web url"
+
+        testCase "ValidationSummary round-trips through JSON with nested results" <| fun () ->
+            let summary =
+                ValidationSummary(
+                    ValidationResult(false, 10, 10, 0, 0),
+                    ValidationResult(true, 4, 2, 1, 1),
+                    ValidationPackageSummary("invenio", "3.1.0", summary = "Validates invenio publishability"))
+            let r = roundTrip ValidationSummary.encoder ValidationSummary.decoder summary
+            Expect.isFalse r.Critical.HasFailures "critical has failures"
+            Expect.equal r.Critical.Total 10 "critical total"
+            Expect.equal r.NonCritical.Errored 1 "non-critical errored"
+            Expect.equal r.ValidationPackage.Name "invenio" "package name"
+            Expect.equal r.ValidationPackage.Summary (Some "Validates invenio publishability") "package summary"
+            Expect.equal r.ValidationPackage.CQCHookEndpoint None "hook endpoint"
+
+        testCase "ValidationPackageRef computes cqc folder path" <| fun () ->
+            let package = ValidationPackageRef.Create("invenio", "3.1.0")
+            Expect.equal package.Branch "main" "default branch"
+            Expect.equal package.Path "main/invenio@3.1.0" "path"
+            Expect.equal (ValidationPackageRef("pride", "1.0.2", "dev")).Path "dev/pride@1.0.2" "explicit branch path"
     ]
