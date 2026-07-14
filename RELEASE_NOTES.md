@@ -1,3 +1,9 @@
+### 0.2.0 (Released 2026-7-14)
+
+* `client.Validation` — ARC validation (CQC) results API: discover validated branches and packages on the `cqc` branch (`ListValidatedBranchesAsync`, `ListPackagesAsync`), fetch each result file (`GetSummaryAsync` typed via the arc-validate `ValidationSummary` schema, `GetReportAsync` JUnit XML, `GetBadgeAsync` SVG), bulk `GetAllSummariesAsync`, and `ListHistoryAsync` for reading results at any commit of the branch history.
+* New models: `ValidationPackageRef`, `ValidationSummary`, `ValidationResult`, `ValidationPackageSummary`.
+* Resource API methods now return host-native awaitables on every target — a JS `Promise`, a Python `Task`/coroutine, F# `Async` on .NET — so `await client.Projects.ListAsync()` reads natively everywhere.
+
 ### 0.1.0 (Released 2026-5-21)
 
 Initial release. Single F# source, transpiled to .NET, JavaScript/TypeScript, and Python — same `DataHubClient(baseUrl, auth)` surface on every target.

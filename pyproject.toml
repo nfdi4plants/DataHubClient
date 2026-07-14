@@ -1,6 +1,6 @@
 [project]
 name = "datahub-client"
-version = "0.1.0"
+version = "0.2.0"
 description = "A polyglot client library for ARC DataHubs — Python distribution."
 license = "MIT"
 requires-python = ">=3.12"
