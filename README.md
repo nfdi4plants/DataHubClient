@@ -88,28 +88,22 @@ Each smoke regenerates its consumer script into `pkg/testScripts/{dotnet,js,py}/
 
 ### Publishing
 
-The release pipeline runs clean → build → test → pack → tag → publish:
+Releases are published by CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) on every version tag:
 
-```sh
-./build.sh Release        # full release: NuGet publish + docs
-./build.sh ReleaseNoDocs  # same, no docs
-./build.sh PreRelease     # prerelease variant
-```
+1. Add a `### X.Y.Z (Released ...)` entry at the top of [RELEASE_NOTES.md](RELEASE_NOTES.md) — the build derives the published version from it, and CI refuses tags that don't match it.
+2. Commit, then tag and push:
 
-The pipeline only auto-publishes the NuGet package. After `./build.sh Pack`, publish the others manually:
+   ```sh
+   git tag X.Y.Z
+   git push origin main X.Y.Z
+   ```
 
-```sh
-# npm — requires `npm login`
-npm publish ./pkg/nfdi4plants-datahub-client-<version>.tgz
+CI then runs all three test suites, packs, and publishes `DataHubClient` to NuGet, `@nfdi4plants/datahub-client` to npm, and `datahub-client` to PyPI. The publish steps skip already-published versions, so re-running a failed release run is safe.
 
-# PyPI — project-scoped token from https://pypi.org/manage/account/token/
-uv publish pkg/datahub_client-<version>-py3-none-any.whl \
-  --token "$PYPI_TOKEN"
+Publishing is keyless via **trusted publishing** (OIDC) on all three registries — no long-lived registry credentials are stored on the repo. The moving parts:
 
-# TestPyPI uses a separate account + token
-uv publish --publish-url https://test.pypi.org/legacy/ \
-  pkg/datahub_client-<version>-py3-none-any.whl \
-  --token "$TEST_PYPI_TOKEN"
-```
+- Each registry has a trusted-publishing policy pointing at this repo, `ci.yml`, and the `release` GitHub environment: [nuget.org → Trusted Publishing](https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing), [npm package settings → Trusted publisher](https://docs.npmjs.com/trusted-publishers/), [PyPI project settings → Publishing](https://docs.pypi.org/trusted-publishers/).
+- The only Actions secret is `NUGET_USER` — the nuget.org profile name the NuGet policy belongs to (the `NuGet/login` action exchanges the job's OIDC token for a temporary API key under that account).
+- The publish job runs in the `release` environment; adding required reviewers to that environment in the repo settings turns publishing into a manually approved step.
 
-Bump [RELEASE_NOTES.md](RELEASE_NOTES.md) before tagging — the build derives the published version from it.
+For local artifacts without publishing, use `./build.sh Pack` (see [Packaging](#packaging)).

@@ -54,7 +54,7 @@ let private writeVersionedPackageJson version outputDirectory =
 /// build derives `version` from RELEASE_NOTES.md; this is the same regex-based
 /// override we use for package.json, just pointed at the single root pyproject
 /// that drives the wheel build (no template/copy step — Fable transpiles into
-/// `src/DataHubClient/py/` and hatchling picks the version up from here).
+/// `src/DataHubClient/py/` and poetry-core picks the version up from here).
 let private setRootPyprojectVersion version =
     let path = "pyproject.toml"
 
