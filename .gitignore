@@ -434,5 +434,9 @@ dist/
 .fsdocs/
 tmp/
 
+# Packed artifacts (FAKE Pack) and the built docs site (FAKE BuildDocs)
+pkg/
+site/
+
 # Fable Python output (lives next to the F# source for hatchling to package).
 src/DataHubClient/py/

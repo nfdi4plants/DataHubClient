@@ -28,6 +28,14 @@ packages = [
     { include = "**/*.py", from = "src/DataHubClient/", to = "datahub_client" },
 ]
 
+# The docs group serves the MkDocs Material guide site (`./build.sh BuildDocs`
+# / `WatchDocs`); it is not a package dependency and syncs on demand via
+# `uv run --group docs mkdocs ...`.
+[dependency-groups]
+docs = [
+    "mkdocs-material>=9.5",
+]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

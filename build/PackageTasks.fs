@@ -1,5 +1,6 @@
 ﻿module PackageTasks
 
+open Helpers
 open ProjectInfo
 
 open BasicTasks
@@ -21,21 +22,6 @@ let private replaceCommitLink input =
 
 let private releaseNotesText =
     release.Notes |> List.map replaceCommitLink |> String.concat "\r\n"
-
-let private runCommand command args workingDirectory =
-    let result =
-        CreateProcess.fromRawCommand command args
-        |> CreateProcess.withWorkingDirectory workingDirectory
-        |> Proc.run
-
-    if result.ExitCode <> 0 then
-        failwithf "%s failed with exit code %i" command result.ExitCode
-
-let private uvArgs args =
-    [ "--cache-dir"; "/tmp/datahubclient-uv-cache" ] @ args
-
-let private npmArgs args =
-    [ "--cache"; "/tmp/datahubclient-npm-cache" ] @ args
 
 let private replaceFirst (pattern: string) (replacement: string) (input: string) =
     Regex(pattern).Replace(input, replacement, 1)

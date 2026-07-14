@@ -8,15 +8,14 @@
 
   <ItemGroup>
     <Compile Include="Helpers.fs" />
-    <Compile Include="MessagePrompts.fs" />
     <Compile Include="ProjectInfo.fs" />
     <Compile Include="ReleaseNotesTasks.fs" />
     <Compile Include="BasicTasks.fs" />
     <Compile Include="TestTasks.fs" />
     <Compile Include="PackageTasks.fs" />
     <Compile Include="TestPackageTasks.fs" />
+    <Compile Include="DocsSampleTasks.fs" />
     <Compile Include="DocumentationTasks.fs" />
-    <Compile Include="ReleaseTasks.fs" />
     <Compile Include="Build.fs" />
   </ItemGroup>
 

@@ -46,6 +46,19 @@ Build and test orchestration runs through the FAKE pipeline — see [AGENTS.md](
 
 Use `build.cmd` on Windows with the same arguments.
 
+### Documentation
+
+The docs site pairs an [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) guide with an [fsdocs](https://fsprojects.github.io/FSharp.Formatting/)-generated F# API reference (design record: [plans/docs.md](plans/docs.md)). Every code sample on the site is a real program under [docs/samples/](docs/samples/), shown per language in tabs and executed in CI against the freshly-packed NuGet/npm/PyPI artifacts — docs that drift from the code fail the build in all three languages.
+
+```sh
+./build.sh RunDocsSamples # pack + run every docs sample in all three languages
+./build.sh BuildDocs      # build the full site into site/ (guide + API reference)
+./build.sh WatchDocs      # live-reload preview of the guide at http://127.0.0.1:8000
+./build.sh WatchApiDocs   # live-reload preview of the F# API reference at http://127.0.0.1:8901
+```
+
+CI deploys `site/` to GitHub Pages on every version tag.
+
 ### Packaging
 
 A single F# source tree produces three published artifacts. Each language uses a different transpile-output location, manifest, and packer:

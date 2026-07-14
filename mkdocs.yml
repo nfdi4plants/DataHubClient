@@ -1,0 +1,62 @@
+# Guide site for https://nfdi4plants.github.io/DataHubClient/.
+#
+# Every code sample on the site is included by reference (pymdownx.snippets)
+# from a real program under docs/samples/<topic>/ that CI executes against the
+# freshly-packed artifacts (`./build.sh RunDocsSamples`) — see plans/docs.md.
+# The F# API reference is generated separately by fsdocs into site/fsdocs/
+# after this site builds (`./build.sh BuildDocs`).
+site_name: DataHubClient
+site_url: https://nfdi4plants.github.io/DataHubClient/
+site_description: A polyglot client library for ARC DataHubs — .NET, JavaScript/TypeScript, and Python from one F# source tree.
+repo_url: https://github.com/nfdi4plants/DataHubClient
+repo_name: nfdi4plants/DataHubClient
+
+# samples/ are include sources, not pages; fsdocs/ is the fsdocs input shell.
+exclude_docs: |
+  samples/
+  fsdocs/
+
+validation:
+  links:
+    # The F# API reference under /DataHubClient/fsdocs/ is generated outside
+    # docs_dir, so links into it are necessarily absolute.
+    absolute_links: ignore
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - content.code.copy
+    # Selecting a language tab switches every tab group on the page.
+    - content.tabs.link
+    - navigation.footer
+    - navigation.instant
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.snippets:
+      # Include paths are repo-root-relative; a missing sample fails the build.
+      base_path: ["."]
+      check_paths: true
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - API reference: reference.md

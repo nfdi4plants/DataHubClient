@@ -73,6 +73,59 @@ jobs:
       - name: Run Python tests
         run: ./build.sh RunTestsPython
 
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v5
+      - name: Restore local tools
+        run: dotnet tool restore
+      - name: make build script executable
+        run: chmod +x build.sh
+      - name: Sync Python dev environment
+        run: uv sync
+      # Packs all three artifacts, installs each like an end user, and runs
+      # every docs/samples/<topic>/ sample in all three languages — the pages
+      # include these files verbatim, so this is what keeps docs and code in sync.
+      - name: Run documentation samples
+        run: ./build.sh RunDocsSamples
+      - name: Build documentation site
+        run: ./build.sh BuildDocs
+      - name: Upload Pages artifact
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  # Docs deploy on version tags so the published site always describes the
+  # released packages; workflow_dispatch allows a manual (re)deploy.
+  docs-deploy:
+    name: Deploy Docs
+    runs-on: ubuntu-latest
+    needs:
+      - docs
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
   pack:
     name: Pack
     runs-on: ubuntu-latest
@@ -81,6 +134,7 @@ jobs:
       - dotnet-test
       - js-test
       - python-test
+      - docs
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4

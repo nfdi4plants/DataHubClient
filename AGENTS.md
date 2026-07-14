@@ -67,9 +67,14 @@ All build orchestration goes through the FAKE/BuildProject pipeline under [build
 ./build.sh runtests            # build + run the .NET test projects
 ./build.sh RunTestsJavaScript  # Fable-transpile the suite and run it under node
 ./build.sh RunTestsPython      # Fable-transpile the suite and run it under uv/python
-./build.sh pack                # nuget pack
-./build.sh release             # full release (clean, build, test, pack, tag, publish, docs)
+./build.sh pack                # pack all three artifacts into pkg/
+./build.sh RunDocsSamples      # pack + run every docs/samples/ program in all three languages
+./build.sh BuildDocs           # mkdocs guide into site/ + fsdocs API reference into site/fsdocs/
+./build.sh WatchDocs           # live-reload preview of the guide (mkdocs serve)
+./build.sh WatchApiDocs        # live-reload preview of the fsdocs F# API reference
 ```
+
+Releases run entirely through CI on version tags (see [.github/workflows/ci.yml](.github/workflows/ci.yml)); there are no interactive release targets.
 
 On Windows, use `build.cmd` with the same arguments.
 

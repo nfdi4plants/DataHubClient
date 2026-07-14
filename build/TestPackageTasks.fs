@@ -1,5 +1,6 @@
 module TestPackageTasks
 
+open Helpers
 open ProjectInfo
 open PackageTasks
 
@@ -14,32 +15,6 @@ open System.IO
 /// regenerated on every run beneath this directory so they can never drift
 /// from the F# source.
 let private testScriptsDir = Path.Combine(pkgDir, "testScripts")
-
-let private runCommand command args workingDirectory =
-    let result =
-        CreateProcess.fromRawCommand command args
-        |> CreateProcess.withWorkingDirectory workingDirectory
-        |> Proc.run
-
-    if result.ExitCode <> 0 then
-        failwithf "%s failed with exit code %i" command result.ExitCode
-
-let private uvArgs args =
-    [ "--cache-dir"; "/tmp/datahubclient-uv-cache" ] @ args
-
-let private npmArgs args =
-    [ "--cache"; "/tmp/datahubclient-npm-cache" ] @ args
-
-let private writeFile (path: string) (content: string) =
-    Directory.CreateDirectory(Path.GetDirectoryName path) |> ignore
-    File.WriteAllText(path, content)
-
-/// Recreate `path` empty. Uses `Directory.Delete(_, recursive = true)` rather
-/// than FAKE's `Shell.cleanDir`, which throws on the symlinks `uv venv`
-/// creates (e.g. `.venv/lib64`).
-let private recreateDir (path: string) =
-    if Directory.Exists path then Directory.Delete(path, true)
-    Directory.CreateDirectory path |> ignore
 
 // --- .NET smoke ----------------------------------------------------------
 
@@ -67,19 +42,7 @@ let testPackagesDotNet =
         let dir = Path.Combine(testScriptsDir, "dotnet")
         recreateDir dir
         writeFile (Path.Combine(dir, "smoke.fsx")) (dotnetFsxFor version (Path.GetFullPath pkgDir))
-        // `#r "nuget: DataHubClient"` in FSI resolves from ~/.nuget/packages.
-        // During local iteration the version stays at the same number, so the
-        // previously-extracted copy of DataHubClient/<version>/ shadows the
-        // freshly-packed .nupkg in pkgDir. Targeted wipe before FSI runs.
-        let cachedExtract =
-            Path.Combine(
-                System.Environment.GetEnvironmentVariable "HOME",
-                ".nuget",
-                "packages",
-                "datahubclient",
-                version)
-        if Directory.Exists cachedExtract then
-            Directory.Delete(cachedExtract, true)
+        wipeCachedNuGetExtract "DataHubClient" version
         runCommand "dotnet" [ "fsi"; "smoke.fsx" ] dir
     }
 
