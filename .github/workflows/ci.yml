@@ -158,8 +158,10 @@ jobs:
       # Keyless via the job's OIDC token; the trusted publisher configured on
       # npmjs.com must match this repo, ci.yml, and the release environment.
       # Provenance attestations are generated automatically.
+      # The ./ prefix is load-bearing: a bare pkg/<name>.tgz parses as a
+      # GitHub owner/repo shorthand instead of a local path.
       - name: Publish npm package
-        run: npm publish pkg/*.tgz --access public
+        run: npm publish ./pkg/*.tgz --access public
       - name: Stage PyPI distributions
         run: |
           mkdir pypi-dist
