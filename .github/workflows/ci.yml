@@ -44,7 +44,7 @@ jobs:
           dotnet-version: 10.0.x
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
       - name: Restore local tools
         run: dotnet tool restore
       - name: make build script executable
@@ -88,7 +88,7 @@ jobs:
           dotnet-version: 10.0.x
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -144,10 +144,7 @@ jobs:
           dotnet-version: 10.0.x
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-      # npm trusted publishing needs npm >= 11.5.1; Node 20 ships npm 10.
-      - name: Update npm for trusted publishing
-        run: npm install -g npm@latest
+          node-version: 24
       # Trusted publishing: exchanges this job's OIDC token for a temporary
       # (1 h, single-use) API key, per the policy configured on nuget.org.
       # NUGET_USER is the nuget.org profile name the policy belongs to.
