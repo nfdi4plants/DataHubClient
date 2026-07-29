@@ -1,3 +1,8 @@
+### 0.3.0 (Released 2026-7-29)
+
+* `client.Users` — user API: `GetCurrentAsync()` (GitLab `GET /user`) resolves the identity behind the configured credential, `GetAsync(userId)` fetches a user by numeric id.
+* `User.Email` — optional, and populated only by `GetCurrentAsync()`: GitLab omits the address on users embedded in issues, merge requests, notes, and commits.
+
 ### 0.2.0 (Released 2026-7-14)
 
 * `client.Validation` — ARC validation (CQC) results API: discover validated branches and packages on the `cqc` branch (`ListValidatedBranchesAsync`, `ListPackagesAsync`), fetch each result file (`GetSummaryAsync` typed via the arc-validate `ValidationSummary` schema, `GetReportAsync` JUnit XML, `GetBadgeAsync` SVG), bulk `GetAllSummariesAsync`, and `ListHistoryAsync` for reading results at any commit of the branch history.
