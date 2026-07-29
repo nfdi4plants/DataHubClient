@@ -58,9 +58,13 @@ contributes to every request. Three factory methods cover the
 ## Resource APIs
 
 The client is a facade over one API object per GitLab resource area:
-`client.Projects`, `client.Repository`, `client.Files`, `client.Issues`,
-`client.MergeRequests`, `client.Packages`, and `client.Validation` (ARC
-validation results). Every call is async — `Async` in F#, `Promise` in
-JavaScript, `awaitable` in Python.
+`client.Users`, `client.Projects`, `client.Repository`, `client.Files`,
+`client.Issues`, `client.MergeRequests`, `client.Packages`, and
+`client.Validation` (ARC validation results). Every call is async — `Async` in
+F#, `Promise` in JavaScript, `awaitable` in Python.
+
+`client.Users.GetCurrentAsync()` resolves the identity behind the configured
+credential, and is the only call that populates `User.Email` — GitLab omits it
+on users embedded in issues, merge requests, notes, and commits.
 
 See the [API reference](reference.md) for the full surface.

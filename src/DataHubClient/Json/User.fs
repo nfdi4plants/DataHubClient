@@ -17,7 +17,8 @@ module User =
                 get.Required.Field "name" Decode.string,
                 get.Required.Field "state" Decode.string,
                 get.Required.Field "web_url" Decode.string,
-                ?avatarUrl = get.Optional.Field "avatar_url" Decode.string))
+                ?avatarUrl = get.Optional.Field "avatar_url" Decode.string,
+                ?email = get.Optional.Field "email" Decode.string))
 
     /// Encodes a <see cref="T:DataHubClient.User"/> to its GitLab JSON representation.
     let encoder (user: User) : IEncodable =
@@ -27,4 +28,5 @@ module User =
             "name", Encode.string user.Name
             "state", Encode.string user.State
             "web_url", Encode.string user.WebUrl
-            "avatar_url", ThothExtensions.encodeOption Encode.string user.AvatarUrl ]
+            "avatar_url", ThothExtensions.encodeOption Encode.string user.AvatarUrl
+            "email", ThothExtensions.encodeOption Encode.string user.Email ]
