@@ -104,7 +104,15 @@ Each smoke regenerates its consumer script into `pkg/testScripts/{dotnet,js,py}/
 Releases are published by CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) on every version tag:
 
 1. Add a `### X.Y.Z (Released ...)` entry at the top of [RELEASE_NOTES.md](RELEASE_NOTES.md) — the build derives the published version from it, and CI refuses tags that don't match it.
-2. Commit, then tag and push:
+2. Regenerate the tracked version source and include it in the same commit:
+
+   ```sh
+   ./build.sh GenerateVersionSource   # rewrites src/DataHubClient/Version.fs
+   ```
+
+   This does **not** affect what gets published: CI exports `DATAHUBCLIENT_VERSION` from the tag, `packageVersion()` prefers it over `RELEASE_NOTES.md`, and the file is regenerated before packing regardless. It matters because `Version.fs` is tracked, and a plain `dotnet build` from a fresh checkout — the quick-iteration path that skips the FAKE pipeline — compiles whatever is committed. Forget this step and `DataHubClientVersion.Value` reports the *previous* release to anyone building that way.
+
+3. Commit, then tag and push:
 
    ```sh
    git tag X.Y.Z
@@ -112,6 +120,8 @@ Releases are published by CI ([.github/workflows/ci.yml](.github/workflows/ci.ym
    ```
 
 CI then runs all three test suites, packs, and publishes `DataHubClient` to NuGet, `@nfdi4plants/datahub-client` to npm, and `datahub-client` to PyPI. The publish steps skip already-published versions, so re-running a failed release run is safe.
+
+The same tag deploys the documentation site. That requires the `github-pages` environment to permit **tags** — it carries a `tag: *.*.*` deployment policy alongside `branch: main`. Without the tag policy the `Deploy Docs` job is rejected while packages still publish, so a release looks half-successful. The `branch: main` entry exists so a manual `workflow_dispatch` run can redeploy the site without cutting a new tag.
 
 Publishing is keyless via **trusted publishing** (OIDC) on all three registries — no long-lived registry credentials are stored on the repo. The moving parts:
 

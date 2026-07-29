@@ -74,7 +74,13 @@ All build orchestration goes through the FAKE/BuildProject pipeline under [build
 ./build.sh WatchApiDocs        # live-reload preview of the fsdocs F# API reference
 ```
 
-Releases run entirely through CI on version tags (see [.github/workflows/ci.yml](.github/workflows/ci.yml)); there are no interactive release targets.
+Releases run entirely through CI on version tags (see [.github/workflows/ci.yml](.github/workflows/ci.yml)); there are no interactive release targets. Cutting one is three steps, and **all three belong in the same commit** — see [Publishing](README.md#publishing):
+
+1. New `### X.Y.Z (Released ...)` entry at the **top** of [RELEASE_NOTES.md](RELEASE_NOTES.md). CI greps the first such heading and fails the release if the tag does not match it.
+2. `./build.sh GenerateVersionSource`, and commit the regenerated `src/DataHubClient/Version.fs`. It is a **tracked generated file**: CI rewrites it from the tag before packing, so published artifacts are always right, but a plain `dotnet build` from a fresh checkout compiles the committed copy. Skipping this silently ships the previous version number to anyone building outside the FAKE pipeline — it has happened.
+3. Tag `X.Y.Z` (no `v` prefix, matching existing tags) and push the tag.
+
+The same tag deploys the docs site, which needs the `github-pages` environment to allow tags (`tag: *.*.*`). If that policy is missing, `Deploy Docs` is rejected while `Publish` still succeeds, and the release looks half-broken.
 
 On Windows, use `build.cmd` with the same arguments.
 
