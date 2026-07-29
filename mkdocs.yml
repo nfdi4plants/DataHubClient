@@ -24,6 +24,8 @@ validation:
 
 theme:
   name: material
+  # overrides/main.html only fills the announcement bar with extra.version.
+  custom_dir: overrides
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -55,6 +57,13 @@ markdown_extensions:
       check_paths: true
   - pymdownx.tabbed:
       alternate_style: true
+
+extra:
+  # The release this site documents, shown in the announcement bar on every page.
+  # `./build.sh BuildDocs` exports DATAHUBCLIENT_DOCS_VERSION from RELEASE_NOTES.md;
+  # a bare `mkdocs serve`/`mkdocs build` has no such value and reports "dev", which
+  # is what a local preview of unreleased pages should say.
+  version: !ENV [DATAHUBCLIENT_DOCS_VERSION, "dev"]
 
 nav:
   - Home: index.md

@@ -22,6 +22,17 @@
     <RepositoryUrl>https://github.com/nfdi4plants/DataHubClient.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>ARC;DataPLANT;nfdi4plants;GitLab;DataHub</PackageTags>
+    <!--
+      Header links in the fsdocs-generated API reference.
+
+      Note that the reference's site root is NOT taken from <PackageProjectUrl> here,
+      even though that is fsdocs' default source for the {{root}} substitution. MkDocs
+      owns https://nfdi4plants.github.io/DataHubClient/ and fsdocs renders into the
+      nested site/fsdocs/, so root must be /DataHubClient/fsdocs/ — not a sensible
+      value for a package's project URL. DocumentationTasks.fs passes it explicitly.
+    -->
+    <FsDocsLicenseLink>https://github.com/nfdi4plants/DataHubClient/blob/main/LICENSE</FsDocsLicenseLink>
+    <FsDocsReleaseNotesLink>https://github.com/nfdi4plants/DataHubClient/blob/main/RELEASE_NOTES.md</FsDocsReleaseNotesLink>
   </PropertyGroup>
 
   <!--
