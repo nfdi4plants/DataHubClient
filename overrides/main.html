@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+<!--
+  Material theme override. The site is built from a single branch and always
+  describes the most recent release, so state which release that is on every
+  page rather than leaving readers to infer it from the API reference.
+
+  `config.extra.version` comes from mkdocs.yml, which reads the
+  DATAHUBCLIENT_DOCS_VERSION environment variable exported by
+  `./build.sh BuildDocs`. A local `mkdocs serve` leaves it unset and the bar
+  reads "dev".
+-->
+{% block announce %}
+  Documentation for <strong>DataHubClient {{ config.extra.version }}</strong>
+{% endblock %}
