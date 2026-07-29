@@ -35,6 +35,8 @@ type DataHubClient(baseUrl: string, auth: Authentication) =
         with get () = http
         and set value = http <- value
 
+    /// User operations, including the identity the credential authenticates as.
+    member _.Users = UsersApi(baseUrl, auth, http)
     /// Project operations.
     member _.Projects = ProjectsApi(baseUrl, auth, http)
     /// Repository branch and commit operations.

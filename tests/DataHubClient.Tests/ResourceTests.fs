@@ -50,6 +50,44 @@ let private decodeObjectFields json =
 let tests =
     testList "Resources" [
 
+        testCaseAsync "Users.GetCurrentAsync hits /user and decodes the email" <| async {
+            let client, mock = makeClient ()
+            mock.Add("GET", apiUrl "user", 200, SampleData.currentUser)
+
+            let! user = client.Users.GetCurrentAsync() |> awaitApi
+
+            Expect.equal user.Id 7 "user id"
+            Expect.equal user.Username "carl" "username"
+            Expect.equal user.Email (Some "carl@hub.example") "email is populated for the current user"
+            let request = mock.LastRequest
+            Expect.equal request.Method "GET" "method"
+            Expect.equal request.Url (apiUrl "user") "url"
+            expectAuthHeader request
+        }
+
+        testCaseAsync "Users.GetAsync fetches a user by id" <| async {
+            let client, mock = makeClient ()
+            mock.Add("GET", apiUrl "users/7", 200, SampleData.user)
+
+            let! user = client.Users.GetAsync 7 |> awaitApi
+
+            Expect.equal user.Id 7 "user id"
+            // Embedded/other users carry no email — only GET /user does.
+            Expect.equal user.Email None "email absent for a non-current user"
+            Expect.equal mock.LastRequest.Url (apiUrl "users/7") "url"
+        }
+
+        testCaseAsync "Users.GetCurrentAsync maps 401 to an error" <| async {
+            let client, mock = makeClient ()
+            mock.Add("GET", apiUrl "user", 401, """{"message":"401 Unauthorized"}""")
+
+            try
+                let! _ = client.Users.GetCurrentAsync() |> awaitApi
+                failwith "expected an error"
+            with
+            | :? DataHubError -> ()
+        }
+
         testCaseAsync "Projects.ListAsync builds sorted query and decodes response" <| async {
             let client, mock = makeClient ()
             mock.Add("GET", apiUrl "projects?search=arc&simple=true", 200, SampleData.projects)

@@ -3,6 +3,11 @@ module DataHubClient.Tests.Mock.SampleData
 let user =
     """{"id":7,"username":"carl","name":"Carl Correns","state":"active","web_url":"https://hub.example/carl","avatar_url":"https://hub.example/avatar.png","ignored":"ok"}"""
 
+/// GitLab's `GET /user` payload. Differs from an embedded user by carrying `email`,
+/// which the API only returns for the authenticated identity.
+let currentUser =
+    """{"id":7,"username":"carl","name":"Carl Correns","state":"active","web_url":"https://hub.example/carl","avatar_url":"https://hub.example/avatar.png","email":"carl@hub.example","ignored":"ok"}"""
+
 let project =
     """{"id":42,"name":"My ARC","path":"my-arc","path_with_namespace":"lab/my-arc","visibility":"private","web_url":"https://hub.example/lab/my-arc","description":"An annotated research context","default_branch":"main","ignored":"ok"}"""
 

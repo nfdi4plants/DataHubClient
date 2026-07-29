@@ -59,6 +59,7 @@
     <Compile Include="Json/Package.fs" />
     <Compile Include="Json/ValidationSummary.fs" />
     <Compile Include="Resources/ResourceHelpers.fs" />
+    <Compile Include="Resources/UsersApi.fs" />
     <Compile Include="Resources/ProjectsApi.fs" />
     <Compile Include="Resources/RepositoryApi.fs" />
     <Compile Include="Resources/FilesApi.fs" />
