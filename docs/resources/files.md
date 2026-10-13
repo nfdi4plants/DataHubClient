@@ -12,16 +12,10 @@ These snippets share this client. Replace the URL and token with your DataHub de
     --8<-- "docs/samples/files/sample.fsx:setup"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/files/sample.mjs:setup"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/files/sample.ts:setup"
     ```
 
 === "Python"
@@ -40,16 +34,10 @@ Read a file from a branch, tag, or commit SHA. `Content` is usually base64-encod
     --8<-- "docs/samples/files/sample.fsx:get"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/files/sample.mjs:get"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/files/sample.ts:get"
     ```
 
 === "Python"
@@ -68,16 +56,10 @@ Create a file and a commit on the target branch. Omit `encoding` for plain text;
     --8<-- "docs/samples/files/sample.fsx:create"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/files/sample.mjs:create"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/files/sample.ts:create"
     ```
 
 === "Python"
@@ -96,16 +78,10 @@ Replace a file and commit the change. This example supplies base64 content. As w
     --8<-- "docs/samples/files/sample.fsx:update"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/files/sample.mjs:update"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/files/sample.ts:update"
     ```
 
 === "Python"
@@ -124,16 +100,10 @@ Delete a file and create a commit. Completion confirms success; the method has n
     --8<-- "docs/samples/files/sample.fsx:delete"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/files/sample.mjs:delete"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/files/sample.ts:delete"
     ```
 
 === "Python"

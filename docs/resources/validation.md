@@ -14,16 +14,10 @@ Replace the example token and project ID with your own. Python examples call eac
     --8<-- "docs/samples/validation/sample.fsx:setup"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/validation/sample.mjs:setup"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/validation/sample.ts:setup"
     ```
 
 === "Python"
@@ -42,16 +36,10 @@ Discover ARC branches that have validation results. Files at the root of the res
     --8<-- "docs/samples/validation/sample.fsx:branches"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/validation/sample.mjs:branches"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/validation/sample.ts:branches"
     ```
 
 === "Python"
@@ -70,16 +58,10 @@ Discover validation packages for an ARC branch. Each `ValidationPackageRef` cont
     --8<-- "docs/samples/validation/sample.fsx:packages"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/validation/sample.mjs:packages"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/validation/sample.ts:packages"
     ```
 
 === "Python"
@@ -98,16 +80,10 @@ Read validation commits, newest first. The optional `branch` scopes history to t
     --8<-- "docs/samples/validation/sample.fsx:history"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/validation/sample.mjs:history"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/validation/sample.ts:history"
     ```
 
 === "Python"
@@ -126,16 +102,10 @@ Read `validation_summary.json` as a `ValidationSummary`. `Critical` and `NonCrit
     --8<-- "docs/samples/validation/sample.fsx:summary"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/validation/sample.mjs:summary"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/validation/sample.ts:summary"
     ```
 
 === "Python"
@@ -154,16 +124,10 @@ Read the raw JUnit XML report using the package reference from the summary examp
     --8<-- "docs/samples/validation/sample.fsx:report"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/validation/sample.mjs:report"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/validation/sample.ts:report"
     ```
 
 === "Python"
@@ -182,16 +146,10 @@ Read the package's validation badge as raw SVG text.
     --8<-- "docs/samples/validation/sample.fsx:badge"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/validation/sample.mjs:badge"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/validation/sample.ts:badge"
     ```
 
 === "Python"
@@ -210,16 +168,10 @@ Discover the packages for an ARC branch, then fetch each summary. The returned c
     --8<-- "docs/samples/validation/sample.fsx:all-summaries"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/validation/sample.mjs:all-summaries"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/validation/sample.ts:all-summaries"
     ```
 
 === "Python"

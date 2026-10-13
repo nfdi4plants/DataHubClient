@@ -12,16 +12,10 @@ These snippets share this client. Replace the URL and token with your DataHub de
     --8<-- "docs/samples/repository/sample.fsx:setup"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/repository/sample.mjs:setup"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/repository/sample.ts:setup"
     ```
 
 === "Python"
@@ -40,16 +34,10 @@ List branches, optionally filtering their names with `search`.
     --8<-- "docs/samples/repository/sample.fsx:list-branches"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/repository/sample.mjs:list-branches"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/repository/sample.ts:list-branches"
     ```
 
 === "Python"
@@ -68,16 +56,10 @@ Get a branch by its name.
     --8<-- "docs/samples/repository/sample.fsx:get-branch"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/repository/sample.mjs:get-branch"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/repository/sample.ts:get-branch"
     ```
 
 === "Python"
@@ -96,16 +78,10 @@ List commits, optionally choosing a branch, tag, or SHA with `refName` (`ref_nam
     --8<-- "docs/samples/repository/sample.fsx:list-commits"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/repository/sample.mjs:list-commits"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/repository/sample.ts:list-commits"
     ```
 
 === "Python"
@@ -124,16 +100,10 @@ Read a single commit by SHA.
     --8<-- "docs/samples/repository/sample.fsx:get-commit"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/repository/sample.mjs:get-commit"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/repository/sample.ts:get-commit"
     ```
 
 === "Python"

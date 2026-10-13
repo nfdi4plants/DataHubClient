@@ -14,16 +14,10 @@ Replace the example token and project ID with your own. Python examples call eac
     --8<-- "docs/samples/packages/sample.fsx:setup"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/packages/sample.mjs:setup"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/packages/sample.ts:setup"
     ```
 
 === "Python"
@@ -42,16 +36,10 @@ Filter the registry by package type and name. Both filters are optional.
     --8<-- "docs/samples/packages/sample.fsx:list"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/packages/sample.mjs:list"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/packages/sample.ts:list"
     ```
 
 === "Python"
@@ -70,16 +58,10 @@ Read the registry metadata for a package ID returned by `ListAsync`.
     --8<-- "docs/samples/packages/sample.fsx:get"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/packages/sample.mjs:get"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/packages/sample.ts:get"
     ```
 
 === "Python"
@@ -98,16 +80,10 @@ Upload a text file under a generic package name and version. This writes to the 
     --8<-- "docs/samples/packages/sample.fsx:upload"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/packages/sample.mjs:upload"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/packages/sample.ts:upload"
     ```
 
 === "Python"
@@ -130,16 +106,10 @@ package coordinates for you.
     --8<-- "docs/samples/packages/sample.fsx:download"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/packages/sample.mjs:download"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/packages/sample.ts:download"
     ```
 
 === "Python"
@@ -168,18 +138,11 @@ for Node.js filesystem and browser download-link examples.
     --8<-- "docs/samples/ro-crate/sample.fsx:download"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/ro-crate/sample.mjs:setup"
     --8<-- "docs/samples/ro-crate/sample.mjs:download"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/ro-crate/sample.ts:setup"
-    --8<-- "docs/samples/ro-crate/sample.ts:download"
     ```
 
 === "Python"

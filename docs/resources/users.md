@@ -12,16 +12,10 @@ These snippets share this client. Replace the URL and token with your DataHub de
     --8<-- "docs/samples/users/sample.fsx:setup"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/users/sample.mjs:setup"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/users/sample.ts:setup"
     ```
 
 === "Python"
@@ -40,16 +34,10 @@ Get the user authenticated by the configured token. `Email` is optional and is p
     --8<-- "docs/samples/users/sample.fsx:get-current"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/users/sample.mjs:get-current"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/users/sample.ts:get-current"
     ```
 
 === "Python"
@@ -68,16 +56,10 @@ Get a user by their instance-wide numeric ID.
     --8<-- "docs/samples/users/sample.fsx:get"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/users/sample.mjs:get"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/users/sample.ts:get"
     ```
 
 === "Python"

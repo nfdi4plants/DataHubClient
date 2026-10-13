@@ -29,6 +29,10 @@ const projects = await client.Projects.ListAsync();
 for (const project of projects) console.log(project.Name); // inferred as string
 ```
 
+See the [TypeScript guide](https://nfdi4plants.github.io/DataHubClient/typescript/)
+for compiler setup, inferred types, and explicit type imports. API examples use
+shared JavaScript / TypeScript tabs.
+
 Use `Authentication.Anonymous()` to read public resources without a token.
 `Projects.ListAllAsync` retrieves all matching projects across pages, with optional
 search, compact-response, and visibility filters; `Projects.ListAsync` retrieves
@@ -94,7 +98,7 @@ system libraries. CI runs this target on every pull request.
 
 ### Documentation
 
-The [published documentation](https://nfdi4plants.github.io/DataHubClient/) pairs an [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) guide with an [fsdocs](https://fsprojects.github.io/FSharp.Formatting/)-generated [F# API reference](https://nfdi4plants.github.io/DataHubClient/fsdocs/reference/index.html) (design record: [plans/docs.md](plans/docs.md)). The guide provides F#, JavaScript, TypeScript, and Python tabs backed by sample programs under [docs/samples/](docs/samples/). CI executes the examples against the freshly-packed NuGet/npm/PyPI artifacts; TypeScript samples also compile in strict mode against the packaged declarations. Browser-only downloads run in the browser checks.
+The [published documentation](https://nfdi4plants.github.io/DataHubClient/) pairs an [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) guide with an [fsdocs](https://fsprojects.github.io/FSharp.Formatting/)-generated [F# API reference](https://nfdi4plants.github.io/DataHubClient/fsdocs/reference/index.html) (design record: [plans/docs.md](plans/docs.md)). The guide provides F#, JavaScript / TypeScript, and Python tabs backed by sample programs under [docs/samples/](docs/samples/), plus a dedicated TypeScript setup guide. CI executes the examples against the freshly-packed NuGet/npm/PyPI artifacts; TypeScript samples also compile in strict mode against the packaged declarations. Browser-only downloads run in the browser checks.
 
 ```sh
 ./build.sh RunDocsSamples # pack + run F#, JavaScript, TypeScript, and Python samples

@@ -14,16 +14,10 @@ Replace the example token and project ID with your own. Python examples call eac
     --8<-- "docs/samples/issues/sample.fsx:setup"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/issues/sample.mjs:setup"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/issues/sample.ts:setup"
     ```
 
 === "Python"
@@ -42,16 +36,10 @@ List issues, optionally filtered by state. Omit `state` to use the server defaul
     --8<-- "docs/samples/issues/sample.fsx:list"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/issues/sample.mjs:list"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/issues/sample.ts:list"
     ```
 
 === "Python"
@@ -70,16 +58,10 @@ Read one issue by its project-local number.
     --8<-- "docs/samples/issues/sample.fsx:get"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/issues/sample.mjs:get"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/issues/sample.ts:get"
     ```
 
 === "Python"
@@ -98,16 +80,10 @@ Create an issue with a title and optional Markdown description. The returned `Ii
     --8<-- "docs/samples/issues/sample.fsx:create"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/issues/sample.mjs:create"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/issues/sample.ts:create"
     ```
 
 === "Python"
@@ -126,16 +102,10 @@ Change the title or description. Omitted fields remain unchanged. Use `stateEven
     --8<-- "docs/samples/issues/sample.fsx:update"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/issues/sample.mjs:update"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/issues/sample.ts:update"
     ```
 
 === "Python"
@@ -154,16 +124,10 @@ Close an issue and return its updated state.
     --8<-- "docs/samples/issues/sample.fsx:close"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/issues/sample.mjs:close"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/issues/sample.ts:close"
     ```
 
 === "Python"
@@ -182,16 +146,10 @@ Read the notes on an issue. `System` distinguishes automatically generated notes
     --8<-- "docs/samples/issues/sample.fsx:notes"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/issues/sample.mjs:notes"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/issues/sample.ts:notes"
     ```
 
 === "Python"
@@ -210,16 +168,10 @@ Add a Markdown comment and return the created note.
     --8<-- "docs/samples/issues/sample.fsx:create-note"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/issues/sample.mjs:create-note"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/issues/sample.ts:create-note"
     ```
 
 === "Python"

@@ -607,6 +607,17 @@ Details and remaining API priorities: [API coverage plan](api-coverage.md).
 - [x] Document the collection signature change and remove the `Array.from`
       workaround from examples intended to demonstrate normal array operations.
 
+### Consolidated JavaScript / TypeScript documentation
+
+- [x] Share identical JavaScript/TypeScript tabs across the guide, retaining
+      separate Node.js and browser saving examples.
+- [x] Add a TypeScript setup page for compiler configuration, inferred types,
+      native arrays, explicit model imports, and typed helpers.
+- [x] Retain packaged TypeScript checks and add an offline sample for the new guide.
+- [x] Verify all 14 TypeScript files compile, all 12 TypeScript sample programs
+      run, and the strict guide/API build passes. All 54 shared tabs render with
+      expanded snippets (2026-10-13).
+
 ## Verification
 
 After the first implementation pass, this checks the design holds end-to-end:

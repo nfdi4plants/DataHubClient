@@ -12,16 +12,10 @@ These snippets share this client. Replace the URL and token with your DataHub de
     --8<-- "docs/samples/projects/sample.fsx:setup"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/projects/sample.mjs:setup"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/projects/sample.ts:setup"
     ```
 
 === "Python"
@@ -40,16 +34,10 @@ Get one page of projects. Both `search` and `simple` are optional; omit them to 
     --8<-- "docs/samples/projects/sample.fsx:list"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/projects/sample.mjs:list"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/projects/sample.ts:list"
     ```
 
 === "Python"
@@ -68,16 +56,10 @@ Get every matching project in ascending ID order. Optional `visibility` accepts 
     --8<-- "docs/samples/projects/sample.fsx:list-all"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/projects/sample.mjs:list-all"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/projects/sample.ts:list-all"
     ```
 
 === "Python"
@@ -96,16 +78,10 @@ Get one project by numeric ID.
     --8<-- "docs/samples/projects/sample.fsx:get"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/projects/sample.mjs:get"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/projects/sample.ts:get"
     ```
 
 === "Python"
@@ -124,16 +100,10 @@ Search by name with the one-page convenience method. Use `ListAllAsync(search = 
     --8<-- "docs/samples/projects/sample.fsx:search"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/projects/sample.mjs:search"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/projects/sample.ts:search"
     ```
 
 === "Python"

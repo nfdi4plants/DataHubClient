@@ -6,6 +6,8 @@ DataHubClient is one F# source tree shipped to three ecosystems. The docs show
 F#, JavaScript, TypeScript, and Python examples, and CI must fail when any sample
 drifts from the code base. `fsdocs --eval` only verifies the F# column; the other
 languages need their own packaged-consumer checks.
+JavaScript and TypeScript share one tab for identical API calls; TypeScript
+setup and examples with explicit type annotations live on a dedicated page.
 
 ## Design decisions
 
@@ -35,7 +37,7 @@ languages need their own packaged-consumer checks.
   the transport injection point. Live-server walkthroughs stay in the
   (non-gating) integration suites.
 - **CI:** a `docs` job on every PR/push runs `RunDocsSamples` + `BuildDocs`, so
-  out-of-sync docs fail PRs in all three languages. On version tags (and
+  out-of-sync docs fail PRs in all four languages. On version tags (and
   `workflow_dispatch`, for bootstrap) the built `site/` deploys to GitHub Pages
   via `actions/deploy-pages` — docs versions track package releases.
 - **Legacy interactive release tasks are retired.** `ReleaseTasks.fs`
@@ -76,16 +78,10 @@ Shared process/scratch helpers move from `TestPackageTasks.fs` into
     --8<-- "docs/samples/getting-started/sample.fsx"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/getting-started/sample.mjs"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/getting-started/sample.ts"
     ```
 
 === "Python"
@@ -98,6 +94,10 @@ Shared process/scratch helpers move from `TestPackageTasks.fs` into
 When a sample later needs a hidden harness (stub transport, assertions), mark
 the shown region with `--8<-- [start:…]` / `[end:…]` section comments and
 include `sample.py:section` instead of the whole file.
+Shared JavaScript / TypeScript tabs include the `.mjs` source; matching `.ts`
+programs retain strict compilation checks. Keep Node.js and browser tabs separate
+where saving or other runtime behavior differs. Typed helper functions belong
+on the TypeScript guide rather than in duplicate language tabs.
 
 ### Layout
 
@@ -106,6 +106,7 @@ mkdocs.yml                    # Material theme, tabs, snippets, exclude samples/
 docs/
   index.md                    # guide landing page (mkdocs)
   getting-started.md          # tabbed install + first-client page
+  typescript.md               # compiler setup, inference, and explicit type imports
   reference.md                # links into the fsdocs-generated API reference
   samples/<topic>/sample.*    # verified polyglot samples (excluded from site nav)
   fsdocs/index.md             # fsdocs input shell → site/fsdocs/
@@ -155,3 +156,12 @@ site/                         # build output (gitignored)
       TypeScript files, and JavaScript/TypeScript downloads in six real-browser
       cases; the guide/API build passes and all 54 TypeScript tabs render with
       expanded snippets (2026-10-13).
+- [x] Consolidate all 54 JavaScript/TypeScript tab pairs into shared tabs,
+      preserving the Node.js/browser split for downloads and both sample checks.
+- [x] Add a dedicated TypeScript guide covering NodeNext/Bundler setup, inference,
+      native arrays, explicit model imports, and the typed browser helper; its
+      new offline sample is discovered by `RunDocsSamplesTypeScript`.
+- [x] Verify strict compilation of all 14 TypeScript files and execution of all
+      12 TypeScript sample programs against the packed npm package. The strict
+      guide/API build passes; all 54 shared tabs render with expanded snippets
+      (2026-10-13).

@@ -8,13 +8,7 @@
     dotnet add package DataHubClient
     ```
 
-=== "JavaScript"
-
-    ```sh
-    npm install @nfdi4plants/datahub-client
-    ```
-
-=== "TypeScript"
+=== "JavaScript / TypeScript"
 
     ```sh
     npm install @nfdi4plants/datahub-client
@@ -30,6 +24,9 @@ The npm package includes JavaScript ES modules and TypeScript declarations.
 TypeScript discovers the declarations automatically; no separate types package
 or TypeScript runtime is required. Both languages use the same imports and run
 the same JavaScript, using native `fetch` in modern browsers or Node.js.
+The shared JavaScript / TypeScript tabs work in either language. See
+[TypeScript setup](typescript.md) for compiler configuration, inferred types,
+and explicit type imports.
 
 ## Create a client
 
@@ -42,22 +39,11 @@ an `Authentication` value:
     --8<-- "docs/samples/getting-started/sample.fsx"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/getting-started/sample.mjs"
     ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/getting-started/sample.ts"
-    ```
-
-    Types are inferred from the generated declarations, including the client,
-    resource APIs, models, and the `Promise` results of resource methods.
-    List results are ordinary JavaScript arrays, typed as `Project[]`, `Issue[]`,
-    and so on. Use `map`, `push`, indexing, and `length` directly.
 
 === "Python"
 
@@ -125,18 +111,11 @@ names and paths; `simple` requests the compact project representation.
     --8<-- "docs/samples/public-projects/sample.fsx:list"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/public-projects/sample.mjs:setup"
     --8<-- "docs/samples/public-projects/sample.mjs:list"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/public-projects/sample.ts:setup"
-    --8<-- "docs/samples/public-projects/sample.ts:list"
     ```
 
 === "Python"

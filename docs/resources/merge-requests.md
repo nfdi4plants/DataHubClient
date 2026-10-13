@@ -14,16 +14,10 @@ Replace the example token and project ID with your own. Python examples call eac
     --8<-- "docs/samples/merge-requests/sample.fsx:setup"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/merge-requests/sample.mjs:setup"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/merge-requests/sample.ts:setup"
     ```
 
 === "Python"
@@ -42,16 +36,10 @@ List merge requests, optionally filtered by state. Omit `state` to use the serve
     --8<-- "docs/samples/merge-requests/sample.fsx:list"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/merge-requests/sample.mjs:list"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/merge-requests/sample.ts:list"
     ```
 
 === "Python"
@@ -70,16 +58,10 @@ Read one merge request by its project-local number.
     --8<-- "docs/samples/merge-requests/sample.fsx:get"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/merge-requests/sample.mjs:get"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/merge-requests/sample.ts:get"
     ```
 
 === "Python"
@@ -98,16 +80,10 @@ Propose changes from a source branch into a target branch. Both branches must al
     --8<-- "docs/samples/merge-requests/sample.fsx:create"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/merge-requests/sample.mjs:create"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/merge-requests/sample.ts:create"
     ```
 
 === "Python"
@@ -126,16 +102,10 @@ Change the title or description. Omitted fields remain unchanged. Use `stateEven
     --8<-- "docs/samples/merge-requests/sample.fsx:update"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/merge-requests/sample.mjs:update"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/merge-requests/sample.ts:update"
     ```
 
 === "Python"
@@ -154,16 +124,10 @@ Close a merge request and return its updated state. Closing a merge request does
     --8<-- "docs/samples/merge-requests/sample.fsx:close"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/merge-requests/sample.mjs:close"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/merge-requests/sample.ts:close"
     ```
 
 === "Python"
@@ -182,16 +146,10 @@ Read the notes on a merge request. `System` distinguishes automatically generate
     --8<-- "docs/samples/merge-requests/sample.fsx:notes"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/merge-requests/sample.mjs:notes"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/merge-requests/sample.ts:notes"
     ```
 
 === "Python"
@@ -210,16 +168,10 @@ Add a Markdown comment and return the created note.
     --8<-- "docs/samples/merge-requests/sample.fsx:create-note"
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/merge-requests/sample.mjs:create-note"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/merge-requests/sample.ts:create-note"
     ```
 
 === "Python"

@@ -72,6 +72,7 @@ extra:
 nav:
   - Home: index.md
   - Getting started: getting-started.md
+  - TypeScript: typescript.md
   - Download an RO-Crate: ro-crate.md
   - Resource API:
       - Overview: resources.md

@@ -26,22 +26,15 @@ access for a public export. For an export that requires credentials, replace
 `Authentication.Anonymous()` with
 `Authentication.PersonalAccessToken("your-datahub-pat")`.
 
-These JavaScript and TypeScript snippets retrieve the JSON-LD text in a browser or
-Node.js. They do not write a file and need no filesystem import. Frontend npm
+This shared JavaScript / TypeScript example retrieves the JSON-LD text in a browser or
+Node.js. It does not write a file and needs no filesystem import. Frontend npm
 imports are resolved by your application's bundler, such as Vite.
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```javascript
     --8<-- "docs/samples/ro-crate/sample.mjs:setup"
     --8<-- "docs/samples/ro-crate/sample.mjs:download"
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    --8<-- "docs/samples/ro-crate/sample.ts:setup"
-    --8<-- "docs/samples/ro-crate/sample.ts:download"
     ```
 
 ## Download and save
@@ -60,7 +53,7 @@ download through the browser. In an existing Python async application, use
     --8<-- "docs/samples/ro-crate/sample.fsx:download"
     ```
 
-=== "JavaScript (Node.js)"
+=== "JavaScript / TypeScript (Node.js)"
 
     ```javascript
     --8<-- "docs/samples/ro-crate/sample.mjs:setup"
@@ -68,22 +61,17 @@ download through the browser. In an existing Python async application, use
     --8<-- "docs/samples/ro-crate/sample.mjs:save"
     ```
 
-=== "TypeScript (Node.js)"
+=== "JavaScript / TypeScript (Browser)"
 
-    ```typescript
-    --8<-- "docs/samples/ro-crate/sample.ts:setup"
-    --8<-- "docs/samples/ro-crate/sample.ts:download"
-    --8<-- "docs/samples/ro-crate/sample.ts:save"
-    ```
-
-=== "JavaScript (Browser)"
-
-    Save this helper as `browser.mjs` in your application. It uses a `Blob` and a
-    download link to save the returned text:
+    Save this JavaScript helper as `browser.mjs` in your application. It uses a
+    `Blob` and a download link to save the returned text:
 
     ```javascript
     --8<-- "docs/samples/ro-crate/browser.mjs"
     ```
+
+    For a `.ts` helper with explicit parameter types, see
+    [TypeScript browser downloads](typescript.md#browser-downloads).
 
     Call it from a button in your frontend module. These npm imports are
     resolved by your application's bundler, such as Vite:
@@ -100,21 +88,6 @@ download through the browser. In an existing Python async application, use
       downloadROCrate(client, 42).catch(console.error);
     });
     document.body.append(button);
-    ```
-
-=== "TypeScript (Browser)"
-
-    Save this typed helper as `browser.ts` in your application:
-
-    ```typescript
-    --8<-- "docs/samples/ro-crate/browser.ts"
-    ```
-
-    Call it from your frontend module. The `.js` import points to the output
-    module; TypeScript resolves it to `browser.ts` during compilation:
-
-    ```typescript
-    --8<-- "docs/samples/ro-crate/browser-example.ts"
     ```
 
 === "Python"

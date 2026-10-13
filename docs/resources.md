@@ -5,7 +5,9 @@ below has a short F#, JavaScript, TypeScript, and Python example for every metho
 in that area. Start with [Getting started](getting-started.md) to install a
 package and choose an authentication method.
 
-For a complete download-and-save example, see [Download an RO-Crate](ro-crate.md).
+JavaScript and TypeScript use a shared tab. See [TypeScript](typescript.md) for
+compiler setup and explicit type imports. For a complete download-and-save
+example, see [Download an RO-Crate](ro-crate.md).
 
 | Client property | Examples |
 | --- | --- |

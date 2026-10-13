@@ -11,6 +11,8 @@ API reads the same in .NET, JS/TS, and Python.
 
 Head to [Getting started](getting-started.md) to install the package for your
 language and create your first client.
+JavaScript and TypeScript share the same example tabs; the
+[TypeScript guide](typescript.md) covers compiler setup and explicit type imports.
 
 Public resources are available without a token through `Authentication.Anonymous()`.
 Use `Projects.ListAllAsync` to retrieve every matching project across pages;
@@ -44,6 +46,7 @@ sensible default transport and callers can supply their own.
 ## Further reading
 
 - [Getting started](getting-started.md) — install and create a client
+- [TypeScript](typescript.md) — setup, inferred types, and typed helper functions
 - [Download an RO-Crate](ro-crate.md) — save an ARC's generated JSON-LD metadata
 - [Resource API](resources.md) — F#, JavaScript, TypeScript, and Python snippets for every resource API call
 - [API reference](reference.md) — the generated F# API reference
