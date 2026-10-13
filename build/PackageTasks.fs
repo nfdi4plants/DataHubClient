@@ -86,6 +86,8 @@ let private packNpm version =
     transpile javaScriptSourceProject "javascript" outputDirectory
     removeFableModulesGitIgnore outputDirectory
     writeVersionedPackageJson version outputDirectory
+    // npm renders the README from the package root, which is the Fable output.
+    File.Copy("README.md", Path.Combine(outputDirectory, "README.md"), true)
     Directory.CreateDirectory(pkgDir) |> ignore
     runCommand "npm" (npmArgs [ "pack"; $"./{outputDirectory}"; "--pack-destination"; pkgDir ]) "."
 

@@ -1,3 +1,7 @@
+### 0.5.1 (Released 2026-10-13)
+
+* Include the repository README in the npm package so the npm landing page can display installation instructions, documentation links, and registry badges.
+
 ### 0.5.0 (Released 2026-10-13)
 
 * `client.Packages.DownloadROCrateAsync(projectId)` — download an ARC's available generated RO-Crate metadata as JSON-LD text, using the DataHub's standard generic-package coordinates.

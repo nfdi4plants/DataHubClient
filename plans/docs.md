@@ -135,3 +135,5 @@ site/                         # build output (gitignored)
       generated API reference include `DownloadROCrateAsync`
 - [x] Guide headings expose clickable permalinks for sharing individual methods
       and sample sections
+- [x] npm packaging copies the repository README to the package root; verified
+      the 0.5.1 tarball contains the exact README and its documentation links
