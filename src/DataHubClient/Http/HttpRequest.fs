@@ -13,7 +13,7 @@ open Fable.Core
 type HttpRequest(url: string, method: string) =
     let mutable _url = url
     let mutable _method = method
-    let mutable _headers : (string * string) list = []
+    let mutable _headers = ResizeArray<string * string>()
     let mutable _body : string option = None
 
     /// The fully-qualified request URL, including any query string.

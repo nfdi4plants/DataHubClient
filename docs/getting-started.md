@@ -56,15 +56,23 @@ an `Authentication` value:
 
     Types are inferred from the generated declarations, including the client,
     resource APIs, models, and the `Promise` results of resource methods.
-    List results use Fable's `MutableArray<T>` type, which supports iteration,
-    indexing, and `length`. Use `Array.from(result)` when you need a standard
-    JavaScript array with methods such as `map` or `push`.
+    List results are ordinary JavaScript arrays, typed as `Project[]`, `Issue[]`,
+    and so on. Use `map`, `push`, indexing, and `length` directly.
 
 === "Python"
 
     ```python
     --8<-- "docs/samples/getting-started/sample.py"
     ```
+
+!!! note "Migrating collection types to 0.7.0"
+    Version 0.7.0 changes public collection results, arguments, and
+    properties to `ResizeArray<T>` in F#. Compared with 0.6.0, use `.Count` instead
+    of `.Length` for these collections, and `ResizeArray [ ... ]` when constructing
+    them. For example, custom transports return
+    `HttpResponse(200, "[]", ResizeArray [ "Content-Type", "application/json" ])`.
+    JavaScript and TypeScript consumers use ordinary arrays, including arrays of
+    `[name, value]` pairs for HTTP headers; no Fable collection helpers are needed.
 
 ## Authentication
 

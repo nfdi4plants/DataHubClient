@@ -26,7 +26,7 @@ type ProjectsApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
 
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" [ "projects" ] query
             let! response = http.SendAsync req
-            return ResourceHelpers.decodeArray Project.decoder response
+            return ResourceHelpers.decodeResizeArray Project.decoder response
         }
         |> ResourceHelpers.toPublic
 
@@ -56,10 +56,10 @@ type ProjectsApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
 
                 let req = ResourceHelpers.emptyRequest baseUrl auth "GET" [ "projects" ] query
                 let! response = http.SendAsync req
-                let projects = ResourceHelpers.decodeArray Project.decoder response
+                let projects = ResourceHelpers.decodeResizeArray Project.decoder response
 
-                if Array.isEmpty projects then
-                    return pages |> List.rev |> Array.concat
+                if projects.Count = 0 then
+                    return pages |> List.rev |> Seq.collect id |> ResizeArray
                 else
                     let mutable previousId = lastId
 

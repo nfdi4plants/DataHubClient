@@ -23,7 +23,7 @@ publicClient.Http <-
                 | 2 -> projectJson 2
                 | 3 -> "[]"
                 | _ -> failwith "Unexpected extra pagination request."
-            return HttpResponse(200, body, [])
+            return HttpResponse(200, body, ResizeArray())
         } }
 
 // --8<-- [start:list]
@@ -32,17 +32,17 @@ let projects =
     publicClient.Projects.ListAllAsync(visibility = "public")
     |> Async.RunSynchronously
 
-printfn $"Found {projects.Length} public projects"
+printfn $"Found {projects.Count} public projects"
 // --8<-- [end:list]
 
-if (projects |> Array.map (fun project -> project.Id)) <> [| 1; 2 |] then
+if (projects |> Seq.map (fun project -> project.Id) |> Seq.toList) <> [ 1; 2 ] then
     failwith "Expected both project pages in ascending ID order."
 if requests.Count <> 3 then failwith "Expected an empty final page."
 for request in requests do
     if request.Method <> "GET" then failwith "Expected GET."
     for query in [ "pagination=keyset"; "order_by=id"; "sort=asc"; "per_page=100"; "visibility=public" ] do
         if not (request.Url.Contains query) then failwith $"Missing query: {query}"
-    if request.Headers |> List.exists (fun (name, _) -> name = "PRIVATE-TOKEN" || name = "Authorization" || name = "JOB-TOKEN" || name = "") then
+    if request.Headers |> Seq.exists (fun (name, _) -> name = "PRIVATE-TOKEN" || name = "Authorization" || name = "JOB-TOKEN" || name = "") then
         failwith "Anonymous requests must omit authentication headers."
 if requests.[0].Url.Contains "id_after" then failwith "The first page must not have a cursor."
 if not (requests.[1].Url.Contains "id_after=1") then failwith "Expected the first cursor."

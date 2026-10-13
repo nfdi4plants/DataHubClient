@@ -11,7 +11,7 @@ open Fable.Core
 /// <param name="body">The raw response body as a string (typically JSON).</param>
 /// <param name="headers">The response headers as name/value pairs.</param>
 [<AttachMembers>]
-type HttpResponse(statusCode: int, body: string, headers: (string * string) list) =
+type HttpResponse(statusCode: int, body: string, headers: ResizeArray<string * string>) =
     /// The numeric HTTP status code of the response.
     member _.StatusCode = statusCode
     /// The raw response body as a string (typically JSON).

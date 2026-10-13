@@ -52,7 +52,7 @@ type DotNetHttpClient(httpClient: HttpClient) =
                 let! body = response.Content.ReadAsStringAsync() |> Async.AwaitTask
 
                 let responseHeaders =
-                    [
+                    ResizeArray [
                         for header in response.Headers do
                             for value in header.Value do
                                 header.Key, value

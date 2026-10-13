@@ -30,7 +30,7 @@ type IssuesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
         async {
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" (issueSegments projectId) [ "state", state ]
             let! response = http.SendAsync req
-            return ResourceHelpers.decodeArray Issue.decoder response
+            return ResourceHelpers.decodeResizeArray Issue.decoder response
         }
         |> ResourceHelpers.toPublic
 
@@ -97,7 +97,7 @@ type IssuesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
         async {
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" (noteSegments projectId iid) []
             let! response = http.SendAsync req
-            return ResourceHelpers.decodeArray Note.decoder response
+            return ResourceHelpers.decodeResizeArray Note.decoder response
         }
         |> ResourceHelpers.toPublic
 

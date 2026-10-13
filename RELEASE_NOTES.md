@@ -1,3 +1,10 @@
+### 0.7.0 (Released 2026-10-13)
+
+* **Breaking change:** Public collection results, constructor arguments, and properties now use `ResizeArray<T>` consistently across targets, including resource lists, issue assignees and labels, and HTTP headers. F#/.NET callers should use `.Count` instead of `.Length` and construct collections with `ResizeArray [ ... ]`.
+* TypeScript collection declarations now use ordinary `T[]`, supporting `map`, `push`, and other native array operations without `Array.from` workarounds. Python receives native lists.
+* Update documentation examples, custom transport fixtures, and cross-target tests for the collection signatures; verify mutable collections, JSON round trips, and browser consumers.
+* Require `ResizeArray` for public collection arguments and return values in the Fable development guidance.
+
 ### 0.6.0 (Released 2026-10-13)
 
 * Bundle TypeScript declarations with the npm package's JavaScript modules, preserving existing import paths for JavaScript and TypeScript consumers.

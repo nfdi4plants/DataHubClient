@@ -71,20 +71,55 @@ let tests =
             Expect.isFalse r.System "system"
             Expect.equal r.Author.Username "carl" "nested author"
 
-        testCase "Issue round-trips through JSON with arrays" <| fun () ->
+        testCase "Issue round-trips through JSON with resizable collections" <| fun () ->
             let issue =
                 Issue(
                     100, 3, 42, "Missing assay metadata", "opened", sampleUser,
-                    [| sampleUser |], [| "bug"; "metadata" |], "https://hub/issue/3",
+                    ResizeArray([ sampleUser ]), ResizeArray([ "bug"; "metadata" ]), "https://hub/issue/3",
                     "2026-05-01T00:00:00Z", "2026-05-03T00:00:00Z", "please fix")
             let r = roundTrip Issue.encoder Issue.decoder issue
             Expect.equal r.Iid 3 "iid"
             Expect.equal r.ProjectId 42 "project id"
             Expect.equal r.State "opened" "state"
-            Expect.equal r.Labels [| "bug"; "metadata" |] "labels"
-            Expect.equal r.Assignees.Length 1 "assignee count"
+            Expect.equal (r.Labels |> Seq.toList) [ "bug"; "metadata" ] "labels"
+            Expect.equal r.Assignees.Count 1 "assignee count"
             Expect.equal r.Assignees.[0].Username "carl" "assignee"
             Expect.equal r.Description (Some "please fix") "description"
+
+        testCase "Issue collections can be resized and replaced before JSON encoding" <| fun () ->
+            let issue =
+                Issue(
+                    100, 3, 42, "Missing assay metadata", "opened", sampleUser,
+                    ResizeArray(), ResizeArray(), "https://hub/issue/3",
+                    "2026-05-01T00:00:00Z", "2026-05-03T00:00:00Z")
+            issue.Assignees.Add(sampleUser)
+            issue.Labels.Add("obsolete")
+            issue.Labels <- ResizeArray([ "bug" ])
+            issue.Labels.Add("metadata")
+
+            let decoded = roundTrip Issue.encoder Issue.decoder issue
+            Expect.equal decoded.Assignees.Count 1 "added assignee is encoded"
+            Expect.equal (decoded.Labels |> Seq.toList) [ "bug"; "metadata" ] "replacement and appended labels are encoded"
+
+            decoded.Assignees.Clear()
+            decoded.Labels.RemoveAt(0)
+            decoded.Labels.Add("reviewed")
+            let updated = roundTrip Issue.encoder Issue.decoder decoded
+            Expect.equal updated.Assignees.Count 0 "decoded assignees can be cleared"
+            Expect.equal (updated.Labels |> Seq.toList) [ "metadata"; "reviewed" ] "decoded labels can be removed and appended"
+
+        testCase "HTTP request and response headers support resizable collections" <| fun () ->
+            let request = HttpRequest("https://hub.example/api/v4/projects", "GET")
+            request.Headers.Add(("X-Initial", "one"))
+            request.Headers <- ResizeArray([ "X-Request-Id", "req-7" ])
+            request.Headers.Add(("Accept", "application/json"))
+            Expect.equal request.Headers.Count 2 "headers can be replaced and appended"
+            Expect.equal request.Headers.[0] ("X-Request-Id", "req-7") "replacement header survives"
+
+            let response = HttpResponse(200, "[]", ResizeArray([ "X-Request-Id", "req-7" ]))
+            response.Headers.Add(("X-Next-Page", "2"))
+            response.Headers.RemoveAt(0)
+            Expect.equal (response.Headers |> Seq.toList) [ "X-Next-Page", "2" ] "response header collection can be resized"
 
         testCase "MergeRequest round-trips through JSON" <| fun () ->
             let mr =

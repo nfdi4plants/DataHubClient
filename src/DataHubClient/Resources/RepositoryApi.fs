@@ -27,7 +27,7 @@ type RepositoryApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
                     [ "search", search ]
 
             let! response = http.SendAsync req
-            return ResourceHelpers.decodeArray Branch.decoder response
+            return ResourceHelpers.decodeResizeArray Branch.decoder response
         }
         |> ResourceHelpers.toPublic
 
@@ -64,7 +64,7 @@ type RepositoryApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
                     [ "path", path; "ref_name", refName ]
 
             let! response = http.SendAsync req
-            return ResourceHelpers.decodeArray Commit.decoder response
+            return ResourceHelpers.decodeResizeArray Commit.decoder response
         }
         |> ResourceHelpers.toPublic
 

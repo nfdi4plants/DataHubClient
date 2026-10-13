@@ -35,9 +35,9 @@ type HttpxHttpClient() =
     [<Emit("$0.aclose()")>]
     static member private Close(client: HttpxAsyncClient) : System.Threading.Tasks.Task<unit> = nativeOnly
 
-    /// Reads the response headers as a sequence of name/value pairs.
+    /// Reads the response headers as a resizable collection of name/value pairs.
     [<Emit("list($0.headers.items())")>]
-    static member private HeaderItems(response: HttpxResponse) : seq<string * string> = nativeOnly
+    static member private HeaderItems(response: HttpxResponse) : ResizeArray<string * string> = nativeOnly
 
     interface IHttpClient with
         /// <summary>Sends a request through <c>httpx.AsyncClient</c>.</summary>
@@ -47,7 +47,7 @@ type HttpxHttpClient() =
             async {
                 let client = HttpxHttpClient.NewClient()
 
-                let headers: obj = box (ResizeArray [ for name, value in request.Headers -> name, value ])
+                let headers: obj = box request.Headers
 
                 let content: obj =
                     match request.Body with
@@ -60,7 +60,7 @@ type HttpxHttpClient() =
 
                 do! HttpxHttpClient.Close client |> Async.AwaitTask
 
-                let collected = [ for name, value in HttpxHttpClient.HeaderItems response -> name, value ]
+                let collected = HttpxHttpClient.HeaderItems response
 
                 return HttpResponse(response.status_code, response.text, collected)
             }

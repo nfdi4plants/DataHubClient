@@ -34,7 +34,7 @@ type PackagesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
                     [ "package_name", packageName; "package_type", packageType ]
 
             let! response = http.SendAsync req
-            return ResourceHelpers.decodeArray Package.decoder response
+            return ResourceHelpers.decodeResizeArray Package.decoder response
         }
         |> ResourceHelpers.toPublic
 

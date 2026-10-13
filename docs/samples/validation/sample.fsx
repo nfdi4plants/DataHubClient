@@ -26,7 +26,7 @@ client.Http <-
             if responses.Count = 0 then failwith "Unexpected extra HTTP request."
             let expectedMethod, body = responses.Dequeue()
             if request.Method <> expectedMethod then failwith $"Expected {expectedMethod}, got {request.Method}."
-            return HttpResponse(200, body, [])
+            return HttpResponse(200, body, ResizeArray())
         } }
 
 // --8<-- [start:branches]
@@ -67,7 +67,7 @@ for item in summaries do
 // --8<-- [end:all-summaries]
 
 if responses.Count <> 0 then failwith "Expected every sample request to run."
-if branches <> [| "main" |] || summary.Critical.Passed <> 10 || summaries.Length <> 1 then
+if (branches |> Seq.toList) <> [ "main" ] || summary.Critical.Passed <> 10 || summaries.Count <> 1 then
     failwith "Unexpected validation discovery or summary."
 if not (report.Contains "<testsuites>") || not (badge.Contains "<svg") then
     failwith "Expected raw XML and SVG responses."

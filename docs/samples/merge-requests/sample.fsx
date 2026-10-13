@@ -25,7 +25,7 @@ client.Http <-
             if responses.Count = 0 then failwith "Unexpected extra HTTP request."
             let expectedMethod, body = responses.Dequeue()
             if request.Method <> expectedMethod then failwith $"Expected {expectedMethod}, got {request.Method}."
-            return HttpResponse(200, body, [])
+            return HttpResponse(200, body, ResizeArray())
         } }
 
 // --8<-- [start:list]

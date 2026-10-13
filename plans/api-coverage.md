@@ -244,6 +244,13 @@ attached public classes, explicit backing fields, native public async behavior,
 hand-written JSON modules, and XML documentation. Register new source files in
 all three project files in matching dependency order.
 
+Public collection returns, method/function arguments, constructor parameters,
+and properties must use `ResizeArray<'T>` on every target. This produces native
+TypeScript `T[]` declarations and supersedes the initial `MutableArray<T>` /
+`Array.from` guidance above. Internal arrays, lists, and sequences may remain
+implementation details. The migration changes the .NET collection signatures,
+including resource results, issue assignees/labels, and request/response headers.
+
 For substantive additions, run the relevant shared and transport-specific
 Pyxpecto suites through the build pipeline, inspect generated JavaScript and
 Python API surfaces, and update packaged documentation examples. Add live tests

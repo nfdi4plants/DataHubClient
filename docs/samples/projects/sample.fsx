@@ -22,7 +22,7 @@ client.Http <-
             let method, url, status, body = responses.Dequeue()
             if (request.Method, request.Url) <> (method, url) then
                 failwithf "Unexpected request: %s %s" request.Method request.Url
-            return HttpResponse(status, body, [])
+            return HttpResponse(status, body, ResizeArray())
         } }
 
 // --8<-- [start:list]
@@ -34,7 +34,7 @@ for project in projects do printfn "%d: %s" project.Id project.PathWithNamespace
 // --8<-- [start:list-all]
 let allProjects =
     client.Projects.ListAllAsync(visibility = "public") |> Async.RunSynchronously
-printfn "Found %d public projects" allProjects.Length
+printfn "Found %d public projects" allProjects.Count
 // --8<-- [end:list-all]
 
 // --8<-- [start:get]

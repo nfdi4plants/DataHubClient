@@ -19,9 +19,9 @@ client.Http <-
             requestCount <- requestCount + 1
             if request.Method <> "GET" || request.Url <> expectedUrl then
                 failwithf "Unexpected request: %s %s" request.Method request.Url
-            if request.Headers <> [ (DataHubClientVersion.HeaderName, DataHubClientVersion.Value) ] then
+            if (request.Headers |> Seq.toList) <> [ (DataHubClientVersion.HeaderName, DataHubClientVersion.Value) ] then
                 failwith "Expected an anonymous request with only the client-version header."
-            return HttpResponse(200, fixture, [])
+            return HttpResponse(200, fixture, ResizeArray())
         } }
 
 let originalDirectory = Directory.GetCurrentDirectory()

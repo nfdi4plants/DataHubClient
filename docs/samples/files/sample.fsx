@@ -23,7 +23,7 @@ client.Http <-
             let method, url, status, body = responses.Dequeue()
             if (request.Method, request.Url) <> (method, url) then
                 failwithf "Unexpected request: %s %s" request.Method request.Url
-            return HttpResponse(status, body, [])
+            return HttpResponse(status, body, ResizeArray())
         } }
 
 // --8<-- [start:get]

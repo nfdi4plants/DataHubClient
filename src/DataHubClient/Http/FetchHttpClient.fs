@@ -47,5 +47,5 @@ type FetchHttpClient() =
                 let collected = ResizeArray()
                 response.headers.forEach (fun value name -> collected.Add(name, value))
 
-                return HttpResponse(response.status, body, List.ofSeq collected)
+                return HttpResponse(response.status, body, collected)
             }

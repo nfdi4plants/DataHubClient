@@ -63,7 +63,7 @@ module internal ResourceHelpers =
         =
         let req = HttpRequest(url baseUrl segments query, method)
         req.Headers <-
-            [
+            ResizeArray [
                 if auth.Header <> "" then
                     yield auth.Header, auth.Value
                 yield DataHubClientVersion.HeaderName, DataHubClientVersion.Value
@@ -72,7 +72,7 @@ module internal ResourceHelpers =
         req.Body <- body
 
         match contentType, body with
-        | Some value, Some _ -> req.Headers <- req.Headers @ [ "Content-Type", value ]
+        | Some value, Some _ -> req.Headers.Add("Content-Type", value)
         | _ -> ()
 
         req
@@ -97,8 +97,9 @@ module internal ResourceHelpers =
         | Ok value -> value
         | Error err -> raise (DataHubError(response.StatusCode, err, response.Body))
 
-    let decodeArray (decoder: Decoder<'T>) (response: HttpResponse) =
-        decode (Decode.array decoder) response
+    /// <summary>Decodes a JSON array into the resizable collection used by public APIs.</summary>
+    let decodeResizeArray (decoder: Decoder<'T>) (response: HttpResponse) : ResizeArray<'T> =
+        decode (Decode.resizeArray decoder) response
 
     let responseBody (response: HttpResponse) =
         ensureSuccess response

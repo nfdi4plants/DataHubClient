@@ -24,6 +24,9 @@ globalThis.compatibility = {
     const anonymous = new DataHubClient(baseUrl, Authentication.Anonymous());
     const projects = await anonymous.Projects.ListAllAsync(undefined, true, "public");
     assert(projects.length === 1 && projects[0].Id === 42, "Anonymous pagination failed.");
+    assert(Array.isArray(projects) && projects.map(item => item.Id).join() === "42", "Public collections must be ordinary browser arrays.");
+    projects.push(project);
+    assert(projects.length === 2 && projects.pop() === project, "Public collections must support array mutation.");
     const file = await client.Files.GetAsync(42, "notes/été.txt", "main");
     const text = new TextDecoder().decode(Uint8Array.from(atob(file.Content), character => character.charCodeAt(0)));
     assert(file.Encoding === "base64" && text === "Pflanzen – étude", "Browser file decoding failed.");

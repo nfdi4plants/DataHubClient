@@ -30,7 +30,7 @@ console.log(`Found ${projects.length} public projects`);
 globalThis.fetch = originalFetch;
 
 import assert from "node:assert/strict";
-assert.deepEqual(Array.from(projects, project => project.Id), [1, 2]);
+assert.deepEqual(projects.map(project => project.Id), [1, 2]);
 assert.equal(requests.length, 3);
 for (const { url: requestUrl, init } of requests) {
   assert.equal(init?.method, "GET");

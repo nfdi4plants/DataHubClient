@@ -30,7 +30,7 @@ let token = Environment.GetEnvironmentVariable("DATAHUB_TEST_TOKEN")
 let auth = Authentication.PersonalAccessToken(token)
 let client = DataHubClient(url, auth)
 let projects = client.Projects.ListAsync() |> Async.RunSynchronously
-printfn "dotnet smoke OK: %d projects at %s" projects.Length url
+printfn "dotnet smoke OK: %d projects at %s" projects.Count url
 """
 
 let private dotnetFsxFor (version: string) (localSource: string) =

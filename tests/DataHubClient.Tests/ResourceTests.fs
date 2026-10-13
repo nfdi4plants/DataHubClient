@@ -21,11 +21,11 @@ let private makeClient () =
 let private expectAuthHeader (request: HttpRequest) =
     Expect.equal request.Headers.[0] ("PRIVATE-TOKEN", "token") "auth header"
     Expect.isTrue
-        (request.Headers |> List.contains (DataHubClientVersion.HeaderName, DataHubClientVersion.Value))
+        (request.Headers |> Seq.contains (DataHubClientVersion.HeaderName, DataHubClientVersion.Value))
         "client version header"
 
 let private expectJsonHeader (request: HttpRequest) =
-    Expect.isTrue (request.Headers |> List.contains ("Content-Type", "application/json")) "content type"
+    Expect.isTrue (request.Headers |> Seq.contains ("Content-Type", "application/json")) "content type"
 
 /// <summary>Builds project pages from the hand-written API fixture with distinct numeric IDs.</summary>
 let private projectPage ids =
@@ -101,12 +101,29 @@ let tests =
 
             let! projects = client.Projects.ListAsync(search = "arc", simple = true) |> awaitApi
 
-            Expect.equal projects.Length 1 "project count"
+            Expect.equal projects.Count 1 "project count"
             Expect.equal projects.[0].PathWithNamespace "lab/my-arc" "decoded project"
             let request = mock.LastRequest
             Expect.equal request.Method "GET" "method"
             Expect.equal request.Url (apiUrl "projects?search=arc&simple=true") "url"
             expectAuthHeader request
+        }
+
+        testCaseAsync "Projects.ListAsync returns an independently resizable collection" <| async {
+            let client, mock = makeClient ()
+            mock.Add("GET", apiUrl "projects", 200, SampleData.projects)
+
+            let! projects = client.Projects.ListAsync() |> awaitApi
+            let original = projects.[0]
+            projects.Add(original)
+            Expect.equal projects.Count 2 "returned projects support append"
+            projects.RemoveAt(0)
+            Expect.equal projects.[0].Id original.Id "remaining project survives removal"
+            projects.Clear()
+
+            let! fresh = client.Projects.ListAsync() |> awaitApi
+            Expect.equal fresh.Count 1 "mutating an earlier result does not affect subsequent decoding"
+            Expect.equal fresh.[0].Id original.Id "subsequent result retains the original data"
         }
 
         testCaseAsync "Projects.GetAsync maps 404 to NotFoundError" <| async {
@@ -133,7 +150,7 @@ let tests =
 
             let! projects = client.Projects.ListAllAsync(search = "plant arc", simple = true, visibility = "public") |> awaitApi
 
-            Expect.equal (projects |> Array.map (fun project -> project.Id)) [| 2; 7; 42 |] "every page is retained in order"
+            Expect.equal (projects |> Seq.map (fun project -> project.Id) |> Seq.toList) [ 2; 7; 42 ] "every page is retained in order"
             Expect.equal (mock.Requests |> Array.map (fun request -> request.Url)) [| firstUrl; secondUrl; thirdUrl |] "short pages continue until an empty page"
 
             for request in mock.Requests do
@@ -150,9 +167,9 @@ let tests =
 
             let! projects = client.Projects.ListAllAsync(visibility = "public") |> awaitApi
 
-            Expect.equal projects.Length 0 "no projects"
+            Expect.equal projects.Count 0 "no projects"
             Expect.equal mock.Requests.Length 1 "stop at the first empty page"
-            Expect.equal mock.LastRequest.Headers [ DataHubClientVersion.HeaderName, DataHubClientVersion.Value ] "only the version header is sent"
+            Expect.equal (mock.LastRequest.Headers |> Seq.toList) [ DataHubClientVersion.HeaderName, DataHubClientVersion.Value ] "only the version header is sent"
         }
 
         testCaseAsync "Projects.ListAllAsync omits unspecified filters" <| async {
@@ -161,7 +178,7 @@ let tests =
 
             let! projects = client.Projects.ListAllAsync() |> awaitApi
 
-            Expect.equal projects.Length 0 "no projects"
+            Expect.equal projects.Count 0 "no projects"
             Expect.equal mock.Requests.Length 1 "one unfiltered request"
         }
 
@@ -358,7 +375,7 @@ let tests =
 
             let! notes = client.MergeRequests.NotesAsync(42, 8) |> awaitApi
 
-            Expect.equal notes.Length 1 "note count"
+            Expect.equal notes.Count 1 "note count"
             Expect.equal notes.[0].Author.Username "carl" "note author"
             Expect.equal mock.LastRequest.Url (apiUrl "projects/42/merge_requests/8/notes") "url"
         }
@@ -369,7 +386,7 @@ let tests =
 
             let! branches = client.Validation.ListValidatedBranchesAsync(42) |> awaitApi
 
-            Expect.equal branches [| "main"; "dev" |] "folders only, blobs skipped"
+            Expect.equal (branches |> Seq.toList) [ "main"; "dev" ] "folders only, blobs skipped"
             Expect.equal mock.LastRequest.Url (apiUrl "projects/42/repository/tree?per_page=100&ref=cqc") "url"
             expectAuthHeader mock.LastRequest
         }
@@ -380,7 +397,7 @@ let tests =
 
             let! packages = client.Validation.ListPackagesAsync(42) |> awaitApi
 
-            Expect.equal packages.Length 2 "unversioned folders and blobs skipped"
+            Expect.equal packages.Count 2 "unversioned folders and blobs skipped"
             Expect.equal packages.[0].Name "invenio" "name"
             Expect.equal packages.[0].Version "3.1.0" "version"
             Expect.equal packages.[0].Branch "main" "branch"
@@ -445,9 +462,9 @@ let tests =
 
             let! summaries = client.Validation.GetAllSummariesAsync(42) |> awaitApi
 
-            Expect.equal summaries.Length 2 "summary count"
-            let names = summaries |> Array.map (fun s -> s.ValidationPackage.Name) |> Array.sort
-            Expect.equal names [| "invenio"; "pride" |] "summary package names"
+            Expect.equal summaries.Count 2 "summary count"
+            let names = summaries |> Seq.map (fun s -> s.ValidationPackage.Name) |> Seq.sort |> Seq.toList
+            Expect.equal names [ "invenio"; "pride" ] "summary package names"
             Expect.equal mock.Requests.Length 3 "one tree listing plus one fetch per package"
         }
 
@@ -475,7 +492,7 @@ let tests =
             Expect.equal packages.[0].PackageType "generic" "package type"
             Expect.equal uploadRequest.Method "PUT" "upload method"
             Expect.equal uploadRequest.Body (Some "zip-content") "upload body"
-            Expect.isTrue (uploadRequest.Headers |> List.contains ("Content-Type", "application/octet-stream")) "upload content type"
+            Expect.isTrue (uploadRequest.Headers |> Seq.contains ("Content-Type", "application/octet-stream")) "upload content type"
             Expect.equal uploadResponse """{"message":"201 Created"}""" "upload response"
             Expect.equal downloadResponse "zip-content" "download response"
         }

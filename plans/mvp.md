@@ -202,12 +202,12 @@ Resource classes follow GitLab's URL grouping. Example:
 ```fsharp
 [<AttachMembers>]
 type IssuesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
-    member this.List(projectId: int) : Async<Issue array> = ...
+    member this.List(projectId: int) : Async<ResizeArray<Issue>> = ...
     member this.Get(projectId: int, iid: int) : Async<Issue> = ...
     member this.Create(projectId: int, title: string, ?description: string) : Async<Issue> = ...
     member this.Update(projectId: int, iid: int, patch: Issue) : Async<Issue> = ...
     member this.Close(projectId: int, iid: int) : Async<Issue> = ...
-    member this.Notes(projectId: int, iid: int) : Async<Note array> = ...
+    member this.Notes(projectId: int, iid: int) : Async<ResizeArray<Note>> = ...
 ```
 
 Top-level facade:
@@ -591,6 +591,21 @@ Tasks:
       TypeScript tabs render with expanded snippets (2026-10-13).
 
 Details and remaining API priorities: [API coverage plan](api-coverage.md).
+
+### Release 0.7.0 — public collection types
+
+- [x] Require `ResizeArray<'T>` for public collection parameters, constructor
+      arguments, properties, and return values in the Fable guidance.
+- [x] Migrate resource results, issue collections, and HTTP headers consistently
+      across .NET, JavaScript/TypeScript, and Python.
+- [x] Verify native TypeScript arrays, mutable collections, JSON round trips,
+      HTTP transports, packaged examples, and browser consumers: 166 cross-target
+      tests, 44 packaged samples, six browser cases, and guide/API builds pass.
+      All 14 collection-returning resource methods emit `Promise<T[]>`; model
+      collections and headers also emit native arrays. Integration consumers
+      compile and the survey's 12 offline checks pass (2026-10-13).
+- [x] Document the collection signature change and remove the `Array.from`
+      workaround from examples intended to demonstrate normal array operations.
 
 ## Verification
 

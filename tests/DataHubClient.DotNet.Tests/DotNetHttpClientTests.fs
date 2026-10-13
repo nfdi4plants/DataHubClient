@@ -14,7 +14,7 @@ let tests =
             let transport = DotNetHttpClient(httpClient) :> IHttpClient
 
             let request = HttpRequest("https://hub.example/api/v4/projects", "GET")
-            request.Headers <- [ "PRIVATE-TOKEN", "secret-token" ]
+            request.Headers <- ResizeArray([ "PRIVATE-TOKEN", "secret-token" ])
 
             let! _ = transport.SendAsync request
 
@@ -32,7 +32,7 @@ let tests =
             let transport = DotNetHttpClient(httpClient) :> IHttpClient
 
             let request = HttpRequest("https://hub.example/api/v4/projects/42/issues", "POST")
-            request.Headers <- [ "PRIVATE-TOKEN", "secret-token"; "Content-Type", "application/json" ]
+            request.Headers <- ResizeArray([ "PRIVATE-TOKEN", "secret-token"; "Content-Type", "application/json" ])
             request.Body <- Some """{"title":"bug"}"""
 
             let! _ = transport.SendAsync request

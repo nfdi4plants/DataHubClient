@@ -202,7 +202,7 @@ Read the package's validation badge as raw SVG text.
 
 ## GetAllSummariesAsync
 
-Discover the packages for an ARC branch, then fetch each summary. The returned array contains one `ValidationSummary` per discovered package; an empty package list returns an empty array.
+Discover the packages for an ARC branch, then fetch each summary. The returned collection contains one `ValidationSummary` per discovered package; an empty package list returns an empty collection.
 
 === "F#"
 

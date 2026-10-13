@@ -16,8 +16,8 @@ module Issue =
                 get.Required.Field "title" Decode.string,
                 get.Required.Field "state" Decode.string,
                 get.Required.Field "author" User.decoder,
-                get.Required.Field "assignees" (Decode.array User.decoder),
-                get.Required.Field "labels" (Decode.array Decode.string),
+                get.Required.Field "assignees" (Decode.resizeArray User.decoder),
+                get.Required.Field "labels" (Decode.resizeArray Decode.string),
                 get.Required.Field "web_url" Decode.string,
                 get.Required.Field "created_at" Decode.string,
                 get.Required.Field "updated_at" Decode.string,
@@ -32,8 +32,8 @@ module Issue =
             "title", Encode.string issue.Title
             "state", Encode.string issue.State
             "author", User.encoder issue.Author
-            "assignees", Encode.array (Array.map User.encoder issue.Assignees)
-            "labels", Encode.array (Array.map Encode.string issue.Labels)
+            "assignees", Encode.resizeArray (ResizeArray(issue.Assignees |> Seq.map User.encoder))
+            "labels", Encode.resizeArray (ResizeArray(issue.Labels |> Seq.map Encode.string))
             "web_url", Encode.string issue.WebUrl
             "created_at", Encode.string issue.CreatedAt
             "updated_at", Encode.string issue.UpdatedAt

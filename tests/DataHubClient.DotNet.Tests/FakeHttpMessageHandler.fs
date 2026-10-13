@@ -78,8 +78,8 @@ module Header =
     /// case-insensitively, as HTTP requires — with exactly <paramref name="value"/>.
     /// System.Net.Http canonicalises some header names (e.g. <c>X-Request-Id</c> to
     /// <c>X-Request-ID</c>), so an exact-case match would be transport-fragile.
-    let contains (name: string) (value: string) (headers: (string * string) list) : bool =
+    let contains (name: string) (value: string) (headers: seq<string * string>) : bool =
         headers
-        |> List.exists (fun (headerName, headerValue) ->
+        |> Seq.exists (fun (headerName, headerValue) ->
             String.Equals(headerName, name, StringComparison.OrdinalIgnoreCase)
             && headerValue = value)

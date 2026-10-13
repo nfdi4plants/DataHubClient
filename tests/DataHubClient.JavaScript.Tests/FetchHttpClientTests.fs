@@ -47,7 +47,7 @@ let tests =
             let transport = FetchHttpClient() :> IHttpClient
 
             let request = HttpRequest("https://hub.example/api/v4/projects", "GET")
-            request.Headers <- [ "PRIVATE-TOKEN", "secret-token" ]
+            request.Headers <- ResizeArray([ "PRIVATE-TOKEN", "secret-token" ])
 
             let! _ = transport.SendAsync request
 
@@ -63,7 +63,7 @@ let tests =
             let transport = FetchHttpClient() :> IHttpClient
 
             let request = HttpRequest("https://hub.example/api/v4/projects/42/issues", "POST")
-            request.Headers <- [ "Content-Type", "application/json" ]
+            request.Headers <- ResizeArray([ "Content-Type", "application/json" ])
             request.Body <- Some """{"title":"bug"}"""
 
             let! _ = transport.SendAsync request
@@ -83,7 +83,7 @@ let tests =
             Expect.equal response.StatusCode 201 "status code"
             Expect.equal response.Body "created-body" "response body"
             Expect.isTrue
-                (response.Headers |> List.contains ("x-request-id", "req-7"))
+                (response.Headers |> Seq.contains ("x-request-id", "req-7"))
                 "response header survives"
         }
     ]

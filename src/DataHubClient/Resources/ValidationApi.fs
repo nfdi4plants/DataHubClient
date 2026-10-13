@@ -40,7 +40,7 @@ type ValidationApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
                     [ "path", path; "per_page", Some "100"; "ref", Some refName ]
 
             let! response = http.SendAsync req
-            return ResourceHelpers.decodeArray treeEntryDecoder response
+            return ResourceHelpers.decodeResizeArray treeEntryDecoder response
         }
 
     let getRawFileResponse projectId (filePath: string) refName =
@@ -65,8 +65,9 @@ type ValidationApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
             let! entries = listTree projectId (Some branch) refName
             return
                 entries
-                |> Array.choose (fun (name, entryType) ->
+                |> Seq.choose (fun (name, entryType) ->
                     if entryType = "tree" then parsePackageFolder branch name else None)
+                |> ResizeArray
         }
 
     let getSummary projectId (package: ValidationPackageRef) refName =
@@ -83,7 +84,8 @@ type ValidationApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
             let! entries = listTree projectId None (defaultArg ref defaultRef)
             return
                 entries
-                |> Array.choose (fun (name, entryType) -> if entryType = "tree" then Some name else None)
+                |> Seq.choose (fun (name, entryType) -> if entryType = "tree" then Some name else None)
+                |> ResizeArray
         }
         |> ResourceHelpers.toPublic
 
@@ -110,7 +112,7 @@ type ValidationApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
                     [ "path", branch; "ref_name", Some(defaultArg ref defaultRef) ]
 
             let! response = http.SendAsync req
-            return ResourceHelpers.decodeArray Commit.decoder response
+            return ResourceHelpers.decodeResizeArray Commit.decoder response
         }
         |> ResourceHelpers.toPublic
 
@@ -155,9 +157,11 @@ type ValidationApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
             let refName = defaultArg ref defaultRef
             let! packages = listPackages projectId (defaultArg branch defaultBranch) refName
 
-            return!
+            let! summaries =
                 packages
-                |> Array.map (fun package -> getSummary projectId package refName)
+                |> Seq.map (fun package -> getSummary projectId package refName)
                 |> Async.Parallel
+
+            return ResizeArray summaries
         }
         |> ResourceHelpers.toPublic

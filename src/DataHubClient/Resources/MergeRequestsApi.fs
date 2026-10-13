@@ -30,7 +30,7 @@ type MergeRequestsApi(baseUrl: string, auth: Authentication, http: IHttpClient) 
         async {
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" (mergeRequestSegments projectId) [ "state", state ]
             let! response = http.SendAsync req
-            return ResourceHelpers.decodeArray MergeRequest.decoder response
+            return ResourceHelpers.decodeResizeArray MergeRequest.decoder response
         }
         |> ResourceHelpers.toPublic
 
@@ -101,7 +101,7 @@ type MergeRequestsApi(baseUrl: string, auth: Authentication, http: IHttpClient) 
         async {
             let req = ResourceHelpers.emptyRequest baseUrl auth "GET" (noteSegments projectId iid) []
             let! response = http.SendAsync req
-            return ResourceHelpers.decodeArray Note.decoder response
+            return ResourceHelpers.decodeResizeArray Note.decoder response
         }
         |> ResourceHelpers.toPublic
 

@@ -17,7 +17,7 @@ type MockHttpClient() =
     let recordLock = obj ()
 
     member _.Add(method: string, url: string, statusCode: int, body: string) =
-        routes <- MockRoute(method, url, HttpResponse(statusCode, body, [])) :: routes
+        routes <- MockRoute(method, url, HttpResponse(statusCode, body, ResizeArray())) :: routes
 
     member _.Requests =
         requests |> List.rev |> List.toArray
