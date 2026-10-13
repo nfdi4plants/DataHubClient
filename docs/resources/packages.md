@@ -1,0 +1,115 @@
+# Packages
+
+Use `client.Packages` to browse a project's Package Registry and transfer generic package files. `packageId` is the numeric registry package ID; generic file operations use the package name, version, and file name instead.
+
+Upload and download currently accept or return **text strings**. These methods do not provide a binary byte-stream API. Listing returns the server's current page.
+
+## Setup
+
+Replace the example token and project ID with your own. Python examples call each API from an async function, then run that function with `asyncio.run`. In an existing async application, call the API with `await` inside its running event loop. The repository runs these exact snippets against offline fixtures during documentation checks.
+
+=== "F#"
+
+    ```fsharp
+    --8<-- "docs/samples/packages/sample.fsx:setup"
+    ```
+
+=== "JavaScript"
+
+    ```javascript
+    --8<-- "docs/samples/packages/sample.mjs:setup"
+    ```
+
+=== "Python"
+
+    ```python
+    --8<-- "docs/samples/packages/sample.py:setup"
+    ```
+
+## ListAsync
+
+Filter the registry by package type and name. Both filters are optional.
+
+=== "F#"
+
+    ```fsharp
+    --8<-- "docs/samples/packages/sample.fsx:list"
+    ```
+
+=== "JavaScript"
+
+    ```javascript
+    --8<-- "docs/samples/packages/sample.mjs:list"
+    ```
+
+=== "Python"
+
+    ```python
+    --8<-- "docs/samples/packages/sample.py:list"
+    ```
+
+## GetAsync
+
+Read the registry metadata for a package ID returned by `ListAsync`.
+
+=== "F#"
+
+    ```fsharp
+    --8<-- "docs/samples/packages/sample.fsx:get"
+    ```
+
+=== "JavaScript"
+
+    ```javascript
+    --8<-- "docs/samples/packages/sample.mjs:get"
+    ```
+
+=== "Python"
+
+    ```python
+    --8<-- "docs/samples/packages/sample.py:get"
+    ```
+
+## UploadGenericFileAsync
+
+Upload a text file under a generic package name and version. This writes to the registry and returns the server's response body as a string.
+
+=== "F#"
+
+    ```fsharp
+    --8<-- "docs/samples/packages/sample.fsx:upload"
+    ```
+
+=== "JavaScript"
+
+    ```javascript
+    --8<-- "docs/samples/packages/sample.mjs:upload"
+    ```
+
+=== "Python"
+
+    ```python
+    --8<-- "docs/samples/packages/sample.py:upload"
+    ```
+
+## DownloadGenericFileAsync
+
+Read a generic package file as text; parse it separately when it contains JSON or another structured format.
+
+=== "F#"
+
+    ```fsharp
+    --8<-- "docs/samples/packages/sample.fsx:download"
+    ```
+
+=== "JavaScript"
+
+    ```javascript
+    --8<-- "docs/samples/packages/sample.mjs:download"
+    ```
+
+=== "Python"
+
+    ```python
+    --8<-- "docs/samples/packages/sample.py:download"
+    ```

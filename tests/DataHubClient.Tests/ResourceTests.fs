@@ -27,6 +27,13 @@ let private expectAuthHeader (request: HttpRequest) =
 let private expectJsonHeader (request: HttpRequest) =
     Expect.isTrue (request.Headers |> List.contains ("Content-Type", "application/json")) "content type"
 
+/// <summary>Builds project pages from the hand-written API fixture with distinct numeric IDs.</summary>
+let private projectPage ids =
+    ids
+    |> List.map (fun id -> SampleData.project.Replace("\"id\":42", "\"id\":" + string id).Replace("\"visibility\":\"private\"", "\"visibility\":\"public\""))
+    |> String.concat ","
+    |> fun projects -> "[" + projects + "]"
+
 let private requestBody (request: HttpRequest) =
     match request.Body with
     | Some body -> body
@@ -115,6 +122,94 @@ let tests =
                 Expect.equal err.Body """{"message":"404 Project Not Found"}""" "body"
         }
 
+        testCaseAsync "Projects.ListAllAsync follows short pages and preserves filters and authentication" <| async {
+            let client, mock = makeClient ()
+            let firstUrl = apiUrl "projects?order_by=id&pagination=keyset&per_page=100&search=plant%20arc&simple=true&sort=asc&visibility=public"
+            let secondUrl = apiUrl "projects?id_after=7&order_by=id&pagination=keyset&per_page=100&search=plant%20arc&simple=true&sort=asc&visibility=public"
+            let thirdUrl = apiUrl "projects?id_after=42&order_by=id&pagination=keyset&per_page=100&search=plant%20arc&simple=true&sort=asc&visibility=public"
+            mock.Add("GET", firstUrl, 200, projectPage [ 2; 7 ])
+            mock.Add("GET", secondUrl, 200, projectPage [ 42 ])
+            mock.Add("GET", thirdUrl, 200, "[]")
+
+            let! projects = client.Projects.ListAllAsync(search = "plant arc", simple = true, visibility = "public") |> awaitApi
+
+            Expect.equal (projects |> Array.map (fun project -> project.Id)) [| 2; 7; 42 |] "every page is retained in order"
+            Expect.equal (mock.Requests |> Array.map (fun request -> request.Url)) [| firstUrl; secondUrl; thirdUrl |] "short pages continue until an empty page"
+
+            for request in mock.Requests do
+                Expect.equal request.Method "GET" "method"
+                expectAuthHeader request
+        }
+
+        testCaseAsync "Projects.ListAllAsync handles an empty public listing anonymously" <| async {
+            let mock = MockHttpClient()
+            let client = DataHubClient(baseUrl, Authentication.Anonymous())
+            client.Http <- mock
+            let url = apiUrl "projects?order_by=id&pagination=keyset&per_page=100&sort=asc&visibility=public"
+            mock.Add("GET", url, 200, "[]")
+
+            let! projects = client.Projects.ListAllAsync(visibility = "public") |> awaitApi
+
+            Expect.equal projects.Length 0 "no projects"
+            Expect.equal mock.Requests.Length 1 "stop at the first empty page"
+            Expect.equal mock.LastRequest.Headers [ DataHubClientVersion.HeaderName, DataHubClientVersion.Value ] "only the version header is sent"
+        }
+
+        testCaseAsync "Projects.ListAllAsync omits unspecified filters" <| async {
+            let client, mock = makeClient ()
+            mock.Add("GET", apiUrl "projects?order_by=id&pagination=keyset&per_page=100&sort=asc", 200, "[]")
+
+            let! projects = client.Projects.ListAllAsync() |> awaitApi
+
+            Expect.equal projects.Length 0 "no projects"
+            Expect.equal mock.Requests.Length 1 "one unfiltered request"
+        }
+
+        testCaseAsync "Projects.ListAllAsync rejects repeated or decreasing IDs between pages" <| async {
+            for nextId in [ 42; 41 ] do
+                let client, mock = makeClient ()
+                mock.Add("GET", apiUrl "projects?order_by=id&pagination=keyset&per_page=100&sort=asc", 200, projectPage [ 42 ])
+                mock.Add("GET", apiUrl "projects?id_after=42&order_by=id&pagination=keyset&per_page=100&sort=asc", 200, projectPage [ nextId ])
+
+                try
+                    let! _ = client.Projects.ListAllAsync() |> awaitApi
+                    failwith "expected a pagination error"
+                with
+                | :? DataHubError as err ->
+                    Expect.equal err.StatusCode 200 "pagination failed on a successful HTTP response"
+                    Expect.equal err.Body (projectPage [ nextId ]) "the invalid page is preserved"
+                    Expect.equal mock.Requests.Length 2 "reject the page before making another request"
+        }
+
+        testCaseAsync "Projects.ListAllAsync rejects repeated or decreasing IDs within a page" <| async {
+            for ids in [ [ 42; 42 ]; [ 42; 41 ] ] do
+                let client, mock = makeClient ()
+                mock.Add("GET", apiUrl "projects?order_by=id&pagination=keyset&per_page=100&sort=asc", 200, projectPage ids)
+
+                try
+                    let! _ = client.Projects.ListAllAsync() |> awaitApi
+                    failwith "expected a pagination error"
+                with
+                | :? DataHubError as err ->
+                    Expect.equal err.Body (projectPage ids) "the invalid page is preserved"
+                    Expect.equal mock.Requests.Length 1 "reject the page before advancing the cursor"
+        }
+
+        testCaseAsync "Projects.ListAllAsync propagates a later page failure instead of returning partial results" <| async {
+            let client, mock = makeClient ()
+            mock.Add("GET", apiUrl "projects?order_by=id&pagination=keyset&per_page=100&sort=asc", 200, projectPage [ 42 ])
+            mock.Add("GET", apiUrl "projects?id_after=42&order_by=id&pagination=keyset&per_page=100&sort=asc", 503, "service unavailable")
+
+            try
+                let! _ = client.Projects.ListAllAsync() |> awaitApi
+                failwith "expected ServerError"
+            with
+            | :? ServerError as err ->
+                Expect.equal err.StatusCode 503 "status"
+                Expect.equal err.Body "service unavailable" "body"
+                Expect.equal mock.Requests.Length 2 "stop at the failed page"
+        }
+
         testCaseAsync "Repository APIs build branch and commit requests" <| async {
             let client, mock = makeClient ()
             mock.Add("GET", apiUrl "projects/42/repository/branches?search=main", 200, SampleData.branches)
@@ -141,9 +236,10 @@ let tests =
             expectAuthHeader mock.LastRequest
         }
 
-        testCaseAsync "Files.CreateAsync sends JSON body" <| async {
+        testCaseAsync "Files.CreateAsync sends JSON body and reads the created file" <| async {
             let client, mock = makeClient ()
-            mock.Add("POST", apiUrl "projects/42/repository/files/assays%2Fa%2Fisa.assay.xlsx", 201, SampleData.repoFile)
+            mock.Add("POST", apiUrl "projects/42/repository/files/assays%2Fa%2Fisa.assay.xlsx", 201, """{"file_path":"assays/a/isa.assay.xlsx","branch":"main"}""")
+            mock.Add("GET", apiUrl "projects/42/repository/files/assays%2Fa%2Fisa.assay.xlsx?ref=main", 200, SampleData.repoFile)
 
             let! file =
                 client.Files.CreateAsync(
@@ -155,7 +251,7 @@ let tests =
                     encoding = "base64")
                 |> awaitApi
 
-            let request = mock.LastRequest
+            let request = mock.Requests.[0]
             let _, _, _, branch, content, commitMessage, encoding, _, _, _ = decodeObjectFields (requestBody request)
             Expect.equal file.Encoding "base64" "decoded file"
             Expect.equal request.Method "POST" "method"
@@ -164,6 +260,61 @@ let tests =
             Expect.equal content (Some "QVJD") "content"
             Expect.equal commitMessage (Some "Add assay file") "commit message"
             Expect.equal encoding (Some "base64") "encoding"
+            Expect.equal mock.Requests.Length 2 "write followed by a read"
+            Expect.equal mock.LastRequest.Method "GET" "read the full file response"
+            expectAuthHeader mock.LastRequest
+        }
+
+        testCaseAsync "Files.UpdateAsync reads the file after GitLab's compact write response" <| async {
+            let client, mock = makeClient ()
+            let url = apiUrl "projects/42/repository/files/assays%2Fa%2Fisa.assay.xlsx"
+            mock.Add("PUT", url, 200, """{"file_path":"assays/a/isa.assay.xlsx","branch":"feature/assay"}""")
+            mock.Add("GET", url + "?ref=feature%2Fassay", 200, SampleData.repoFile)
+
+            let! file = client.Files.UpdateAsync(42, "assays/a/isa.assay.xlsx", "feature/assay", "updated content", "Update assay") |> awaitApi
+            let _, _, _, branch, content, commitMessage, encoding, _, _, _ = decodeObjectFields (requestBody mock.Requests.[0])
+
+            Expect.equal file.FilePath "assays/a/isa.assay.xlsx" "decoded file"
+            Expect.equal branch (Some "feature/assay") "target branch"
+            Expect.equal content (Some "updated content") "replacement content"
+            Expect.equal commitMessage (Some "Update assay") "commit message"
+            Expect.equal encoding None "default text encoding"
+            Expect.equal mock.Requests.Length 2 "write followed by a read"
+            Expect.equal mock.LastRequest.Url (url + "?ref=feature%2Fassay") "read the target branch"
+        }
+
+        testCaseAsync "Files writes do not read back after a failed write" <| async {
+            for method in [ "POST"; "PUT" ] do
+                let client, mock = makeClient ()
+                mock.Add(method, apiUrl "projects/42/repository/files/README.md", 403, "forbidden")
+                try
+                    let! _ =
+                        (if method = "POST" then client.Files.CreateAsync(42, "README.md", "main", "text", "Create file")
+                         else client.Files.UpdateAsync(42, "README.md", "main", "text", "Update file"))
+                        |> awaitApi
+                    failwith "expected UnauthorizedError"
+                with
+                | :? UnauthorizedError as err ->
+                    Expect.equal err.Body "forbidden" "preserve write error"
+                    Expect.equal mock.Requests.Length 1 "stop after failed write"
+        }
+
+        testCaseAsync "Files writes report read-back failures after successful writes" <| async {
+            for method in [ "POST"; "PUT" ] do
+                let client, mock = makeClient ()
+                let url = apiUrl "projects/42/repository/files/README.md"
+                mock.Add(method, url, 200, """{"file_path":"README.md","branch":"main"}""")
+                mock.Add("GET", url + "?ref=main", 503, "read unavailable")
+                try
+                    let! _ =
+                        (if method = "POST" then client.Files.CreateAsync(42, "README.md", "main", "text", "Create file")
+                         else client.Files.UpdateAsync(42, "README.md", "main", "text", "Update file"))
+                        |> awaitApi
+                    failwith "expected ServerError"
+                with
+                | :? ServerError as err ->
+                    Expect.equal err.Body "read unavailable" "preserve read error"
+                    Expect.equal mock.Requests.Length 2 "do not retry the successful write"
         }
 
         testCaseAsync "Issues APIs send bodies and decode notes" <| async {

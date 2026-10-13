@@ -68,4 +68,14 @@ extra:
 nav:
   - Home: index.md
   - Getting started: getting-started.md
+  - Resource examples:
+      - Overview: resources.md
+      - Users: resources/users.md
+      - Projects: resources/projects.md
+      - Repository: resources/repository.md
+      - Files: resources/files.md
+      - Issues: resources/issues.md
+      - Merge requests: resources/merge-requests.md
+      - Packages: resources/packages.md
+      - Validation: resources/validation.md
   - API reference: reference.md

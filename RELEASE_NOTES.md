@@ -1,3 +1,12 @@
+### 0.4.0 (Released 2026-10-13)
+
+* `Authentication.Anonymous()` — access public resources without sending an authentication header.
+* `client.Projects.ListAllAsync()` — retrieve every matching project in ascending ID order using keyset pagination, with optional search, compact representation, and visibility filters. Invalid ordering and failed pages raise errors instead of returning partial results.
+* Fixed `Files.CreateAsync()` and `Files.UpdateAsync()` failing to decode successful GitLab write responses. Both now read back the file from the target branch to return its contents and metadata; a read-back failure is reported even if the write succeeded.
+* Documentation examples for every method across all eight resource APIs, verified against the .NET, JavaScript, and Python packages.
+* Documentation sample runner supports the Windows npm launcher, Python environments, and NuGet cache paths.
+* README links to the published guide and API reference, with version badges linking to NuGet, npm, and PyPI.
+
 ### 0.3.0 (Released 2026-7-29)
 
 * `client.Users` — user API: `GetCurrentAsync()` (GitLab `GET /user`) resolves the identity behind the configured credential, `GetAsync(userId)` fetches a user by numeric id.

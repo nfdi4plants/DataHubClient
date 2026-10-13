@@ -25,11 +25,7 @@ type FilesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
             "encoding", encoding |> Option.map Encode.string
         ]
 
-    /// <summary>Gets a repository file from a branch, tag, or commit SHA.</summary>
-    /// <param name="projectId">The project identifier.</param>
-    /// <param name="filePath">The repository-relative file path.</param>
-    /// <param name="refName">The branch, tag, or commit SHA to read from.</param>
-    member _.GetAsync(projectId: int, filePath: string, refName: string) =
+    let getFile projectId filePath refName =
         async {
             let req =
                 ResourceHelpers.emptyRequest
@@ -42,9 +38,17 @@ type FilesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
             let! response = http.SendAsync req
             return ResourceHelpers.decode RepoFile.decoder response
         }
+
+    /// <summary>Gets a repository file from a branch, tag, or commit SHA.</summary>
+    /// <param name="projectId">The project identifier.</param>
+    /// <param name="filePath">The repository-relative file path.</param>
+    /// <param name="refName">The branch, tag, or commit SHA to read from.</param>
+    member _.GetAsync(projectId: int, filePath: string, refName: string) =
+        getFile projectId filePath refName
         |> ResourceHelpers.toPublic
 
-    /// <summary>Creates a repository file.</summary>
+    /// <summary>Creates a repository file, then fetches its contents and metadata from the target branch.</summary>
+    /// <remarks>The write may have succeeded even if the subsequent read fails. Concurrent branch changes can affect the returned file.</remarks>
     /// <param name="projectId">The project identifier.</param>
     /// <param name="filePath">The repository-relative file path.</param>
     /// <param name="branch">The target branch.</param>
@@ -63,11 +67,13 @@ type FilesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
                     (writeBody branch content commitMessage encoding)
 
             let! response = http.SendAsync req
-            return ResourceHelpers.decode RepoFile.decoder response
+            ResourceHelpers.ensureSuccess response
+            return! getFile projectId filePath branch
         }
         |> ResourceHelpers.toPublic
 
-    /// <summary>Updates a repository file.</summary>
+    /// <summary>Updates a repository file, then fetches its contents and metadata from the target branch.</summary>
+    /// <remarks>The write may have succeeded even if the subsequent read fails. Concurrent branch changes can affect the returned file.</remarks>
     /// <param name="projectId">The project identifier.</param>
     /// <param name="filePath">The repository-relative file path.</param>
     /// <param name="branch">The target branch.</param>
@@ -86,7 +92,8 @@ type FilesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
                     (writeBody branch content commitMessage encoding)
 
             let! response = http.SendAsync req
-            return ResourceHelpers.decode RepoFile.decoder response
+            ResourceHelpers.ensureSuccess response
+            return! getFile projectId filePath branch
         }
         |> ResourceHelpers.toPublic
 

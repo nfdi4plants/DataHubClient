@@ -37,8 +37,10 @@ let private topicOf (samplePath: string) =
 let private fsxReferenceLine = "#r \"nuget: DataHubClient\""
 
 let private pinnedFsx (version: string) (samplePath: string) =
+    // Forward slashes keep Windows paths from becoming F# string escapes.
+    let localSource = Path.GetFullPath(pkgDir).Replace('\\', '/')
     let pin =
-        $"#i \"nuget: {Path.GetFullPath pkgDir}\"\n#r \"nuget: DataHubClient, {version}\""
+        $"#i \"nuget: {localSource}\"\n#r \"nuget: DataHubClient, {version}\""
 
     let source = File.ReadAllText samplePath
 
@@ -97,7 +99,7 @@ let runDocsSamplesJavaScript =
 let runDocsSamplesPython =
     BuildTask.create "RunDocsSamplesPython" [ pack ] {
         let version = packageVersion ()
-        let venv = "/tmp/datahubclient-py-docs-venv"
+        let venv = Path.Combine(Path.GetTempPath(), "datahubclient-py-docs-venv")
         let wheel =
             Path.GetFullPath(Path.Combine(pkgDir, $"datahub_client-{version}-py3-none-any.whl"))
         recreateDir venv
@@ -107,7 +109,10 @@ let runDocsSamplesPython =
         for sample in samplesByExtension ".py" do
             // The venv's python directly rather than `uv run`, which walks up to
             // the dev project's pyproject.toml and switches environments.
-            runCommand (Path.Combine(venv, "bin", "python")) [ Path.GetFileName sample ] (Path.GetDirectoryName sample)
+            let python =
+                if System.OperatingSystem.IsWindows() then Path.Combine(venv, "Scripts", "python.exe")
+                else Path.Combine(venv, "bin", "python")
+            runCommand python [ Path.GetFileName sample ] (Path.GetDirectoryName sample)
     }
 
 // --- Roll-up -----------------------------------------------------------------

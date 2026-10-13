@@ -230,6 +230,10 @@ PublishScripts/
 **/[Pp]ackages/*
 # except build/, which is used as an MSBuild target.
 !**/[Pp]ackages/build/
+# Runnable documentation for the Packages resource is source, not a NuGet cache.
+!docs/samples/packages/sample.fsx
+!docs/samples/packages/sample.mjs
+!docs/samples/packages/sample.py
 # Uncomment if necessary however generally it will be regenerated when needed
 #!**/[Pp]ackages/repositories.config
 # NuGet v3's project.json files produces more ignorable files

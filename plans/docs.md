@@ -117,5 +117,12 @@ site/                         # build output (gitignored)
 - [x] Verified locally: `./build.sh RunDocsSamples` and `./build.sh BuildDocs`
       green; all three samples executed against the packed artifacts and
       rendered as synced tabs (no unexpanded snippet markers) in the built site
-- [ ] Later: richer topic samples (stub-transport `client.Http` injection,
-      validation results walkthrough) using section markers
+- [x] Resource guides covering all 39 methods across Users, Projects, Repository,
+      Files, Issues, MergeRequests, Packages, and Validation, with section-marked
+      F#/JavaScript/Python snippets and offline HTTP fixtures
+- [x] Anonymous project-discovery example using `Projects.ListAllAsync`
+- [x] README links to the published guide, resource examples, and API reference;
+      Shields.io version badges link to NuGet, npm, and PyPI
+- [x] Release 0.4.0 verification: all 30 packaged sample programs pass across the
+      three languages; strict guide and API-reference builds pass; all 39 method
+      sections render with expanded snippets and the correct release banner

@@ -527,6 +527,18 @@ Tasks:
   the same suite runnable locally against a docker-compose DataHUB by setting the
   two env vars.
 
+### Release 0.4.0 — public access and resource documentation
+
+- [x] Anonymous credentials and complete project pagination with shared tests.
+- [x] File create/update methods accept GitLab's compact write response and read
+      back the resulting file; shared tests cover failed writes and failed reads.
+- [x] Examples for every resource method in all three languages, linked from the
+      guide and README; registry badges link to the three published packages.
+- [x] Windows support for documentation sample npm invocation, Python environment,
+      and NuGet cache lookup.
+- [x] Validate packed samples and the generated documentation; prepare 0.4.0
+      for NuGet, npm, PyPI, and GitHub Pages via the version-tag workflow.
+
 ## Verification
 
 After the first implementation pass, this checks the design holds end-to-end:

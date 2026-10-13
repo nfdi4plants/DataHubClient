@@ -17,8 +17,13 @@ let runDotNet cmd workingDir =
     if result.ExitCode <> 0 then failwithf "'dotnet %s' failed in %s" cmd workingDir
 
 let runCommand command args workingDirectory =
+    // npm is a .cmd launcher on Windows and needs the command interpreter.
+    let executable, arguments =
+        if System.OperatingSystem.IsWindows() && command = "npm" then
+            "cmd.exe", [ "/d"; "/c"; "npm" ] @ args
+        else command, args
     let result =
-        CreateProcess.fromRawCommand command args
+        CreateProcess.fromRawCommand executable arguments
         |> CreateProcess.withWorkingDirectory workingDirectory
         |> Proc.run
 
@@ -49,7 +54,7 @@ let recreateDir (path: string) =
 let wipeCachedNuGetExtract (packageId: string) (version: string) =
     let cachedExtract =
         Path.Combine(
-            System.Environment.GetEnvironmentVariable "HOME",
+            System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
             ".nuget",
             "packages",
             packageId.ToLowerInvariant(),

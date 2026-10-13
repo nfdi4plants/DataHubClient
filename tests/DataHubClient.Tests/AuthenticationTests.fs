@@ -5,6 +5,11 @@ open DataHubClient
 
 let tests =
     testList "Authentication" [
+        testCase "Anonymous has no authentication header" <| fun () ->
+            let auth = Authentication.Anonymous()
+            Expect.equal auth.Header "" "no header name"
+            Expect.equal auth.Value "" "no header value"
+
         testCase "PersonalAccessToken sets PRIVATE-TOKEN header" <| fun () ->
             let auth = Authentication.PersonalAccessToken("abc123")
             Expect.equal auth.Header "PRIVATE-TOKEN" "header name"

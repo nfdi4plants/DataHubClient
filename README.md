@@ -1,6 +1,12 @@
 # DataHubClient
 
+[![NuGet](https://img.shields.io/nuget/v/DataHubClient?logo=nuget)](https://www.nuget.org/packages/DataHubClient)
+[![npm](https://img.shields.io/npm/v/%40nfdi4plants%2Fdatahub-client?logo=npm)](https://www.npmjs.com/package/@nfdi4plants/datahub-client)
+[![PyPI](https://img.shields.io/pypi/v/datahub-client?logo=pypi)](https://pypi.org/project/datahub-client/)
+
 A polyglot client library for ARC DataHubs. Written once in F# and transpiled to .NET, JavaScript/TypeScript, and Python via [Fable](https://fable.io); published to NuGet, npm, and PyPI.
+
+**[Documentation](https://nfdi4plants.github.io/DataHubClient/)** · [Getting started](https://nfdi4plants.github.io/DataHubClient/getting-started/) · [Resource examples](https://nfdi4plants.github.io/DataHubClient/resources/) · [API reference](https://nfdi4plants.github.io/DataHubClient/fsdocs/reference/index.html)
 
 ## Installation
 
@@ -9,6 +15,12 @@ A polyglot client library for ARC DataHubs. Written once in F# and transpiled to
 | .NET   | `dotnet add package DataHubClient` |
 | JS/TS  | `npm install @nfdi4plants/datahub-client` |
 | Python | `pip install datahub-client` |
+
+Use `Authentication.Anonymous()` to read public resources without a token.
+`Projects.ListAllAsync` retrieves all matching projects across pages, with optional
+search, compact-response, and visibility filters; `Projects.ListAsync` retrieves
+one page. See [listing public projects](https://nfdi4plants.github.io/DataHubClient/getting-started/#list-every-public-project)
+for examples in all three languages.
 
 ## Development
 
@@ -48,7 +60,7 @@ Use `build.cmd` on Windows with the same arguments.
 
 ### Documentation
 
-The docs site pairs an [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) guide with an [fsdocs](https://fsprojects.github.io/FSharp.Formatting/)-generated F# API reference (design record: [plans/docs.md](plans/docs.md)). Every code sample on the site is a real program under [docs/samples/](docs/samples/), shown per language in tabs and executed in CI against the freshly-packed NuGet/npm/PyPI artifacts — docs that drift from the code fail the build in all three languages.
+The [published documentation](https://nfdi4plants.github.io/DataHubClient/) pairs an [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) guide with an [fsdocs](https://fsprojects.github.io/FSharp.Formatting/)-generated [F# API reference](https://nfdi4plants.github.io/DataHubClient/fsdocs/reference/index.html) (design record: [plans/docs.md](plans/docs.md)). Every code sample on the site is a real program under [docs/samples/](docs/samples/), shown per language in tabs and executed in CI against the freshly-packed NuGet/npm/PyPI artifacts — docs that drift from the code fail the build in all three languages.
 
 ```sh
 ./build.sh RunDocsSamples # pack + run every docs sample in all three languages

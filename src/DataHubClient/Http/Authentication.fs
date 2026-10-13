@@ -4,17 +4,23 @@ open Fable.Core
 
 /// <summary>
 /// A DataHub credential, reduced to the single HTTP header it contributes to a
-/// request. Construct one via the static factory methods rather than directly.
+/// request, or anonymous access without an authentication header. Construct one
+/// via the static factory methods rather than directly.
 /// See the <see href="https://docs.gitlab.com/ee/api/rest/authentication.html">GitLab REST API authentication docs</see>.
 /// </summary>
-/// <param name="header">The HTTP header name carrying the credential.</param>
-/// <param name="value">The HTTP header value carrying the credential.</param>
+/// <param name="header">The HTTP header name carrying the credential, or an empty string for anonymous access.</param>
+/// <param name="value">The HTTP header value carrying the credential, or an empty string for anonymous access.</param>
 [<AttachMembers>]
 type Authentication private (header: string, value: string) =
-    /// The HTTP header name carrying the credential.
+    /// <summary>The HTTP header name carrying the credential, or an empty string for anonymous access.</summary>
     member _.Header = header
-    /// The HTTP header value carrying the credential.
+    /// <summary>The HTTP header value carrying the credential, or an empty string for anonymous access.</summary>
     member _.Value = value
+
+    /// <summary>Accesses public resources without sending an authentication header.</summary>
+    /// <returns>An anonymous credential with empty <c>Header</c> and <c>Value</c> properties.</returns>
+    static member Anonymous() =
+        Authentication("", "")
 
     /// <summary>Authenticates with a Personal Access Token via the <c>PRIVATE-TOKEN</c> header.</summary>
     /// <param name="token">The personal access token.</param>
