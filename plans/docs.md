@@ -133,3 +133,5 @@ site/                         # build output (gitignored)
 - [x] Release 0.5.0 verification: all 33 samples pass against the packaged
       artifacts; strict guide/API builds pass, and the rendered guide and
       generated API reference include `DownloadROCrateAsync`
+- [x] Guide headings expose clickable permalinks for sharing individual methods
+      and sample sections
