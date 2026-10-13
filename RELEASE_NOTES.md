@@ -1,3 +1,11 @@
+### 0.6.0 (Released 2026-10-13)
+
+* Bundle TypeScript declarations with the npm package's JavaScript modules, preserving existing import paths for JavaScript and TypeScript consumers.
+* Add TypeScript tabs throughout the documentation, backed by strictly compiled examples tested against the packaged library.
+* Separate RO-Crate metadata retrieval from Node.js filesystem saving and provide browser download examples for JavaScript and TypeScript.
+* Verify the npm package in Chromium and Firefox with native ES modules, Vite development, and Vite production builds, including real fetch, CORS, and file downloads.
+* Upgrade Fable and the Python Fable runtime to 5.18.0 for corrected TypeScript generation.
+
 ### 0.5.1 (Released 2026-10-13)
 
 * Include the repository README in the npm package so the npm landing page can display installation instructions, documentation links, and registry badges.
