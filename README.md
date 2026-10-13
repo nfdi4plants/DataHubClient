@@ -6,7 +6,7 @@
 
 A polyglot client library for ARC DataHubs. Written once in F# and transpiled to .NET, JavaScript/TypeScript, and Python via [Fable](https://fable.io); published to NuGet, npm, and PyPI.
 
-**[Documentation](https://nfdi4plants.github.io/DataHubClient/)** · [Getting started](https://nfdi4plants.github.io/DataHubClient/getting-started/) · [Resource examples](https://nfdi4plants.github.io/DataHubClient/resources/) · [API reference](https://nfdi4plants.github.io/DataHubClient/fsdocs/reference/index.html)
+**[Documentation](https://nfdi4plants.github.io/DataHubClient/)** · [Getting started](https://nfdi4plants.github.io/DataHubClient/getting-started/) · [Resource API](https://nfdi4plants.github.io/DataHubClient/resources/) · [API reference](https://nfdi4plants.github.io/DataHubClient/fsdocs/reference/index.html)
 
 ## Installation
 
@@ -21,6 +21,10 @@ Use `Authentication.Anonymous()` to read public resources without a token.
 search, compact-response, and visibility filters; `Projects.ListAsync` retrieves
 one page. See [listing public projects](https://nfdi4plants.github.io/DataHubClient/getting-started/#list-every-public-project)
 for examples in all three languages.
+
+Use `client.Packages.DownloadROCrateAsync(projectId)` to download an ARC's
+generated metadata. The [RO-Crate download guide](https://nfdi4plants.github.io/DataHubClient/ro-crate/)
+shows how to save it as a UTF-8 file in all three languages.
 
 ## Development
 

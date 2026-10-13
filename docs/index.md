@@ -44,7 +44,8 @@ sensible default transport and callers can supply their own.
 ## Further reading
 
 - [Getting started](getting-started.md) — install and create a client
-- [Resource examples](resources.md) — F#, JavaScript, and Python snippets for every resource API call
+- [Download an RO-Crate](ro-crate.md) — save an ARC's generated JSON-LD metadata
+- [Resource API](resources.md) — F#, JavaScript, and Python snippets for every resource API call
 - [API reference](reference.md) — the generated F# API reference
 - [AGENTS.md](https://github.com/nfdi4plants/DataHubClient/blob/main/AGENTS.md) — repo layout, conventions, and the transpilation-first F# style
 - [GitLab REST API](https://docs.gitlab.com/ee/api/api_resources.html) — the API surface the client wraps

@@ -70,7 +70,7 @@ F#, `Promise` in JavaScript, `awaitable` in Python.
 credential, and is the only call that populates `User.Email` — GitLab omits it
 on users embedded in issues, merge requests, notes, and commits.
 
-See [Resource examples](resources.md) for calls in all three languages and the
+See [Resource API](resources.md) for calls in all three languages and the
 [API reference](reference.md) for the full surface.
 
 ## List every public project

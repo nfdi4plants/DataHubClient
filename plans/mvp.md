@@ -539,6 +539,15 @@ Tasks:
 - [x] Validate packed samples and the generated documentation; prepare 0.4.0
       for NuGet, npm, PyPI, and GitHub Pages via the version-tag workflow.
 
+### Release 0.5.0 — RO-Crate download
+
+- [x] `Packages.DownloadROCrateAsync(projectId)` wraps the standard generated
+      export coordinates, returning JSON-LD text with normal error propagation.
+- [x] Shared tests and packaged examples verify the method on .NET, JavaScript,
+      and Python; generated API and guide document the method.
+- [x] RO-Crate download-and-save guide and expanded Resource API sidebar;
+      prepare 0.5.0 packages and matching documentation for tag-triggered CI.
+
 ## Verification
 
 After the first implementation pass, this checks the design holds end-to-end:

@@ -91,3 +91,16 @@ type PackagesApi(baseUrl: string, auth: Authentication, http: IHttpClient) =
             return ResourceHelpers.responseBody response
         }
         |> ResourceHelpers.toPublic
+
+    /// <summary>
+    /// Downloads a project's currently available generated main-branch ARC RO-Crate export as JSON-LD text.
+    /// The export is not regenerated and is not guaranteed to represent the latest commit on the main branch.
+    /// </summary>
+    /// <param name="projectId">The ARC project's numeric identifier.</param>
+    /// <returns>The raw JSON-LD metadata text from the generated RO-Crate export.</returns>
+    /// <remarks>
+    /// Downloads <c>arc-ro-crate-metadata.json</c> from generic package <c>isa_arc_json</c>, version <c>0.0.1</c>.
+    /// Errors from the package download propagate, including missing exports and insufficient access.
+    /// </remarks>
+    member this.DownloadROCrateAsync(projectId: int) =
+        this.DownloadGenericFileAsync(projectId, "isa_arc_json", "0.0.1", "arc-ro-crate-metadata.json")

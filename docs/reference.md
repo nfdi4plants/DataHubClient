@@ -1,7 +1,7 @@
 # API reference
 
 For short examples of every resource method in F#, JavaScript, and Python,
-see [Resource examples](resources.md).
+see [Resource API](resources.md).
 
 The API surface is identical across all three targets — one F# source tree
 produces every package — so the generated **F# API reference** is the

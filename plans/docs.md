@@ -117,7 +117,7 @@ site/                         # build output (gitignored)
 - [x] Verified locally: `./build.sh RunDocsSamples` and `./build.sh BuildDocs`
       green; all three samples executed against the packed artifacts and
       rendered as synced tabs (no unexpanded snippet markers) in the built site
-- [x] Resource guides covering all 39 methods across Users, Projects, Repository,
+- [x] Resource guides covering all 40 methods across Users, Projects, Repository,
       Files, Issues, MergeRequests, Packages, and Validation, with section-marked
       F#/JavaScript/Python snippets and offline HTTP fixtures
 - [x] Anonymous project-discovery example using `Projects.ListAllAsync`
@@ -126,3 +126,10 @@ site/                         # build output (gitignored)
 - [x] Release 0.4.0 verification: all 30 packaged sample programs pass across the
       three languages; strict guide and API-reference builds pass; all 39 method
       sections render with expanded snippets and the correct release banner
+- [x] RO-Crate download-and-save guide using `Packages.DownloadROCrateAsync` and
+      verified F#/JavaScript/Python samples; all 33 packaged sample programs pass
+- [x] Resource API pages grouped under a fixed desktop sidebar heading, with
+      navigation expansion enabled and README/guide links updated
+- [x] Release 0.5.0 verification: all 33 samples pass against the packaged
+      artifacts; strict guide/API builds pass, and the rendered guide and
+      generated API reference include `DownloadROCrateAsync`

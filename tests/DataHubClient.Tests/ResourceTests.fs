@@ -479,4 +479,51 @@ let tests =
             Expect.equal uploadResponse """{"message":"201 Created"}""" "upload response"
             Expect.equal downloadResponse "zip-content" "download response"
         }
+
+        testCaseAsync "Packages.DownloadROCrateAsync downloads the project's export as unchanged text" <| async {
+            let client, mock = makeClient ()
+            let url = apiUrl "projects/73/packages/generic/isa_arc_json/0.0.1/arc-ro-crate-metadata.json"
+            let body = """{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [{"@id": "./", "@type": "Dataset", "name": "Pflanzen – étude"}]
+}"""
+            mock.Add("GET", url, 200, body)
+
+            let! metadata = client.Packages.DownloadROCrateAsync(73) |> awaitApi
+
+            Expect.equal metadata body "preserve Unicode and JSON-LD formatting"
+            Expect.equal mock.Requests.Length 1 "one export download"
+            Expect.equal mock.LastRequest.Url url "use the requested project and standard export coordinates"
+            Expect.equal mock.LastRequest.Method "GET" "download method"
+            expectAuthHeader mock.LastRequest
+        }
+
+        testCaseAsync "Packages.DownloadROCrateAsync reports a missing export as NotFoundError" <| async {
+            let client, mock = makeClient ()
+            let body = """{"message":"404 Package Not Found"}"""
+            mock.Add("GET", apiUrl "projects/73/packages/generic/isa_arc_json/0.0.1/arc-ro-crate-metadata.json", 404, body)
+
+            try
+                let! _ = client.Packages.DownloadROCrateAsync(73) |> awaitApi
+                failwith "expected NotFoundError"
+            with
+            | :? NotFoundError as err ->
+                Expect.equal err.StatusCode 404 "missing export status"
+                Expect.equal err.Body body "preserve the server error body"
+        }
+
+        testCaseAsync "Packages.DownloadROCrateAsync preserves authorization failures" <| async {
+            for status in [ 401; 403 ] do
+                let client, mock = makeClient ()
+                let body = """{"message":"Export access denied"}"""
+                mock.Add("GET", apiUrl "projects/73/packages/generic/isa_arc_json/0.0.1/arc-ro-crate-metadata.json", status, body)
+
+                try
+                    let! _ = client.Packages.DownloadROCrateAsync(73) |> awaitApi
+                    failwith "expected UnauthorizedError"
+                with
+                | :? UnauthorizedError as err ->
+                    Expect.equal err.StatusCode status "preserve the authorization status"
+                    Expect.equal err.Body body "preserve the server error body"
+        }
     ]

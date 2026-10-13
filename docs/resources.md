@@ -1,9 +1,11 @@
-# Resource examples
+# Resource API
 
 The client is a facade over one API object per GitLab resource area. Each page
 below has a short F#, JavaScript, and Python example for every method in that
 area. Start with [Getting started](getting-started.md) to install a package and
 choose an authentication method.
+
+For a complete download-and-save example, see [Download an RO-Crate](ro-crate.md).
 
 | Client property | Examples |
 | --- | --- |
@@ -13,7 +15,7 @@ choose an authentication method.
 | [`client.Files`](resources/files.md) | Read, create, update, and delete repository files |
 | [`client.Issues`](resources/issues.md) | List, read, create, update, close, and comment on issues |
 | [`client.MergeRequests`](resources/merge-requests.md) | List, read, create, update, close, and comment on merge requests |
-| [`client.Packages`](resources/packages.md) | Package metadata and generic file upload/download |
+| [`client.Packages`](resources/packages.md) | Package metadata, generic file upload/download, and ARC RO-Crate export |
 | [`client.Validation`](resources/validation.md) | Validated branches, packages, history, summaries, reports, and badges |
 
 Every call is async: F# examples run an `Async` computation, JavaScript uses

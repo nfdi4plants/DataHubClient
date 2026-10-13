@@ -1,3 +1,9 @@
+### 0.5.0 (Released 2026-10-13)
+
+* `client.Packages.DownloadROCrateAsync(projectId)` — download an ARC's available generated RO-Crate metadata as JSON-LD text, using the DataHub's standard generic-package coordinates.
+* RO-Crate download-and-save guide with verified F#, JavaScript, and Python examples using the new method, linked from the README and Packages API page.
+* Resource API documentation appears under a fixed desktop sidebar heading with navigation expansion enabled.
+
 ### 0.4.0 (Released 2026-10-13)
 
 * `Authentication.Anonymous()` — access public resources without sending an authentication header.

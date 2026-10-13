@@ -1,6 +1,6 @@
 # Packages
 
-Use `client.Packages` to browse a project's Package Registry and transfer generic package files. `packageId` is the numeric registry package ID; generic file operations use the package name, version, and file name instead.
+Use `client.Packages` to browse a project's Package Registry, transfer generic package files, and download an ARC's generated RO-Crate. `packageId` is the numeric registry package ID; generic file operations use the package name, version, and file name instead.
 
 Upload and download currently accept or return **text strings**. These methods do not provide a binary byte-stream API. Listing returns the server's current page.
 
@@ -96,6 +96,10 @@ Upload a text file under a generic package name and version. This writes to the 
 
 Read a generic package file as text; parse it separately when it contains JSON or another structured format.
 
+For the DataHub's generated ARC export, see
+[`DownloadROCrateAsync`](#downloadrocrateasync), which supplies the standard
+package coordinates for you.
+
 === "F#"
 
     ```fsharp
@@ -113,3 +117,39 @@ Read a generic package file as text; parse it separately when it contains JSON o
     ```python
     --8<-- "docs/samples/packages/sample.py:download"
     ```
+
+## DownloadROCrateAsync
+
+Download an ARC's currently available generated main-branch RO-Crate as JSON-LD
+text. This method takes only the numeric project ID and fetches
+`isa_arc_json/0.0.1/arc-ro-crate-metadata.json` from the generic Package Registry.
+It is available since version `0.5.0`.
+
+The following complete example creates an anonymous client and saves the
+download as UTF-8. Replace the project ID and use a token if the export requires
+credentials. The JavaScript example runs in Node.js.
+
+=== "F#"
+
+    ```fsharp
+    --8<-- "docs/samples/ro-crate/sample.fsx:setup"
+    --8<-- "docs/samples/ro-crate/sample.fsx:download"
+    ```
+
+=== "JavaScript"
+
+    ```javascript
+    --8<-- "docs/samples/ro-crate/sample.mjs:setup"
+    --8<-- "docs/samples/ro-crate/sample.mjs:download"
+    ```
+
+=== "Python"
+
+    ```python
+    --8<-- "docs/samples/ro-crate/sample.py:setup"
+    --8<-- "docs/samples/ro-crate/sample.py:download"
+    ```
+
+The export is not guaranteed to represent the latest commit. See
+[Download an ARC RO-Crate](../ro-crate.md) for export freshness and handling
+missing or inaccessible exports.
