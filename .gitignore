@@ -233,6 +233,7 @@ PublishScripts/
 # Runnable documentation for the Packages resource is source, not a NuGet cache.
 !docs/samples/packages/sample.fsx
 !docs/samples/packages/sample.mjs
+!docs/samples/packages/sample.ts
 !docs/samples/packages/sample.py
 # Uncomment if necessary however generally it will be regenerated when needed
 #!**/[Pp]ackages/repositories.config

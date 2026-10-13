@@ -1,5 +1,4 @@
 // --8<-- [start:setup]
-import { writeFile } from "node:fs/promises";
 import { DataHubClient } from "@nfdi4plants/datahub-client";
 import { Authentication } from "@nfdi4plants/datahub-client/Http/Authentication.js";
 
@@ -33,9 +32,14 @@ process.chdir(temporaryDirectory);
 // --8<-- [start:download]
 
 const metadata = await client.Packages.DownloadROCrateAsync(projectId);
+// --8<-- [end:download]
+
+// --8<-- [start:save]
+import { writeFile } from "node:fs/promises";
+
 await writeFile("arc-ro-crate-metadata.json", metadata, "utf8");
 console.log("Saved arc-ro-crate-metadata.json");
-// --8<-- [end:download]
+// --8<-- [end:save]
 
 try {
   assert.equal(requestCount, 1);

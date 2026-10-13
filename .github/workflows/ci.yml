@@ -35,7 +35,7 @@ jobs:
         run: ./build.sh RunTestsDotNet
 
   js-test:
-    name: JavaScript and TypeScript Tests
+    name: JavaScript, TypeScript, and Browser Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -51,8 +51,12 @@ jobs:
         run: chmod +x build.sh
       - name: Run JavaScript tests
         run: ./build.sh RunTestsJavaScript
-      - name: Verify JavaScript and TypeScript npm consumers
-        run: ./build.sh PackJavaScript
+      - name: Install npm build and browser test dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install test browsers
+        run: node node_modules/playwright/cli.js install --with-deps chromium firefox
+      - name: Verify JavaScript, TypeScript, and browser npm consumers
+        run: ./build.sh RunTestsBrowser
 
   python-test:
     name: Python Tests
@@ -97,7 +101,7 @@ jobs:
       - name: Sync Python dev environment
         run: uv sync
       # Packs all three artifacts, installs each like an end user, and runs
-      # every docs/samples/<topic>/ sample in all three languages — the pages
+      # every F#, JavaScript, TypeScript, and Python documentation sample — the pages
       # include these files verbatim, so this is what keeps docs and code in sync.
       - name: Run documentation samples
         run: ./build.sh RunDocsSamples

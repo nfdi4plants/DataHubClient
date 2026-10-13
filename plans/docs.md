@@ -2,15 +2,15 @@
 
 ## Context
 
-DataHubClient is one F# source tree shipped to three ecosystems, so the docs
-must show every sample in all three languages **and** CI must fail when any of
-the three drifts from the code base. `fsdocs --eval` only ever verifies the F#
-column; JavaScript and Python prose samples would rot silently.
+DataHubClient is one F# source tree shipped to three ecosystems. The docs show
+F#, JavaScript, TypeScript, and Python examples, and CI must fail when any sample
+drifts from the code base. `fsdocs --eval` only verifies the F# column; the other
+languages need their own packaged-consumer checks.
 
 ## Design decisions
 
 - **Samples are runnable files, not prose.** Each doc sample lives as a real
-  program per language under `docs/samples/<topic>/sample.{fsx,mjs,py}`. A FAKE
+  program per language under `docs/samples/<topic>/sample.{fsx,mjs,ts,py}`. A FAKE
   target `RunDocsSamples` (depends on `Pack`) executes every one of them against
   the freshly-packed artifacts using the `TestPackages` consumer pattern —
   `dotnet fsi` + local NuGet source, `npm install <tarball>` + node, venv +
@@ -55,6 +55,11 @@ column; JavaScript and Python prose samples would rot silently.
   `TestPackagesDotNet`), and runs `dotnet fsi`.
 - **JS** — scratch dir with a private `package.json`, `npm install` the packed
   tarball, run the committed `sample.mjs` unmodified.
+- **TypeScript** — install the same tarball into a separate scratch directory,
+  copy all `.ts` examples, compile with strict NodeNext settings and the packed
+  declarations, then execute the emitted `sample.js` files. Browser-only helper
+  and usage examples are also compiled; `RunTestsBrowser` executes those examples
+  in Chromium and Firefox.
 - **Python** — venv outside the repo (FAKE `Shell.cleanDirs` chokes on `lib64`
   symlinks), `pip install` the wheel, run the committed `sample.py` unmodified.
 
@@ -75,6 +80,12 @@ Shared process/scratch helpers move from `TestPackageTasks.fs` into
 
     ```javascript
     --8<-- "docs/samples/getting-started/sample.mjs"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/getting-started/sample.ts"
     ```
 
 === "Python"
@@ -137,3 +148,10 @@ site/                         # build output (gitignored)
       and sample sections
 - [x] npm packaging copies the repository README to the package root; verified
       the 0.5.1 tarball contains the exact README and its documentation links
+- [x] Add TypeScript tabs beside all 54 JavaScript examples, backed by eleven
+      runnable sample programs and two browser helper/usage files; integrate
+      strict compilation and execution into `RunDocsSamplesTypeScript`.
+- [x] Verify all 44 packaged sample programs, strict compilation of all 13
+      TypeScript files, and JavaScript/TypeScript downloads in six real-browser
+      cases; the guide/API build passes and all 54 TypeScript tabs render with
+      expanded snippets (2026-10-13).

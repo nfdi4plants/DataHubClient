@@ -1,6 +1,6 @@
 # API reference
 
-For short examples of every resource method in F#, JavaScript, and Python,
+For short examples of every resource method in F#, JavaScript, TypeScript, and Python,
 see [Resource API](resources.md).
 
 The API surface is identical across all three targets — one F# source tree

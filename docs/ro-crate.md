@@ -19,25 +19,16 @@ represent the latest commit on `main`.
 For a file stored under different package coordinates, use
 [`DownloadGenericFileAsync`](resources/packages.md#downloadgenericfileasync).
 
-## Download and save
+## Download the metadata
 
 Replace `42` with the ARC's numeric project ID. The example uses anonymous
 access for a public export. For an export that requires credentials, replace
 `Authentication.Anonymous()` with
 `Authentication.PersonalAccessToken("your-datahub-pat")`.
 
-The method returns JSON-LD text. These examples save that text as UTF-8 to
-`arc-ro-crate-metadata.json` in the current working directory, replacing an
-existing file with that name. The JavaScript example runs in Node.js. In an
-existing Python async application, use `await download_ro_crate()` inside the
-running event loop instead of `asyncio.run`.
-
-=== "F#"
-
-    ```fsharp
-    --8<-- "docs/samples/ro-crate/sample.fsx:setup"
-    --8<-- "docs/samples/ro-crate/sample.fsx:download"
-    ```
+These JavaScript and TypeScript snippets retrieve the JSON-LD text in a browser or
+Node.js. They do not write a file and need no filesystem import. Frontend npm
+imports are resolved by your application's bundler, such as Vite.
 
 === "JavaScript"
 
@@ -46,12 +37,112 @@ running event loop instead of `asyncio.run`.
     --8<-- "docs/samples/ro-crate/sample.mjs:download"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/ro-crate/sample.ts:setup"
+    --8<-- "docs/samples/ro-crate/sample.ts:download"
+    ```
+
+## Download and save
+
+The method returns JSON-LD text. The F#, Node.js, and Python examples save that
+text as UTF-8 to `arc-ro-crate-metadata.json` in the current working directory,
+replacing an existing file with that name. The browser example starts a file
+download through the browser. In an existing Python async application, use
+`await download_ro_crate()` inside the running event loop instead of
+`asyncio.run`.
+
+=== "F#"
+
+    ```fsharp
+    --8<-- "docs/samples/ro-crate/sample.fsx:setup"
+    --8<-- "docs/samples/ro-crate/sample.fsx:download"
+    ```
+
+=== "JavaScript (Node.js)"
+
+    ```javascript
+    --8<-- "docs/samples/ro-crate/sample.mjs:setup"
+    --8<-- "docs/samples/ro-crate/sample.mjs:download"
+    --8<-- "docs/samples/ro-crate/sample.mjs:save"
+    ```
+
+=== "TypeScript (Node.js)"
+
+    ```typescript
+    --8<-- "docs/samples/ro-crate/sample.ts:setup"
+    --8<-- "docs/samples/ro-crate/sample.ts:download"
+    --8<-- "docs/samples/ro-crate/sample.ts:save"
+    ```
+
+=== "JavaScript (Browser)"
+
+    Save this helper as `browser.mjs` in your application. It uses a `Blob` and a
+    download link to save the returned text:
+
+    ```javascript
+    --8<-- "docs/samples/ro-crate/browser.mjs"
+    ```
+
+    Call it from a button in your frontend module. These npm imports are
+    resolved by your application's bundler, such as Vite:
+
+    ```javascript
+    import { DataHubClient } from "@nfdi4plants/datahub-client";
+    import { Authentication } from "@nfdi4plants/datahub-client/Http/Authentication.js";
+    import { downloadROCrate } from "./browser.mjs";
+
+    const client = new DataHubClient("https://git.nfdi4plants.org", Authentication.Anonymous());
+    const button = document.createElement("button");
+    button.textContent = "Download RO-Crate";
+    button.addEventListener("click", () => {
+      downloadROCrate(client, 42).catch(console.error);
+    });
+    document.body.append(button);
+    ```
+
+=== "TypeScript (Browser)"
+
+    Save this typed helper as `browser.ts` in your application:
+
+    ```typescript
+    --8<-- "docs/samples/ro-crate/browser.ts"
+    ```
+
+    Call it from your frontend module. The `.js` import points to the output
+    module; TypeScript resolves it to `browser.ts` during compilation:
+
+    ```typescript
+    --8<-- "docs/samples/ro-crate/browser-example.ts"
+    ```
+
 === "Python"
 
     ```python
     --8<-- "docs/samples/ro-crate/sample.py:setup"
     --8<-- "docs/samples/ro-crate/sample.py:download"
     ```
+
+### Browser imports and CORS
+
+`node:fs/promises` is Node.js's filesystem module; it cannot be imported into a
+browser application. It appears in the Node.js example to write the downloaded
+text to disk. `DataHubClient` itself uses `fetch` and returns a string; use the
+browser example above to save that string as a file.
+
+When adapting the Node.js save example for a browser, remove its filesystem
+import as well as the `writeFile` call. A retained static import can prevent the
+module from loading even when the imported function is never called. The
+metadata-only snippet above contains just the client imports and download.
+
+When the DataHub and your application have different origins, the DataHub must
+allow your application's origin through
+[CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS). Requests
+include `X-DataHubClient-Version`, so even anonymous downloads need a successful
+preflight that allows this header. Authenticated downloads also need the
+authentication header allowed, such as `PRIVATE-TOKEN`. A rejected CORS request
+is a separate problem from an unsupported `node:fs/promises` import.
 
 ## Missing or inaccessible exports
 
@@ -66,9 +157,12 @@ RO-Crate. Errors expose `StatusCode` and the server's response `Body` for
 diagnostics.
 
 !!! info "Offline verification"
-    The [complete sample programs](https://github.com/nfdi4plants/DataHubClient/tree/main/docs/samples/ro-crate)
+    The F#, JavaScript, TypeScript, and Python
+    [sample programs](https://github.com/nfdi4plants/DataHubClient/tree/main/docs/samples/ro-crate)
     replace HTTP access with a fixture, check the exact package endpoint and
     anonymous headers, and verify the saved UTF-8 content in a temporary
-    working directory. CI needs no DataHub credentials or live export.
+    working directory. The browser checks exercise the helper above with a
+    local HTTP server and verify the downloaded file. These checks need no
+    DataHub credentials or live export.
 
 See [Packages](resources/packages.md) for the remaining Package Registry calls.

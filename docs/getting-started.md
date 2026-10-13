@@ -8,7 +8,13 @@
     dotnet add package DataHubClient
     ```
 
-=== "JavaScript / TypeScript"
+=== "JavaScript"
+
+    ```sh
+    npm install @nfdi4plants/datahub-client
+    ```
+
+=== "TypeScript"
 
     ```sh
     npm install @nfdi4plants/datahub-client
@@ -45,7 +51,7 @@ an `Authentication` value:
 === "TypeScript"
 
     ```typescript
-    --8<-- "docs/samples/getting-started/sample.mjs"
+    --8<-- "docs/samples/getting-started/sample.ts"
     ```
 
     Types are inferred from the generated declarations, including the client,
@@ -81,13 +87,13 @@ The client is a facade over one API object per GitLab resource area:
 `client.Users`, `client.Projects`, `client.Repository`, `client.Files`,
 `client.Issues`, `client.MergeRequests`, `client.Packages`, and
 `client.Validation` (ARC validation results). Every call is async — `Async` in
-F#, `Promise` in JavaScript, `awaitable` in Python.
+F#, `Promise` in JavaScript and TypeScript, `awaitable` in Python.
 
 `client.Users.GetCurrentAsync()` resolves the identity behind the configured
 credential, and is the only call that populates `User.Email` — GitLab omits it
 on users embedded in issues, merge requests, notes, and commits.
 
-See [Resource API](resources.md) for calls in all three languages and the
+See [Resource API](resources.md) for calls in all four languages and the
 [API reference](reference.md) for the full surface.
 
 ## List every public project
@@ -116,6 +122,13 @@ names and paths; `simple` requests the compact project representation.
     ```javascript
     --8<-- "docs/samples/public-projects/sample.mjs:setup"
     --8<-- "docs/samples/public-projects/sample.mjs:list"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/public-projects/sample.ts:setup"
+    --8<-- "docs/samples/public-projects/sample.ts:list"
     ```
 
 === "Python"

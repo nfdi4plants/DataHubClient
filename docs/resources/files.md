@@ -18,6 +18,12 @@ These snippets share this client. Replace the URL and token with your DataHub de
     --8<-- "docs/samples/files/sample.mjs:setup"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/files/sample.ts:setup"
+    ```
+
 === "Python"
 
     ```python
@@ -26,7 +32,7 @@ These snippets share this client. Replace the URL and token with your DataHub de
 
 ## GetAsync
 
-Read a file from a branch, tag, or commit SHA. `Content` is usually base64-encoded; check `Encoding` before decoding. These text-file examples use UTF-8; the JavaScript example uses Node.js `Buffer`.
+Read a file from a branch, tag, or commit SHA. `Content` is usually base64-encoded; check `Encoding` before decoding. These text-file examples use UTF-8; the JavaScript and TypeScript examples use Node.js `Buffer`.
 
 === "F#"
 
@@ -38,6 +44,12 @@ Read a file from a branch, tag, or commit SHA. `Content` is usually base64-encod
 
     ```javascript
     --8<-- "docs/samples/files/sample.mjs:get"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/files/sample.ts:get"
     ```
 
 === "Python"
@@ -62,6 +74,12 @@ Create a file and a commit on the target branch. Omit `encoding` for plain text;
     --8<-- "docs/samples/files/sample.mjs:create"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/files/sample.ts:create"
+    ```
+
 === "Python"
 
     ```python
@@ -84,6 +102,12 @@ Replace a file and commit the change. This example supplies base64 content. As w
     --8<-- "docs/samples/files/sample.mjs:update"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/files/sample.ts:update"
+    ```
+
 === "Python"
 
     ```python
@@ -104,6 +128,12 @@ Delete a file and create a commit. Completion confirms success; the method has n
 
     ```javascript
     --8<-- "docs/samples/files/sample.mjs:delete"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/files/sample.ts:delete"
     ```
 
 === "Python"

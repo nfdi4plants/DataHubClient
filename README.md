@@ -33,11 +33,11 @@ Use `Authentication.Anonymous()` to read public resources without a token.
 `Projects.ListAllAsync` retrieves all matching projects across pages, with optional
 search, compact-response, and visibility filters; `Projects.ListAsync` retrieves
 one page. See [listing public projects](https://nfdi4plants.github.io/DataHubClient/getting-started/#list-every-public-project)
-for examples in all three languages.
+for examples in F#, JavaScript, TypeScript, and Python.
 
 Use `client.Packages.DownloadROCrateAsync(projectId)` to download an ARC's
 generated metadata. The [RO-Crate download guide](https://nfdi4plants.github.io/DataHubClient/ro-crate/)
-shows how to save it as a UTF-8 file in all three languages.
+shows how to save it as a UTF-8 file in F#, JavaScript, TypeScript, and Python.
 
 ## Development
 
@@ -75,12 +75,30 @@ Build and test orchestration runs through the FAKE pipeline — see [AGENTS.md](
 
 Use `build.cmd` on Windows with the same arguments.
 
-### Documentation
+Browser tests install the packed npm artifact and run it in Chromium and Firefox,
+using native ES modules, the Vite development server, and a Vite production build.
+They exercise real HTTP requests and CORS against a local test server, including
+RO-Crate downloads saved with the browser's `Blob` API. No DataHub account or token
+is needed.
 
-The [published documentation](https://nfdi4plants.github.io/DataHubClient/) pairs an [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) guide with an [fsdocs](https://fsprojects.github.io/FSharp.Formatting/)-generated [F# API reference](https://nfdi4plants.github.io/DataHubClient/fsdocs/reference/index.html) (design record: [plans/docs.md](plans/docs.md)). Every code sample on the site is a real program under [docs/samples/](docs/samples/), shown per language in tabs and executed in CI against the freshly-packed NuGet/npm/PyPI artifacts — docs that drift from the code fail the build in all three languages.
+Install the browsers once, then run the browser target:
 
 ```sh
-./build.sh RunDocsSamples # pack + run every docs sample in all three languages
+npm ci
+node node_modules/playwright/cli.js install chromium firefox
+./build.sh RunTestsBrowser        # packs npm, checks TypeScript, then runs browsers
+```
+
+On Linux, add `--with-deps` to the browser installation command to install required
+system libraries. CI runs this target on every pull request.
+
+### Documentation
+
+The [published documentation](https://nfdi4plants.github.io/DataHubClient/) pairs an [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) guide with an [fsdocs](https://fsprojects.github.io/FSharp.Formatting/)-generated [F# API reference](https://nfdi4plants.github.io/DataHubClient/fsdocs/reference/index.html) (design record: [plans/docs.md](plans/docs.md)). The guide provides F#, JavaScript, TypeScript, and Python tabs backed by sample programs under [docs/samples/](docs/samples/). CI executes the examples against the freshly-packed NuGet/npm/PyPI artifacts; TypeScript samples also compile in strict mode against the packaged declarations. Browser-only downloads run in the browser checks.
+
+```sh
+./build.sh RunDocsSamples # pack + run F#, JavaScript, TypeScript, and Python samples
+./build.sh RunDocsSamplesTypeScript # pack + compile and run TypeScript samples
 ./build.sh BuildDocs      # build the full site into site/ (guide + API reference)
 ./build.sh WatchDocs      # live-reload preview of the guide at http://127.0.0.1:8000
 ./build.sh WatchApiDocs   # live-reload preview of the F# API reference at http://127.0.0.1:8901

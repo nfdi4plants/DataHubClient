@@ -82,6 +82,15 @@ let testPackagesJavaScript =
         runCommand "node" [ "smoke.mjs" ] dir
     }
 
+/// <summary>Verifies the packed npm package in Chromium and Firefox using native modules and Vite.</summary>
+let runTestsBrowser =
+    BuildTask.create "RunTestsBrowser" [ packJavaScript ] {
+        let version = packageVersion ()
+        let tarball =
+            Path.GetFullPath(Path.Combine(pkgDir, $"nfdi4plants-datahub-client-{version}.tgz"))
+        runCommand "node" [ "tests/DataHubClient.Browser.Tests/run.mjs"; tarball ] "."
+    }
+
 // --- Python smoke --------------------------------------------------------
 
 let private pySmoke =

@@ -20,6 +20,12 @@ Replace the example token and project ID with your own. Python examples call eac
     --8<-- "docs/samples/issues/sample.mjs:setup"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/issues/sample.ts:setup"
+    ```
+
 === "Python"
 
     ```python
@@ -40,6 +46,12 @@ List issues, optionally filtered by state. Omit `state` to use the server defaul
 
     ```javascript
     --8<-- "docs/samples/issues/sample.mjs:list"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/issues/sample.ts:list"
     ```
 
 === "Python"
@@ -64,6 +76,12 @@ Read one issue by its project-local number.
     --8<-- "docs/samples/issues/sample.mjs:get"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/issues/sample.ts:get"
+    ```
+
 === "Python"
 
     ```python
@@ -86,6 +104,12 @@ Create an issue with a title and optional Markdown description. The returned `Ii
     --8<-- "docs/samples/issues/sample.mjs:create"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/issues/sample.ts:create"
+    ```
+
 === "Python"
 
     ```python
@@ -94,7 +118,7 @@ Create an issue with a title and optional Markdown description. The returned `Ii
 
 ## UpdateAsync
 
-Change the title or description. Omitted fields remain unchanged. Use `stateEvent = "reopen"` (Python: `state_event="reopen"`) to reopen a closed issue; JavaScript takes this as the fifth argument.
+Change the title or description. Omitted fields remain unchanged. Use `stateEvent = "reopen"` (Python: `state_event="reopen"`) to reopen a closed issue; JavaScript and TypeScript take this as the fifth argument.
 
 === "F#"
 
@@ -106,6 +130,12 @@ Change the title or description. Omitted fields remain unchanged. Use `stateEven
 
     ```javascript
     --8<-- "docs/samples/issues/sample.mjs:update"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/issues/sample.ts:update"
     ```
 
 === "Python"
@@ -130,6 +160,12 @@ Close an issue and return its updated state.
     --8<-- "docs/samples/issues/sample.mjs:close"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/issues/sample.ts:close"
+    ```
+
 === "Python"
 
     ```python
@@ -152,6 +188,12 @@ Read the notes on an issue. `System` distinguishes automatically generated notes
     --8<-- "docs/samples/issues/sample.mjs:notes"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/issues/sample.ts:notes"
+    ```
+
 === "Python"
 
     ```python
@@ -172,6 +214,12 @@ Add a Markdown comment and return the created note.
 
     ```javascript
     --8<-- "docs/samples/issues/sample.mjs:create-note"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/issues/sample.ts:create-note"
     ```
 
 === "Python"

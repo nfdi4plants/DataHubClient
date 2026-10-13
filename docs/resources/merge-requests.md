@@ -20,6 +20,12 @@ Replace the example token and project ID with your own. Python examples call eac
     --8<-- "docs/samples/merge-requests/sample.mjs:setup"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/merge-requests/sample.ts:setup"
+    ```
+
 === "Python"
 
     ```python
@@ -40,6 +46,12 @@ List merge requests, optionally filtered by state. Omit `state` to use the serve
 
     ```javascript
     --8<-- "docs/samples/merge-requests/sample.mjs:list"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/merge-requests/sample.ts:list"
     ```
 
 === "Python"
@@ -64,6 +76,12 @@ Read one merge request by its project-local number.
     --8<-- "docs/samples/merge-requests/sample.mjs:get"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/merge-requests/sample.ts:get"
+    ```
+
 === "Python"
 
     ```python
@@ -86,6 +104,12 @@ Propose changes from a source branch into a target branch. Both branches must al
     --8<-- "docs/samples/merge-requests/sample.mjs:create"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/merge-requests/sample.ts:create"
+    ```
+
 === "Python"
 
     ```python
@@ -94,7 +118,7 @@ Propose changes from a source branch into a target branch. Both branches must al
 
 ## UpdateAsync
 
-Change the title or description. Omitted fields remain unchanged. Use `stateEvent = "reopen"` (Python: `state_event="reopen"`) to reopen a closed merge request; JavaScript takes this as the fifth argument.
+Change the title or description. Omitted fields remain unchanged. Use `stateEvent = "reopen"` (Python: `state_event="reopen"`) to reopen a closed merge request; JavaScript and TypeScript take this as the fifth argument.
 
 === "F#"
 
@@ -106,6 +130,12 @@ Change the title or description. Omitted fields remain unchanged. Use `stateEven
 
     ```javascript
     --8<-- "docs/samples/merge-requests/sample.mjs:update"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/merge-requests/sample.ts:update"
     ```
 
 === "Python"
@@ -130,6 +160,12 @@ Close a merge request and return its updated state. Closing a merge request does
     --8<-- "docs/samples/merge-requests/sample.mjs:close"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/merge-requests/sample.ts:close"
+    ```
+
 === "Python"
 
     ```python
@@ -152,6 +188,12 @@ Read the notes on a merge request. `System` distinguishes automatically generate
     --8<-- "docs/samples/merge-requests/sample.mjs:notes"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/merge-requests/sample.ts:notes"
+    ```
+
 === "Python"
 
     ```python
@@ -172,6 +214,12 @@ Add a Markdown comment and return the created note.
 
     ```javascript
     --8<-- "docs/samples/merge-requests/sample.mjs:create-note"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/merge-requests/sample.ts:create-note"
     ```
 
 === "Python"

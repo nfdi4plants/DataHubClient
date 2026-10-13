@@ -13,7 +13,7 @@ open System.IO
 /// exactly the way a real end user consumes them (see TestPackageTasks for the
 /// same consumer pattern). The doc pages include these files verbatim via
 /// pymdownx snippets, so a sample that renders on the site is by construction
-/// a sample that ran green in CI — for all three languages, not just F#.
+/// a sample that ran green in CI — for F#, JavaScript, TypeScript, and Python.
 /// Samples must not hit the network: PR CI has no live DataHub.
 let private samplesSourceDir = Path.Combine("docs", "samples")
 
@@ -91,6 +91,30 @@ let runDocsSamplesJavaScript =
             runCommand "node" [ script ] dir
     }
 
+// --- TypeScript -------------------------------------------------------------
+
+/// <summary>Compiles every TypeScript documentation example in strict mode against the packed npm declarations, then executes its offline sample programs.</summary>
+let runDocsSamplesTypeScript =
+    BuildTask.create "RunDocsSamplesTypeScript" [ pack ] {
+        let version = packageVersion ()
+        let dir = Path.Combine(samplesScratchDir, "ts")
+        recreateDir dir
+        writeFile (Path.Combine(dir, "package.json")) jsPackageJson
+        File.Copy(Path.Combine(samplesSourceDir, "tsconfig.json"), Path.Combine(dir, "tsconfig.json"), true)
+        let tarball =
+            Path.GetFullPath(Path.Combine(pkgDir, $"nfdi4plants-datahub-client-{version}.tgz"))
+        runCommand "npm" (npmArgs [ "install"; tarball; "--offline"; "--ignore-scripts"; "--no-audit"; "--no-fund" ]) dir
+
+        for sample in Directory.GetFiles(samplesSourceDir, "*.ts", SearchOption.AllDirectories) do
+            let destination = Path.Combine(dir, Path.GetRelativePath(samplesSourceDir, sample))
+            Directory.CreateDirectory(Path.GetDirectoryName destination) |> ignore
+            File.Copy(sample, destination, true)
+
+        runCommand "node" [ "node_modules/typescript/bin/tsc"; "--project"; Path.Combine(dir, "tsconfig.json") ] "."
+        for sample in samplesByExtension ".ts" do
+            runCommand "node" [ Path.Combine("compiled", topicOf sample, "sample.js") ] dir
+    }
+
 // --- Python -----------------------------------------------------------------
 
 /// The committed .py files run unmodified against a venv holding the packed
@@ -120,4 +144,4 @@ let runDocsSamplesPython =
 let runDocsSamples =
     BuildTask.createEmpty
         "RunDocsSamples"
-        [ runDocsSamplesDotNet; runDocsSamplesJavaScript; runDocsSamplesPython ]
+        [ runDocsSamplesDotNet; runDocsSamplesJavaScript; runDocsSamplesTypeScript; runDocsSamplesPython ]

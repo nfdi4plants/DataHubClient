@@ -20,6 +20,12 @@ Replace the example token and project ID with your own. Python examples call eac
     --8<-- "docs/samples/packages/sample.mjs:setup"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/packages/sample.ts:setup"
+    ```
+
 === "Python"
 
     ```python
@@ -40,6 +46,12 @@ Filter the registry by package type and name. Both filters are optional.
 
     ```javascript
     --8<-- "docs/samples/packages/sample.mjs:list"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/packages/sample.ts:list"
     ```
 
 === "Python"
@@ -64,6 +76,12 @@ Read the registry metadata for a package ID returned by `ListAsync`.
     --8<-- "docs/samples/packages/sample.mjs:get"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/packages/sample.ts:get"
+    ```
+
 === "Python"
 
     ```python
@@ -84,6 +102,12 @@ Upload a text file under a generic package name and version. This writes to the 
 
     ```javascript
     --8<-- "docs/samples/packages/sample.mjs:upload"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/packages/sample.ts:upload"
     ```
 
 === "Python"
@@ -112,6 +136,12 @@ package coordinates for you.
     --8<-- "docs/samples/packages/sample.mjs:download"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/packages/sample.ts:download"
+    ```
+
 === "Python"
 
     ```python
@@ -125,9 +155,11 @@ text. This method takes only the numeric project ID and fetches
 `isa_arc_json/0.0.1/arc-ro-crate-metadata.json` from the generic Package Registry.
 It is available since version `0.5.0`.
 
-The following complete example creates an anonymous client and saves the
-download as UTF-8. Replace the project ID and use a token if the export requires
-credentials. The JavaScript example runs in Node.js.
+The following examples create an anonymous client. Replace the project ID and
+use a token if the export requires credentials. The JavaScript and TypeScript
+examples retrieve JSON-LD text in either a browser or Node.js; the F# and Python
+examples also save the text as UTF-8. See [Download and save](../ro-crate.md#download-and-save)
+for Node.js filesystem and browser download-link examples.
 
 === "F#"
 
@@ -141,6 +173,13 @@ credentials. The JavaScript example runs in Node.js.
     ```javascript
     --8<-- "docs/samples/ro-crate/sample.mjs:setup"
     --8<-- "docs/samples/ro-crate/sample.mjs:download"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/ro-crate/sample.ts:setup"
+    --8<-- "docs/samples/ro-crate/sample.ts:download"
     ```
 
 === "Python"

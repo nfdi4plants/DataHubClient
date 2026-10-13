@@ -20,6 +20,12 @@ Replace the example token and project ID with your own. Python examples call eac
     --8<-- "docs/samples/validation/sample.mjs:setup"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/validation/sample.ts:setup"
+    ```
+
 === "Python"
 
     ```python
@@ -40,6 +46,12 @@ Discover ARC branches that have validation results. Files at the root of the res
 
     ```javascript
     --8<-- "docs/samples/validation/sample.mjs:branches"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/validation/sample.ts:branches"
     ```
 
 === "Python"
@@ -64,6 +76,12 @@ Discover validation packages for an ARC branch. Each `ValidationPackageRef` cont
     --8<-- "docs/samples/validation/sample.mjs:packages"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/validation/sample.ts:packages"
+    ```
+
 === "Python"
 
     ```python
@@ -84,6 +102,12 @@ Read validation commits, newest first. The optional `branch` scopes history to t
 
     ```javascript
     --8<-- "docs/samples/validation/sample.mjs:history"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/validation/sample.ts:history"
     ```
 
 === "Python"
@@ -108,6 +132,12 @@ Read `validation_summary.json` as a `ValidationSummary`. `Critical` and `NonCrit
     --8<-- "docs/samples/validation/sample.mjs:summary"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/validation/sample.ts:summary"
+    ```
+
 === "Python"
 
     ```python
@@ -116,7 +146,7 @@ Read `validation_summary.json` as a `ValidationSummary`. `Critical` and `NonCrit
 
 ## GetReportAsync
 
-Read the raw JUnit XML report using the package reference from the summary example. For a historical result, also pass `ref` (`GetReportAsync(projectId, packageRef, sha)` in JavaScript).
+Read the raw JUnit XML report using the package reference from the summary example. For a historical result, also pass `ref` (`GetReportAsync(projectId, packageRef, sha)` in JavaScript or TypeScript).
 
 === "F#"
 
@@ -128,6 +158,12 @@ Read the raw JUnit XML report using the package reference from the summary examp
 
     ```javascript
     --8<-- "docs/samples/validation/sample.mjs:report"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/validation/sample.ts:report"
     ```
 
 === "Python"
@@ -152,6 +188,12 @@ Read the package's validation badge as raw SVG text.
     --8<-- "docs/samples/validation/sample.mjs:badge"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/validation/sample.ts:badge"
+    ```
+
 === "Python"
 
     ```python
@@ -172,6 +214,12 @@ Discover the packages for an ARC branch, then fetch each summary. The returned a
 
     ```javascript
     --8<-- "docs/samples/validation/sample.mjs:all-summaries"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/validation/sample.ts:all-summaries"
     ```
 
 === "Python"

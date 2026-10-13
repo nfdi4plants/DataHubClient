@@ -18,6 +18,12 @@ These snippets share this client. Replace the URL and token with your DataHub de
     --8<-- "docs/samples/repository/sample.mjs:setup"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/repository/sample.ts:setup"
+    ```
+
 === "Python"
 
     ```python
@@ -38,6 +44,12 @@ List branches, optionally filtering their names with `search`.
 
     ```javascript
     --8<-- "docs/samples/repository/sample.mjs:list-branches"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/repository/sample.ts:list-branches"
     ```
 
 === "Python"
@@ -62,6 +74,12 @@ Get a branch by its name.
     --8<-- "docs/samples/repository/sample.mjs:get-branch"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/repository/sample.ts:get-branch"
+    ```
+
 === "Python"
 
     ```python
@@ -84,6 +102,12 @@ List commits, optionally choosing a branch, tag, or SHA with `refName` (`ref_nam
     --8<-- "docs/samples/repository/sample.mjs:list-commits"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/repository/sample.ts:list-commits"
+    ```
+
 === "Python"
 
     ```python
@@ -104,6 +128,12 @@ Read a single commit by SHA.
 
     ```javascript
     --8<-- "docs/samples/repository/sample.mjs:get-commit"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/repository/sample.ts:get-commit"
     ```
 
 === "Python"

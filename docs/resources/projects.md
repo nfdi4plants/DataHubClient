@@ -18,6 +18,12 @@ These snippets share this client. Replace the URL and token with your DataHub de
     --8<-- "docs/samples/projects/sample.mjs:setup"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/projects/sample.ts:setup"
+    ```
+
 === "Python"
 
     ```python
@@ -38,6 +44,12 @@ Get one page of projects. Both `search` and `simple` are optional; omit them to 
 
     ```javascript
     --8<-- "docs/samples/projects/sample.mjs:list"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/projects/sample.ts:list"
     ```
 
 === "Python"
@@ -62,6 +74,12 @@ Get every matching project in ascending ID order. Optional `visibility` accepts 
     --8<-- "docs/samples/projects/sample.mjs:list-all"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/projects/sample.ts:list-all"
+    ```
+
 === "Python"
 
     ```python
@@ -84,6 +102,12 @@ Get one project by numeric ID.
     --8<-- "docs/samples/projects/sample.mjs:get"
     ```
 
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/projects/sample.ts:get"
+    ```
+
 === "Python"
 
     ```python
@@ -92,7 +116,7 @@ Get one project by numeric ID.
 
 ## SearchAsync
 
-Search by name with the one-page convenience method. Use `ListAllAsync(search = ...)` in F#, `ListAllAsync("plant arc")` in JavaScript, or `ListAllAsync(search=...)` in Python when every page is needed.
+Search by name with the one-page convenience method. Use `ListAllAsync(search = ...)` in F#, `ListAllAsync("plant arc")` in JavaScript or TypeScript, or `ListAllAsync(search=...)` in Python when every page is needed.
 
 === "F#"
 
@@ -104,6 +128,12 @@ Search by name with the one-page convenience method. Use `ListAllAsync(search = 
 
     ```javascript
     --8<-- "docs/samples/projects/sample.mjs:search"
+    ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/projects/sample.ts:search"
     ```
 
 === "Python"

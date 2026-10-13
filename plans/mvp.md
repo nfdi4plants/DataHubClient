@@ -562,6 +562,36 @@ Tasks:
       compiler upgrade: 157 tests passed across .NET, JavaScript, and Python;
       all 78 packed declarations and npm consumer checks passed (2026-10-13).
 
+### Browser compatibility verification
+
+- [x] Test the installed npm artifact in Chromium and Firefox, using native ES
+      modules, Vite development, and Vite production builds.
+- [x] Exercise real cross-origin fetch, preflight acceptance and rejection,
+      authentication, pagination, models, errors, uploads, and UTF-8 downloads.
+- [x] Add `RunTestsBrowser`, pinned Playwright browser tooling, and CI execution.
+- [x] Reproduce the Node.js RO-Crate snippet's `node:fs/promises` browser failure;
+      add and test a browser Blob download example with distinct documentation.
+- [x] Reproduce the failure with the save call removed and the unused filesystem
+      import retained; separate metadata retrieval from saving and execute the
+      exact metadata-only documentation snippet in the browser checks.
+- [x] Verify all six cases against both published npm 0.5.1 and the current build
+      on 2026-10-13. Neither artifact imports Node filesystem APIs; the exact
+      reporting application's import remains unknown.
+
+### TypeScript documentation examples
+
+- [x] Add dedicated TypeScript tabs beside every JavaScript example, including
+      metadata-only, Node.js saving, and browser saving examples.
+- [x] Add eleven runnable `sample.ts` programs plus typed browser helper/usage
+      examples; retain strict typing in their offline fixtures.
+- [x] Add `RunDocsSamplesTypeScript` to the documentation sample pipeline and
+      exercise the TypeScript browser examples in the real-browser checks.
+- [x] Verify all 44 packaged sample programs, strict compilation of all 13
+      TypeScript files, six browser cases, and the guide/API build; all 54
+      TypeScript tabs render with expanded snippets (2026-10-13).
+
+Details and remaining API priorities: [API coverage plan](api-coverage.md).
+
 ## Verification
 
 After the first implementation pass, this checks the design holds end-to-end:

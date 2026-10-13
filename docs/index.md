@@ -15,13 +15,13 @@ language and create your first client.
 Public resources are available without a token through `Authentication.Anonymous()`.
 Use `Projects.ListAllAsync` to retrieve every matching project across pages;
 the [public-project examples](getting-started.md#list-every-public-project) show
-the same operation in all three languages.
+the same operation in all four languages.
 
 !!! info "Samples on this site are executed, not transcribed"
     Every code sample is a real program from the repository's
     [`docs/samples/`](https://github.com/nfdi4plants/DataHubClient/tree/main/docs/samples)
     tree. CI installs the freshly-built NuGet, npm, and PyPI packages the way an
-    end user would and runs each sample in all three languages on every change —
+    end user would and runs the F#, JavaScript, TypeScript, and Python samples on every change —
     a sample that renders here is a sample that works.
 
 ## How it works
@@ -45,7 +45,7 @@ sensible default transport and callers can supply their own.
 
 - [Getting started](getting-started.md) — install and create a client
 - [Download an RO-Crate](ro-crate.md) — save an ARC's generated JSON-LD metadata
-- [Resource API](resources.md) — F#, JavaScript, and Python snippets for every resource API call
+- [Resource API](resources.md) — F#, JavaScript, TypeScript, and Python snippets for every resource API call
 - [API reference](reference.md) — the generated F# API reference
 - [AGENTS.md](https://github.com/nfdi4plants/DataHubClient/blob/main/AGENTS.md) — repo layout, conventions, and the transpilation-first F# style
 - [GitLab REST API](https://docs.gitlab.com/ee/api/api_resources.html) — the API surface the client wraps
