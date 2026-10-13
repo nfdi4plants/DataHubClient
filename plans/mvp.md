@@ -548,6 +548,20 @@ Tasks:
 - [x] RO-Crate download-and-save guide and expanded Resource API sidebar;
       prepare 0.5.0 packages and matching documentation for tag-triggered CI.
 
+### TypeScript declarations in the npm package
+
+- [x] Follow ARCtrl's Fable TypeScript plus Vite/declaration-plugin pipeline,
+      shipping JavaScript and `.d.ts` files together with existing import paths.
+- [x] Upgrade Fable and the Python runtime to 5.18.0 for corrected TypeScript
+      generic-method emission; keep strict source and installed-package checks.
+- [x] Add pinned npm build dependencies, `PackJavaScript`, and CI verification
+      of NodeNext/Bundler types, offline requests, and browser bundling.
+- [x] Document TypeScript imports, automatic declaration discovery, and the
+      `MutableArray<T>` result shape without changing the public F# API.
+- [x] Verify all target suites and packaged documentation samples after the
+      compiler upgrade: 157 tests passed across .NET, JavaScript, and Python;
+      all 78 packed declarations and npm consumer checks passed (2026-10-13).
+
 ## Verification
 
 After the first implementation pass, this checks the design holds end-to-end:

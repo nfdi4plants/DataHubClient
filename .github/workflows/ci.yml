@@ -35,7 +35,7 @@ jobs:
         run: ./build.sh RunTestsDotNet
 
   js-test:
-    name: JavaScript Tests
+    name: JavaScript and TypeScript Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -51,6 +51,8 @@ jobs:
         run: chmod +x build.sh
       - name: Run JavaScript tests
         run: ./build.sh RunTestsJavaScript
+      - name: Verify JavaScript and TypeScript npm consumers
+        run: ./build.sh PackJavaScript
 
   python-test:
     name: Python Tests

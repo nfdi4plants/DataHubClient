@@ -16,6 +16,19 @@ A polyglot client library for ARC DataHubs. Written once in F# and transpiled to
 | JS/TS  | `npm install @nfdi4plants/datahub-client` |
 | Python | `pip install datahub-client` |
 
+The npm package includes JavaScript ES modules and generated TypeScript declarations.
+JavaScript and TypeScript consumers use the same imports; TypeScript discovers the
+types automatically, and the package needs no TypeScript runtime:
+
+```typescript
+import { DataHubClient } from "@nfdi4plants/datahub-client";
+import { Authentication } from "@nfdi4plants/datahub-client/Http/Authentication.js";
+
+const client = new DataHubClient("https://git.nfdi4plants.org", Authentication.Anonymous());
+const projects = await client.Projects.ListAsync();
+for (const project of projects) console.log(project.Name); // inferred as string
+```
+
 Use `Authentication.Anonymous()` to read public resources without a token.
 `Projects.ListAllAsync` retrieves all matching projects across pages, with optional
 search, compact-response, and visibility filters; `Projects.ListAsync` retrieves
@@ -33,7 +46,7 @@ shows how to save it as a UTF-8 file in all three languages.
 - .NET 10 SDK
 - Python ≥ 3.12
 - `uv` for Python environment management (see [uv docs](https://docs.astral.sh/uv/))
-- `node` and `npm` for JavaScript
+- Node.js 20.19+ or 22.12+ and npm for JavaScript packaging (CI uses Node.js 24)
 
 Run once after cloning (or after a devcontainer rebuild):
 
@@ -79,13 +92,21 @@ CI deploys `site/` to GitHub Pages on every version tag.
 
 A single F# source tree produces three published artifacts. Each language uses a different transpile-output location, manifest, and packer:
 
-| Target | Fable output dir         | Manifest                                 | Built into `pkg/`                            |
+| Target | Build output dir         | Manifest                                 | Built into `pkg/`                            |
 |--------|--------------------------|------------------------------------------|----------------------------------------------|
 | .NET   | n/a (compiled .NET assembly) | `src/DataHubClient/DataHubClient.fsproj` | `DataHubClient.<version>.nupkg`              |
-| JS/TS  | `dist/js/`               | `src/DataHubClient/package.json`         | `nfdi4plants-datahub-client-<version>.tgz`   |
+| JS/TS  | `dist/ts/` → `dist/js/`  | `src/DataHubClient/package.json`         | `nfdi4plants-datahub-client-<version>.tgz`   |
 | Python | `src/DataHubClient/py/`  | root [pyproject.toml](pyproject.toml) (poetry-core) | `datahub_client-<version>-py3-none-any.whl` |
 
 The version comes from [RELEASE_NOTES.md](RELEASE_NOTES.md): the FAKE build stamps it into each manifest before packing.
+
+The **JavaScript/TypeScript build** uses Fable to generate TypeScript in `dist/ts/`,
+checks it with TypeScript in strict mode, then runs Vite 7 with `vite-plugin-dts`
+4.5.4 to produce JavaScript ES modules and adjacent `.d.ts` files in `dist/js/`.
+Both are packed together, preserving the existing root and deep import paths.
+Packing runs `npm ci` to install the pinned build dependencies from the root
+`package.json` and lockfile. These tools are build dependencies; consumers run the
+JavaScript using native `fetch` in modern browsers or Node.js.
 
 The **Python build mirrors ARCtrl's layout**:
 
@@ -101,6 +122,11 @@ Build all three packages into `pkg/`:
 ./build.sh Pack           # production version from RELEASE_NOTES.md
 ./build.sh PackPrerelease # same, with a prerelease suffix
 ```
+
+To build only the npm package, run `./build.sh PackJavaScript`. Both this target
+and the full `Pack` target install the packed tarball into an isolated consumer,
+check its declarations with strict TypeScript under `NodeNext` and `Bundler`
+module resolution, and run offline request checks against the packaged JavaScript.
 
 ### Package smoke tests
 

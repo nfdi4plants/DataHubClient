@@ -83,13 +83,19 @@ let private transpile project lang outputDirectory =
 
 let private packNpm version =
     let outputDirectory = "dist/js"
-    transpile javaScriptSourceProject "javascript" outputDirectory
-    removeFableModulesGitIgnore outputDirectory
+    // Fable preserves the F# types in an intermediate TS tree. Vite emits
+    // ESM JavaScript and adjacent declarations, following ARCtrl's library build.
+    transpile javaScriptSourceProject "typescript" "dist/ts"
+    runCommand "npm" (npmArgs [ "ci"; "--no-audit"; "--no-fund" ]) "."
+    runCommand "node" [ "node_modules/typescript/bin/tsc"; "--project"; "tsconfig.json" ] "."
+    runCommand "node" [ "node_modules/vite/bin/vite.js"; "build" ] "."
     writeVersionedPackageJson version outputDirectory
     // npm renders the README from the package root, which is the Fable output.
     File.Copy("README.md", Path.Combine(outputDirectory, "README.md"), true)
     Directory.CreateDirectory(pkgDir) |> ignore
     runCommand "npm" (npmArgs [ "pack"; $"./{outputDirectory}"; "--pack-destination"; pkgDir ]) "."
+    let tarball = Path.Combine(pkgDir, $"nfdi4plants-datahub-client-{version}.tgz")
+    runCommand "node" [ "tests/DataHubClient.TypeScript.Tests/run.mjs"; tarball ] "."
 
 let private packPython version =
     // Fable lands inside the source tree (sibling of the .fs files), so the
@@ -108,6 +114,10 @@ let private packAll version versionSuffix =
     packNuGet version versionSuffix
     packNpm version
     packPython version
+
+/// <summary>Builds and verifies the npm package with JavaScript and TypeScript declarations.</summary>
+let packJavaScript =
+    BuildTask.create "PackJavaScript" [ generateVersionSource ] { packNpm (packageVersion ()) }
 
 let pack =
     BuildTask.create "Pack" [ clean; buildSolution; runTestsAll ] { packAll (packageVersion ()) None }

@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022", "DOM"],
+    "rootDir": "dist/ts",
+    "outDir": "dist/js",
+    "declaration": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "noEmitOnError": true,
+    "strict": true,
+    "skipLibCheck": false,
+    "types": []
+  },
+  "include": ["dist/ts/DataHubClient.ts"],
+  "exclude": ["node_modules", "dist/js", "dist/ts/fable_modules"]
+}

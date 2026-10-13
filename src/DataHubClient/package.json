@@ -10,9 +10,10 @@
   },
   "homepage": "https://github.com/nfdi4plants/DataHubClient",
   "main": "./DataHubClient.js",
+  "types": "./DataHubClient.d.ts",
   "files": [
     "**/*.js",
-    "fable_modules/**/*"
+    "**/*.d.ts"
   ],
   "keywords": [
     "ARC",

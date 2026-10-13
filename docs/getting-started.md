@@ -8,7 +8,7 @@
     dotnet add package DataHubClient
     ```
 
-=== "JavaScript"
+=== "JavaScript / TypeScript"
 
     ```sh
     npm install @nfdi4plants/datahub-client
@@ -19,6 +19,11 @@
     ```sh
     pip install datahub-client
     ```
+
+The npm package includes JavaScript ES modules and TypeScript declarations.
+TypeScript discovers the declarations automatically; no separate types package
+or TypeScript runtime is required. Both languages use the same imports and run
+the same JavaScript, using native `fetch` in modern browsers or Node.js.
 
 ## Create a client
 
@@ -36,6 +41,18 @@ an `Authentication` value:
     ```javascript
     --8<-- "docs/samples/getting-started/sample.mjs"
     ```
+
+=== "TypeScript"
+
+    ```typescript
+    --8<-- "docs/samples/getting-started/sample.mjs"
+    ```
+
+    Types are inferred from the generated declarations, including the client,
+    resource APIs, models, and the `Promise` results of resource methods.
+    List results use Fable's `MutableArray<T>` type, which supports iteration,
+    indexing, and `length`. Use `Array.from(result)` when you need a standard
+    JavaScript array with methods such as `map` or `push`.
 
 === "Python"
 
@@ -108,7 +125,7 @@ names and paths; `simple` requests the compact project representation.
     --8<-- "docs/samples/public-projects/sample.py:list"
     ```
 
-In JavaScript, use `undefined` for optional parameters you want to skip. Python
+In JavaScript and TypeScript, use `undefined` for optional parameters you want to skip. Python
 supports named arguments; F# uses named optional arguments as shown above.
 
 !!! info "How this example is checked"
