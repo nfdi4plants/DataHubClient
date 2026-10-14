@@ -618,6 +618,48 @@ Details and remaining API priorities: [API coverage plan](api-coverage.md).
       run, and the strict guide/API build passes. All 54 shared tabs render with
       expanded snippets (2026-10-13).
 
+### Python package-download redirects
+
+- [x] Enable HTTPX redirect following so Python package and RO-Crate downloads
+      resolve the DataHub's object-storage redirects; remove authentication
+      headers when redirects change the URL's origin.
+- [x] Exercise real HTTPX redirect handling in the Python transport suite and
+      the packaged RO-Crate documentation sample, using offline responses.
+      Cover final errors and credential retention/removal across redirects.
+- [x] Verify all 60 Python tests and 11 packaged Python samples; inspect the
+      generated transport and run the reported anonymous project-1040 example
+      against `https://git.nfdi4plants.org/` using the installed wheel. On
+      2026-10-14 it returned 608,759 characters and 1,243 JSON-LD graph entries.
+
+### Redirect credential protection across targets
+
+- [x] Follow .NET redirects explicitly and remove GitLab credentials across
+      origins; bound redirects and document injected-client requirements.
+- [x] Follow JavaScript custom-token redirects explicitly in Node; stop browser
+      opaque redirects before forwarding tokens. Preserve native anonymous and
+      bearer-token behavior and document browser limitations.
+- [x] Add real .NET/Node/browser redirect receivers and deterministic edge-case
+      tests for header retention/removal, return redirects, and final errors.
+- [x] Audit the live workflow and dev fixture; add required configuration mode,
+      explicit canonical fixtures, anonymous smoke mode, and RO-Crate downloads.
+- [x] Validate 185 unit cases, 45 packaged sample programs, 19 native Node
+      redirect cases, and 16 redirect cases in each of six browser setups.
+      Strict TypeScript consumers and guide/API documentation builds pass.
+- [x] Run anonymous live suites on all three targets: 17 cases per target on
+      dev project 38, and three per target on production project 1040, including
+      its object-storage redirect. Verify twelve unconfigured/invalid-config
+      checks. Document empty-fixture paths and the unverified GitHub token.
+- [x] Record remote follow-up in `docs/integration-tests.md`: re-enable the
+      inactive workflow, select the RO-Crate fixture, configure actual dev
+      storage redirects, and observe header absence at the receiving endpoint.
+- [x] Verify successful OAuth-authenticated browser downloads from an
+      authentication-gated package fixture: same-origin, cross-origin, and
+      return redirects through both download APIs and the browser save helper;
+      reject missing/wrong tokens and assert exact UTF-8 file contents in all
+      six browser setups. `RunTestsBrowser` passes 54 successful authenticated
+      downloads and 12 authentication rejections alongside the existing cases
+      (2026-10-14).
+
 ## Verification
 
 After the first implementation pass, this checks the design holds end-to-end:

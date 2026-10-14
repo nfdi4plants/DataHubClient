@@ -22,9 +22,12 @@ For a file stored under different package coordinates, use
 ## Download the metadata
 
 Replace `42` with the ARC's numeric project ID. The example uses anonymous
-access for a public export. For an export that requires credentials, replace
+access for a public export. For server-side downloads that require credentials, replace
 `Authentication.Anonymous()` with
 `Authentication.PersonalAccessToken("your-datahub-pat")`.
+For browser downloads that require redirects, use OAuth bearer authentication;
+see [redirects and authentication](#redirects-and-authentication) for supported
+authentication modes and CORS requirements.
 
 This shared JavaScript / TypeScript example retrieves the JSON-LD text in a browser or
 Node.js. It does not write a file and needs no filesystem import. Frontend npm
@@ -129,12 +132,42 @@ The download raises an error in these cases; it does not return an empty
 RO-Crate. Errors expose `StatusCode` and the server's response `Body` for
 diagnostics.
 
+## Redirects and authentication
+
+Package downloads can redirect from the DataHub to a signed object-storage URL.
+The default .NET and Python transports, and the JavaScript transport in Node,
+follow those redirects while removing `Authorization`, `PRIVATE-TOKEN`, and
+`JOB-TOKEN` when the origin changes (scheme, hostname, or port). Removed
+credentials are not restored if a later redirect returns to the DataHub.
+
+Browsers hide intermediate redirect destinations from JavaScript. A browser
+request using `Authentication.PersonalAccessToken(...)` or
+`Authentication.JobToken(...)` therefore stops with an explanatory error at
+any redirect, including a same-origin redirect, before sending the token to
+the destination. Anonymous downloads and OAuth bearer authentication through
+`Authentication.OAuthToken(...)` use native redirect handling; browsers remove
+`Authorization` when the origin changes. CORS must permit the download too.
+For private browser downloads that require GitLab's custom token headers, use
+a server-side client to perform the download.
+
+If you inject your own .NET `HttpClient` into `DotNetHttpClient`, configure its
+handler with `AllowAutoRedirect = false` so the transport can inspect redirects.
+Supply authentication through `Authentication` or individual request headers;
+credential-bearing `HttpClient.DefaultRequestHeaders` cause cross-origin
+redirects to fail, because `HttpClient` would otherwise add those defaults
+back. Custom handlers must not add credentials to redirected requests.
+
+See [live integration tests](integration-tests.md) for verifying the DataHub's
+storage configuration and actual download path.
+
 !!! info "Offline verification"
     The F#, JavaScript, TypeScript, and Python
     [sample programs](https://github.com/nfdi4plants/DataHubClient/tree/main/docs/samples/ro-crate)
     replace HTTP access with a fixture, check the exact package endpoint and
     anonymous headers, and verify the saved UTF-8 content in a temporary
-    working directory. The browser checks exercise the helper above with a
+    working directory. The Python sample uses the real HTTPX client with a
+    mock transport to verify HTTP `302` redirects to an object-storage host.
+    The browser checks exercise the helper above with a
     local HTTP server and verify the downloaded file. These checks need no
     DataHub credentials or live export.
 

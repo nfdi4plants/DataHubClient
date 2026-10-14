@@ -4,12 +4,26 @@ open Fable.Pyxpecto
 open DataHubClient
 open DataHubClient.Integration.Tests
 open DataHubClient.Tests.TestHelpers
+open Thoth.Json.Core
+
+#if FABLE_COMPILER_PYTHON
+open Thoth.Json.Python
+#endif
+#if FABLE_COMPILER_JAVASCRIPT || FABLE_COMPILER_TYPESCRIPT
+open Thoth.Json.JavaScript
+#endif
+#if !FABLE_COMPILER
+open Thoth.Json.Newtonsoft
+#endif
 
 /// Builds a client pointed at the configured live DataHub. The transport is the
 /// per-target default — DotNetHttpClient / FetchHttpClient / HttpxHttpClient —
 /// so these cases exercise the real HTTP stack, not the mock.
 let private makeClient () =
-    DataHubClient(LiveConfig.url, Authentication.PersonalAccessToken LiveConfig.token)
+    let auth =
+        if LiveConfig.anonymous then Authentication.Anonymous()
+        else Authentication.PersonalAccessToken LiveConfig.token
+    DataHubClient(LiveConfig.url, auth)
 
 /// Decodes the base64 body GitLab returns for a repository file into UTF-8 text.
 /// Fable's Python target has no working System.Text.Encoding, so the Python
@@ -215,94 +229,108 @@ let private projectCases = [
     }
 ]
 
-/// Content assertions for the `dataplant-dev` fixture — the public
-/// `integration_tests/test_1` project on the DataPLANT dev instance. Unlike the
-/// generic cases above, these hardcode known values, so they are only valid
-/// when the suite is pointed at that exact fixture. They are gated twice: by
-/// matching on `DATAHUB_TEST_URL` (see `fixtureCases`), and — because a dev
-/// instance reset can leave `DATAHUB_TEST_PROJECT` pointing at some other
-/// project — each case additionally no-ops unless the configured project
-/// really is the canonical `integration_tests/test_1` fixture.
-let private isCanonicalFixtureProject (client: DataHubClient) =
+/// Requires the explicitly selected canonical fixture; a reset or wrong id fails.
+let private requireCanonicalFixtureProject (client: DataHubClient) =
     async {
         let! project = client.Projects.GetAsync LiveConfig.projectId |> awaitApi
-        return project.PathWithNamespace = "integration_tests/test_1"
+        Expect.equal project.PathWithNamespace "integration_tests/test_1" "configured project must be the canonical fixture"
     }
 
 let private dataplantDevCases = [
 
     testCaseAsync "Fixture: project metadata matches dataplant-dev" <| async {
         let client = makeClient ()
-        let! isFixture = isCanonicalFixtureProject client
-        if isFixture then
-            let! project = client.Projects.GetAsync LiveConfig.projectId |> awaitApi
-            Expect.equal project.Name "Test_1" "project name"
-            Expect.equal project.Path "test_1" "project path"
-            Expect.equal project.Visibility "public" "project visibility"
-            Expect.equal project.DefaultBranch (Some "main") "default branch"
+        do! requireCanonicalFixtureProject client
+        let! project = client.Projects.GetAsync LiveConfig.projectId |> awaitApi
+        Expect.equal project.Name "Test_1" "project name"
+        Expect.equal project.Path "test_1" "project path"
+        Expect.equal project.Visibility "public" "project visibility"
+        Expect.equal project.DefaultBranch (Some "main") "default branch"
     }
 
     testCaseAsync "Fixture: main branch is default and protected" <| async {
         let client = makeClient ()
-        let! isFixture = isCanonicalFixtureProject client
-        if isFixture then
-            let! branch = client.Repository.GetBranchAsync(LiveConfig.projectId, "main") |> awaitApi
-            Expect.equal branch.Name "main" "branch name"
-            Expect.isTrue branch.Default "main is the default branch"
-            Expect.isTrue branch.Protected "main is protected"
+        do! requireCanonicalFixtureProject client
+        let! branch = client.Repository.GetBranchAsync(LiveConfig.projectId, "main") |> awaitApi
+        Expect.equal branch.Name "main" "branch name"
+        Expect.isTrue branch.Default "main is the default branch"
+        Expect.isTrue branch.Protected "main is protected"
     }
 
     testCaseAsync "Fixture: issue 1 is Test_Issue_1" <| async {
         let client = makeClient ()
-        let! isFixture = isCanonicalFixtureProject client
-        if isFixture then
-            let! issue = client.Issues.GetAsync(LiveConfig.projectId, 1) |> awaitApi
-            Expect.equal issue.Iid 1 "issue iid"
-            Expect.equal issue.Title "Test_Issue_1" "issue title"
-            Expect.equal issue.State "opened" "issue state"
-            Expect.equal
-                issue.Description
-                (Some "This is an issue for DataHubClient integration tests!")
-                "issue description"
-            Expect.isTrue
-                (Seq.contains "integration_tests" issue.Labels)
-                "issue carries the integration_tests label"
+        do! requireCanonicalFixtureProject client
+        let! issue = client.Issues.GetAsync(LiveConfig.projectId, 1) |> awaitApi
+        Expect.equal issue.Iid 1 "issue iid"
+        Expect.equal issue.Title "Test_Issue_1" "issue title"
+        Expect.equal issue.State "opened" "issue state"
+        Expect.equal
+            issue.Description
+            (Some "This is an issue for DataHubClient integration tests!")
+            "issue description"
+        Expect.isTrue
+            (Seq.contains "integration_tests" issue.Labels)
+            "issue carries the integration_tests label"
     }
 
     testCaseAsync "Fixture: README.md has the expected content" <| async {
         let client = makeClient ()
-        let! isFixture = isCanonicalFixtureProject client
-        if isFixture then
-            let! file = client.Files.GetAsync(LiveConfig.projectId, "README.md", "main") |> awaitApi
-            Expect.equal file.FilePath "README.md" "file path"
-            Expect.equal file.Ref "main" "file ref"
-            // Content is compared trimmed — a committed file may or may not carry a
-            // trailing newline, which is not what this fixture is asserting.
-            Expect.equal (decodeBase64(file.Content).Trim()) "Hello DataHubClient!" "README content"
+        do! requireCanonicalFixtureProject client
+        let! file = client.Files.GetAsync(LiveConfig.projectId, "README.md", "main") |> awaitApi
+        Expect.equal file.FilePath "README.md" "file path"
+        Expect.equal file.Ref "main" "file ref"
+        // A committed file may or may not carry a trailing newline.
+        Expect.equal (decodeBase64(file.Content).Trim()) "Hello DataHubClient!" "README content"
     }
 ]
 
-/// The fixture cases selected by the configured `DATAHUB_TEST_URL`. A URL that
-/// is not a known fixture host yields no cases — the generic suite still runs.
+/// Strict content assertions are enabled explicitly, never inferred from a host.
 let private fixtureCases =
-    match LiveConfig.url with
-    | "https://gitdev.nfdi4plants.org" -> dataplantDevCases
+    match LiveConfig.fixture with
+    | "dataplant-dev" -> dataplantDevCases
     | _ -> []
 
-/// The live integration suite. It is read-only: every case lists or gets
-/// resources, none create or mutate. The case set narrows by what is
-/// configured — it collapses to an empty (skipped, not failed) list when no
-/// DataHub credentials are present, and gains the fixture content assertions
-/// only when `DATAHUB_TEST_URL` matches a known fixture host. See LiveConfig.
+/// Validates JSON-LD structure so a successful HTML login page cannot pass.
+let private expectRoCrate (body: string) =
+    let decoder =
+        Decode.object (fun get ->
+            get.Required.Field "@context" Decode.value |> ignore
+            get.Required.Field "@graph" (Decode.list (Decode.field "@id" Decode.string)))
+    match Decode.fromString decoder body with
+    | Ok ids -> Expect.isTrue (not (List.isEmpty ids)) "RO-Crate contains graph entities"
+    | Error error -> failwith ("Downloaded package is not RO-Crate JSON-LD: " + error)
+
+/// Explicit package fixtures must exist: missing exports are failures, not skips.
+let private roCrateCases = [
+    testCaseAsync "Packages.DownloadROCrateAsync downloads JSON-LD" <| async {
+        let client = makeClient ()
+        let! body = client.Packages.DownloadROCrateAsync LiveConfig.roCrateProjectId |> awaitApi
+        expectRoCrate body
+    }
+    testCaseAsync "Packages.DownloadGenericFileAsync downloads the RO-Crate package" <| async {
+        let client = makeClient ()
+        let! body =
+            client.Packages.DownloadGenericFileAsync(
+                LiveConfig.roCrateProjectId, "isa_arc_json", "0.0.1", "arc-ro-crate-metadata.json")
+            |> awaitApi
+        expectRoCrate body
+    }
+]
+
+/// Read-only live tests. Unconfigured local runs skip; required CI runs fail.
 let tests =
     let cases, label =
-        if not LiveConfig.isConfigured then
-            [], "Integration (skipped: set DATAHUB_TEST_URL and DATAHUB_TEST_TOKEN)"
-        elif not LiveConfig.hasProject then
-            instanceCases, "Integration (instance-only: set DATAHUB_TEST_PROJECT for project cases)"
-        elif List.isEmpty fixtureCases then
-            instanceCases @ projectCases, "Integration"
+        if not (List.isEmpty LiveConfig.configurationErrors) then
+            [ testCase "Live integration configuration is valid" (fun () ->
+                failwith (String.concat "\n" LiveConfig.configurationErrors)) ], "Integration (invalid configuration)"
+        elif not LiveConfig.isConfigured then
+            printfn "Live integration tests skipped: set DATAHUB_TEST_URL and a token, or explicitly enable anonymous tests."
+            [], "Integration (skipped: set URL and token, or explicitly enable anonymous tests)"
         else
-            instanceCases @ projectCases @ fixtureCases, "Integration (fixture: DataPLANT dev instance)"
+            if not LiveConfig.hasRoCrateProject then
+                printfn "RO-Crate download coverage disabled: set DATAHUB_TEST_ROCRATE_PROJECT."
+            let projectTests = if LiveConfig.hasProject then projectCases else []
+            let packageTests = if LiveConfig.hasRoCrateProject then roCrateCases else []
+            instanceCases @ projectTests @ fixtureCases @ packageTests, "Integration"
 
     testList label cases

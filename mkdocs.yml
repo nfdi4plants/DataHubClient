@@ -74,6 +74,7 @@ nav:
   - Getting started: getting-started.md
   - TypeScript: typescript.md
   - Download an RO-Crate: ro-crate.md
+  - Integration tests: integration-tests.md
   - Resource API:
       - Overview: resources.md
       - Users: resources/users.md

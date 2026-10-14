@@ -15,6 +15,8 @@ permissions:
 env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
+  # A missing/expired environment setup must not produce an empty green run.
+  DATAHUB_TEST_REQUIRED: "true"
 
 jobs:
   integration-dotnet:
@@ -25,6 +27,8 @@ jobs:
       DATAHUB_TEST_URL: ${{ vars.DATAHUB_TEST_URL }}
       DATAHUB_TEST_TOKEN: ${{ secrets.DATAHUB_TEST_TOKEN }}
       DATAHUB_TEST_PROJECT: ${{ vars.DATAHUB_TEST_PROJECT }}
+      DATAHUB_TEST_ROCRATE_PROJECT: ${{ vars.DATAHUB_TEST_ROCRATE_PROJECT }}
+      DATAHUB_TEST_FIXTURE: ${{ vars.DATAHUB_TEST_FIXTURE }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -45,6 +49,8 @@ jobs:
       DATAHUB_TEST_URL: ${{ vars.DATAHUB_TEST_URL }}
       DATAHUB_TEST_TOKEN: ${{ secrets.DATAHUB_TEST_TOKEN }}
       DATAHUB_TEST_PROJECT: ${{ vars.DATAHUB_TEST_PROJECT }}
+      DATAHUB_TEST_ROCRATE_PROJECT: ${{ vars.DATAHUB_TEST_ROCRATE_PROJECT }}
+      DATAHUB_TEST_FIXTURE: ${{ vars.DATAHUB_TEST_FIXTURE }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -68,6 +74,8 @@ jobs:
       DATAHUB_TEST_URL: ${{ vars.DATAHUB_TEST_URL }}
       DATAHUB_TEST_TOKEN: ${{ secrets.DATAHUB_TEST_TOKEN }}
       DATAHUB_TEST_PROJECT: ${{ vars.DATAHUB_TEST_PROJECT }}
+      DATAHUB_TEST_ROCRATE_PROJECT: ${{ vars.DATAHUB_TEST_ROCRATE_PROJECT }}
+      DATAHUB_TEST_FIXTURE: ${{ vars.DATAHUB_TEST_FIXTURE }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
