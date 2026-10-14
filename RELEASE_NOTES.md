@@ -1,3 +1,11 @@
+### 0.8.0 (Released 2026-10-14)
+
+* Fix Python package and RO-Crate downloads failing with HTTP `302` by enabling HTTPX redirects. Exercise the real HTTPX redirect implementation in tests and the packaged documentation sample.
+* Remove `Authorization`, `PRIVATE-TOKEN`, and `JOB-TOKEN` on cross-origin redirects in the default transports. Credentials remain removed when a later redirect returns to the original origin.
+* **Browser compatibility change:** Requests using `PRIVATE-TOKEN` or `JOB-TOKEN` now fail on redirects, including same-origin redirects, because browsers hide the destination needed to remove custom credentials safely. Anonymous and OAuth bearer requests retain native redirect handling. Verify successful OAuth downloads and saved RO-Crate files in Chromium and Firefox with native modules and Vite development/production builds.
+* **Custom .NET transport requirement:** Injected `HttpClient` instances must disable automatic redirects and provide credentials per request. Cross-origin redirects fail when credentials are configured in `DefaultRequestHeaders`, which would otherwise restore them.
+* Add live RO-Crate and generic-package download coverage, explicit integration fixtures, and required CI configuration checks. Document the Git dev object-storage setup needed to exercise real redirects and verify credential removal.
+
 ### 0.7.0 (Released 2026-10-13)
 
 * **Breaking change:** Public collection results, constructor arguments, and properties now use `ResizeArray<T>` consistently across targets, including resource lists, issue assignees and labels, and HTTP headers. F#/.NET callers should use `.Count` instead of `.Length` and construct collections with `ResizeArray [ ... ]`.
