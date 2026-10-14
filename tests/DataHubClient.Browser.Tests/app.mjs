@@ -3,6 +3,7 @@ import { Authentication } from "@nfdi4plants/datahub-client/Http/Authentication.
 import { Project } from "@nfdi4plants/datahub-client/Models/Project.js";
 import { DataHubError, NotFoundError, UnauthorizedError } from "@nfdi4plants/datahub-client/Models/Errors.js";
 import { downloadROCrate } from "./download-ro-crate.mjs";
+import { exerciseRedirects, exerciseAuthenticatedDownloads } from "./redirect-cases.mjs";
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -10,6 +11,9 @@ function assert(condition, message) {
 
 // This module runs inside an actual browser, with native fetch and no Node shims.
 globalThis.compatibility = {
+  exerciseRedirects,
+  exerciseAuthenticatedDownloads,
+
   async exercise(baseUrl) {
     assert(typeof process === "undefined" && typeof Buffer === "undefined", "Unexpected Node polyfills.");
     const client = new DataHubClient(baseUrl, Authentication.PersonalAccessToken("browser-test-token"));
@@ -55,8 +59,10 @@ globalThis.compatibility = {
     throw new Error("The browser allowed a response without CORS permission.");
   },
 
-  prepareDownload(baseUrl) {
-    const client = new DataHubClient(baseUrl, Authentication.Anonymous());
+  prepareDownload(baseUrl, bearerToken) {
+    const authentication = bearerToken ? Authentication.OAuthToken(bearerToken) : Authentication.Anonymous();
+    const client = new DataHubClient(baseUrl, authentication);
+    globalThis.downloadError = undefined;
     document.querySelector("#download").onclick = () => {
       downloadROCrate(client, 42).catch(error => { globalThis.downloadError = String(error); });
     };

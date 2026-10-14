@@ -18,6 +18,7 @@ const outputRoot = join(repositoryRoot, "artifacts/browser");
 mkdirSync(outputRoot, { recursive: true });
 const consumerDirectory = mkdtempSync(join(outputRoot, "consumer-"));
 copyFileSync(join(fixtureDirectory, "app.mjs"), join(consumerDirectory, "app.mjs"));
+copyFileSync(join(fixtureDirectory, "redirect-cases.mjs"), join(consumerDirectory, "redirect-cases.mjs"));
 copyFileSync(join(repositoryRoot, "docs/samples/ro-crate/browser.mjs"), join(consumerDirectory, "download-ro-crate.mjs"));
 writeFileSync(join(consumerDirectory, "package.json"), JSON.stringify({
   name: "datahub-client-browser-consumer", private: true, type: "module",
@@ -62,6 +63,109 @@ const uploadPath = "/api/v4/projects/42/packages/generic/browser-fixture/0.0.1/h
 const allowedOrigins = new Set();
 const requests = [];
 const fixtureErrors = [];
+const redirectRequests = [];
+let redirectOrigins;
+
+// Two real servers differ by port: credentials must never reach the second
+// origin, even if a later hop redirects back to the original server.
+function redirectServer(index) {
+  return createServer(async (request, response) => {
+    try {
+      response.setHeader("Access-Control-Allow-Origin", request.headers.origin || "*");
+      response.setHeader("Access-Control-Allow-Methods", "GET, PUT, OPTIONS");
+      response.setHeader("Access-Control-Allow-Headers", "PRIVATE-TOKEN, JOB-TOKEN, Authorization, X-DataHubClient-Version, Content-Type");
+      response.setHeader("Access-Control-Expose-Headers", "Location");
+      response.setHeader("Vary", "Origin");
+      if (request.method === "OPTIONS") { response.writeHead(204).end(); return; }
+      const chunks = [];
+      for await (const chunk of request) chunks.push(chunk);
+      const body = Buffer.concat(chunks).toString("utf8");
+      const url = new URL(request.url, redirectOrigins[index]);
+      const [, prefix, id, route, step] = url.pathname.split("/");
+      assert(["redirect", "download"].includes(prefix));
+      assert(["same", "cross", "return", "missing", "put303", "put307", "loop"].includes(route));
+      redirectRequests.push({ id, route, index, step, path: url.pathname, headers: request.headers });
+      assert.equal(request.headers["x-datahubclient-version"], packageMetadata.version);
+      const destination = (origin, next) => `${origin}/${prefix}/${id}/${route}/${next}`;
+      if (prefix === "download") {
+        assert(["same", "cross", "return"].includes(route));
+        assert.equal(request.method, "GET");
+        if (step === "api") {
+          assert.equal(index, 0);
+          assert.equal(url.pathname, `/download/${id}/${route}${cratePath}`);
+          if (request.headers.authorization !== "Bearer redirect-oauth") {
+            response.writeHead(401, { "Content-Type": "application/json" }).end(JSON.stringify({ message: "A valid bearer token is required." }));
+            return;
+          }
+        } else {
+          // Same-origin redirects retain authentication. Storage and subsequent
+          // return hops must succeed without any forwarded GitLab credentials.
+          assert.equal(request.headers.authorization, route === "same" ? "Bearer redirect-oauth" : undefined);
+        }
+        assert.equal(request.headers["private-token"], undefined);
+        assert.equal(request.headers["job-token"], undefined);
+        if (step === "api") {
+          response.writeHead(302, { Location: destination(redirectOrigins[route === "same" ? 0 : 1], "done") }).end();
+        } else if (route === "return" && index === 1) {
+          response.writeHead(302, { Location: destination(redirectOrigins[0], "returned") }).end();
+        } else {
+          response.writeHead(200, { "Content-Type": "application/ld+json; charset=utf-8" }).end(crate);
+        }
+        return;
+      }
+      if (route === "loop") {
+        response.writeHead(302, { Location: destination(redirectOrigins[0], "done") }).end();
+      } else if (step === "api" && route.startsWith("put")) {
+        response.writeHead(Number(route.slice(3)), { Location: destination(redirectOrigins[0], "done") }).end();
+      } else if (step === "api") {
+        const origin = route === "same" ? redirectOrigins[0] : redirectOrigins[1];
+        // Exercise relative Location resolution as well as absolute redirects.
+        const location = route === "same" ? "../../../../../../../../done" : destination(origin, "done");
+        response.writeHead(id.includes("-job-") ? 307 : 302, { Location: location }).end();
+      } else if (route === "return" && index === 1) {
+        response.writeHead(302, { Location: destination(redirectOrigins[0], "returned") }).end();
+      } else if (route === "missing") {
+        response.writeHead(404, { "Content-Type": "application/json" }).end(JSON.stringify({ message: "redirect destination missing" }));
+      } else {
+        response.writeHead(200, { "Content-Type": "application/json" }).end(JSON.stringify({ route, method: request.method, body, headers: request.headers }));
+      }
+    } catch (error) {
+      fixtureErrors.push(error);
+      response.writeHead(500).end(String(error));
+    }
+  });
+}
+
+function checkRedirectRequests(cases) {
+  for (const { id, credential, route, blocked } of cases) {
+    const observed = redirectRequests.filter(request => request.id === id);
+    assert.equal(observed.length, blocked ? 1 : route === "return" ? 3 : route === "loop" ? 21 : 2, `${id}: unexpected redirect hop count.`);
+    assert.equal(observed[0].index, 0);
+    assert.equal(observed[0].headers["private-token"], credential === "private" ? "redirect-private" : undefined);
+    assert.equal(observed[0].headers["job-token"], credential === "job" ? "redirect-job" : undefined);
+    assert.equal(observed[0].headers.authorization, credential === "oauth" ? "Bearer redirect-oauth" : undefined);
+    if (!blocked && ["same", "cross", "return"].includes(route)) {
+      assert.deepEqual(observed.map(request => request.index), route === "same" ? [0, 0] : route === "cross" ? [0, 1] : [0, 1, 0], `${id}: unexpected redirect origins.`);
+    }
+    if (["cross", "return", "missing"].includes(route)) {
+      for (const request of observed.slice(1)) {
+        for (const header of ["private-token", "job-token", "authorization"])
+          assert.equal(request.headers[header], undefined, `${id}: ${header} leaked on redirect.`);
+      }
+    }
+  }
+  assert.deepEqual(fixtureErrors, [], "Unexpected redirect fixture errors.");
+}
+
+function checkDeniedDownloads(cases) {
+  for (const { id, credential } of cases) {
+    const observed = redirectRequests.filter(request => request.id === id);
+    assert.equal(observed.length, 1, `${id}: rejected authentication must not reach storage.`);
+    assert.equal(observed[0].index, 0);
+    assert.equal(observed[0].path, `/download/${id}/cross${cratePath}`);
+    assert.equal(observed[0].headers.authorization, credential === "invalid-oauth" ? "Bearer invalid-redirect-oauth" : undefined);
+  }
+}
 
 // A separate origin exercises real fetch, preflight, headers and UTF-8 bodies.
 // No page.route interception or fetch replacement bypasses browser CORS checks.
@@ -141,10 +245,38 @@ function staticServer(root) {
   });
 }
 
+async function saveCrateDownload(page, filename) {
+  let download;
+  try {
+    [download] = await Promise.all([
+      page.waitForEvent("download"),
+      page.locator("#download").click(),
+    ]);
+  } catch (error) {
+    const downloadError = await page.evaluate(() => globalThis.downloadError);
+    if (downloadError) throw new Error(`Browser download failed: ${downloadError}`, { cause: error });
+    throw error;
+  }
+  assert.equal(download.suggestedFilename(), "arc-ro-crate-metadata.json");
+  const downloadPath = join(consumerDirectory, filename);
+  await download.saveAs(downloadPath);
+  assert.deepEqual(await readFile(downloadPath), Buffer.from(crate, "utf8"));
+}
+
 const cleanups = [];
 const results = [];
 const originalNodeEnv = process.env.NODE_ENV;
 try {
+  const redirectServers = [redirectServer(0), redirectServer(1)];
+  redirectOrigins = [];
+  for (const server of redirectServers) {
+    redirectOrigins.push(await listen(server));
+    cleanups.push(() => close(server));
+  }
+  const { exerciseRedirects } = await import(pathToFileURL(join(consumerDirectory, "redirect-cases.mjs")).href);
+  const nodeRedirects = await exerciseRedirects(redirectOrigins[0], "node");
+  checkRedirectRequests(nodeRedirects);
+  console.log(`PASS Node native fetch: ${nodeRedirects.length} packaged redirect and credential cases`);
   const apiOrigin = await listen(api);
   cleanups.push(() => close(api));
   // Execute the exact metadata-only documentation snippet in every browser mode.
@@ -201,19 +333,25 @@ try {
           await page.waitForFunction(() => Boolean(globalThis.compatibility));
           const values = await page.evaluate(baseUrl => globalThis.compatibility.exercise(baseUrl), apiOrigin);
           assert.deepEqual(values, { projectId: 42, fileText, projects: 1 });
-          await page.evaluate(baseUrl => globalThis.compatibility.prepareDownload(baseUrl), apiOrigin);
-          const downloadPromise = page.waitForEvent("download");
-          await page.locator("#download").click();
-          let download;
-          try { download = await downloadPromise; } catch (error) {
-            const downloadError = await page.evaluate(() => globalThis.downloadError);
-            if (downloadError) throw new Error(`Browser download failed: ${downloadError}`, { cause: error });
-            throw error;
+          const redirects = await page.evaluate(({ baseUrl, runtime }) => globalThis.compatibility.exerciseRedirects(baseUrl, runtime), {
+            baseUrl: redirectOrigins[0], runtime: `${browserName}-${mode}`,
+          });
+          checkRedirectRequests(redirects);
+          const authenticated = await page.evaluate(({ baseUrl, runtime, metadata }) =>
+            globalThis.compatibility.exerciseAuthenticatedDownloads(baseUrl, runtime, metadata), {
+            baseUrl: redirectOrigins[0], runtime: `${browserName}-${mode}`, metadata: crate,
+          });
+          checkDeniedDownloads(authenticated.denials);
+          for (const route of ["same", "cross", "return"]) {
+            const id = `${browserName}-${mode}-oauth-download-${route}-browser-file`;
+            await page.evaluate(baseUrl => globalThis.compatibility.prepareDownload(baseUrl, "redirect-oauth"),
+              `${redirectOrigins[0]}/download/${id}/${route}`);
+            await saveCrateDownload(page, `${id}.json`);
+            authenticated.downloads.push({ id, credential: "oauth", route, blocked: false, api: "browser-file" });
           }
-          assert.equal(download.suggestedFilename(), "arc-ro-crate-metadata.json");
-          const downloadPath = join(consumerDirectory, `${browserName}-${mode}.json`);
-          await download.saveAs(downloadPath);
-          assert.deepEqual(await readFile(downloadPath), Buffer.from(crate, "utf8"));
+          checkRedirectRequests(authenticated.downloads);
+          await page.evaluate(baseUrl => globalThis.compatibility.prepareDownload(baseUrl), apiOrigin);
+          await saveCrateDownload(page, `${browserName}-${mode}.json`);
           await page.evaluate(() => globalThis.compatibility.prepareTypeScriptDownload());
           const typeScriptDownloadPromise = page.waitForEvent("download");
           await page.getByRole("button", { name: "Download RO-Crate", exact: true }).last().click();
@@ -231,13 +369,14 @@ try {
           assert(preflight, "Expected a real authenticated CORS preflight.");
           assert(observed.some(request => request.method === "OPTIONS" && request.path.startsWith("/denied/")), "Expected denied CORS preflight.");
           assert(!observed.some(request => request.method !== "OPTIONS" && request.path.startsWith("/denied/")), "Browser sent a request despite denied CORS.");
-          results.push({ browser: browserName, browserVersion: browser.version(), mode, passed: true, requests: observed.length });
-          console.log(`PASS ${browserName} ${mode}: imports, fetch, CORS, models, errors, upload, and JS/TS UTF-8 downloads`);
+          results.push({ browser: browserName, browserVersion: browser.version(), mode, passed: true, requests: observed.length,
+            redirectCases: redirects.length, authenticatedDownloadCases: authenticated.downloads.length, authenticationRejectionCases: authenticated.denials.length });
+          console.log(`PASS ${browserName} ${mode}: imports, fetch, CORS, models, errors, upload, JS/TS UTF-8 downloads, ${redirects.length} redirects, ${authenticated.downloads.length} authenticated downloads, and ${authenticated.denials.length} authentication rejections`);
         } finally { await context.close(); }
       }
     } finally { await browser.close(); }
   }
-  writeFileSync(join(consumerDirectory, "results.json"), JSON.stringify({ packageVersion: packageMetadata.version, tarball, results }, null, 2));
+  writeFileSync(join(consumerDirectory, "results.json"), JSON.stringify({ packageVersion: packageMetadata.version, tarball, nodeRedirectCases: nodeRedirects.length, results }, null, 2));
   console.log(`Passed ${results.length} actual-browser cases for ${packageMetadata.name}@${packageMetadata.version}. Results: ${consumerDirectory}`);
 } finally {
   if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
