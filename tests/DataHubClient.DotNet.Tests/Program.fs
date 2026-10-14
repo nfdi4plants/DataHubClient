@@ -5,6 +5,7 @@ open Fable.Pyxpecto
 let all =
     testList "All" [
         DotNetHttpClientTests.tests
+        RedirectTests.tests
         DataHubClientTests.tests
     ]
 

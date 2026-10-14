@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="FakeHttpMessageHandler.fs" />
     <Compile Include="DotNetHttpClientTests.fs" />
+    <Compile Include="RedirectTests.fs" />
     <Compile Include="DataHubClientTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
