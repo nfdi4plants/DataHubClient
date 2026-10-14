@@ -86,6 +86,9 @@ responses = json.loads(r'''[
 
 
 class OfflineClient:
+    def __init__(self, *, follow_redirects, **kwargs):
+        assert follow_redirects is True
+
     async def request(self, method, url, headers=None, content=None):
         expected_method, expected_url, status, body = responses.pop(0)
         assert (method, url) == (expected_method, expected_url), (method, url)

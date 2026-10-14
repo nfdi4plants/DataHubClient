@@ -45,6 +45,9 @@ responses = deque([
 
 
 class OfflineClient:
+    def __init__(self, *, follow_redirects, **kwargs):
+        assert follow_redirects is True
+
     async def request(self, method, request_url, headers=None, content=None):
         assert responses, "Unexpected extra HTTP request."
         expected_method, body = responses.popleft()

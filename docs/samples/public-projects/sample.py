@@ -16,6 +16,9 @@ requests = []
 
 
 class OfflineClient:
+    def __init__(self, *, follow_redirects, **kwargs):
+        assert follow_redirects is True
+
     async def request(self, method, request_url, headers=None, content=None):
         requests.append((method, request_url, dict(headers or [])))
         project_id = len(requests)
